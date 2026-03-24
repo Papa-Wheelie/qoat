@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed-dim": "#474646",
+              "error": "#ba1a1a",
+              "surface-variant": "#e2e3e1",
+              "on-surface": "#1a1c1b",
+              "surface-bright": "#f9f9f7",
+              "inverse-surface": "#2f3130",
+              "surface-tint": "#5f5e5e",
+              "inverse-primary": "#c8c6c5",
+              "error-container": "#ffdad6",
+              "tertiary-fixed": "#894b64",
+              "on-error-container": "#410002",
+              "on-secondary-fixed-variant": "#004439",
+              "on-tertiary-container": "#ffffff",
+              "surface-dim": "#dadad8",
+              "on-primary-container": "#ffffff",
+              "outline-variant": "#c6c6c6",
+              "on-secondary": "#ffffff",
+              "secondary-fixed-dim": "#63baa7",
+              "on-primary": "#e5e2e1",
+              "surface-container-highest": "#e2e3e1",
+              "surface-container": "#eeeeec",
+              "surface": "#f9f9f7",
+              "on-tertiary-fixed": "#ffffff",
+              "secondary-container": "#8de5d0",
+              "on-surface-variant": "#474747",
+              "tertiary": "#602940",
+              "surface-container-low": "#f4f4f2",
+              "on-primary-fixed-variant": "#e5e2e1",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#7fd6c2",
+              "on-background": "#1a1c1b",
+              "on-tertiary": "#ffd9e4",
+              "primary-fixed": "#5f5e5e",
+              "on-primary-fixed": "#ffffff",
+              "outline": "#777777",
+              "on-secondary-container": "#00201a",
+              "on-tertiary-fixed-variant": "#ffd9e4",
+              "primary-container": "#3c3b3b",
+              "tertiary-container": "#a3607a",
+              "inverse-on-surface": "#f1f1ef",
+              "surface-container-high": "#e8e8e6",
+              "on-secondary-fixed": "#00201a",
+              "background": "#f9f9f7",
+              "primary": "#000000",
+              "secondary": "#006b5b",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-fixed-dim": "#6d344c"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f9f9f7; /* Matching Design System surface */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center justify-between selection:bg-secondary-container">
+<!-- Top Navigation Suppressed for Login focus journey -->
+<main class="w-full max-w-md px-8 pt-24 pb-12 flex-grow flex flex-col">
+<!-- Brand Identity Section -->
+<header class="mb-20 text-center md:text-left">
+<h1 class="text-4xl font-extrabold tracking-tighter text-primary">QOAT</h1>
+<p class="mt-4 text-on-surface-variant font-medium leading-relaxed max-w-[280px] md:max-w-none">
+                Quality Of All Things. Excellence curated for the modern minimalist.
+            </p>
+</header>
+<!-- Login Form Section -->
+<section class="flex-grow">
+<form action="#" class="space-y-6" method="POST">
+<!-- Email Input -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold tracking-wide text-primary/70 uppercase px-1" for="email">Email</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200" id="email" name="email" placeholder="hello@qoat.com" required="" type="email"/>
+</div>
+<!-- Password Input -->
+<div class="space-y-2">
+<div class="flex justify-between items-end px-1">
+<label class="block text-sm font-semibold tracking-wide text-primary/70 uppercase" for="password">Password</label>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+<div class="flex justify-end pt-1">
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#">Forgot password?</a>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-8">
+<button class="w-full bg-primary text-on-primary py-4 rounded-[12px] font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-black/5" type="submit">
+                        Sign In
+                    </button>
+</div>
+</form>
+</section>
+<!-- Footer Navigation / Register Prompt -->
+<footer class="mt-12 text-center pb-8">
+<p class="text-on-surface-variant font-medium">
+                Don't have an account? 
+                <a class="text-primary font-bold hover:underline underline-offset-4 ml-1" href="#">Register</a>
+</p>
+</footer>
+</main>
+<!-- Navigation Shell Suppressed: Following "Destination" Rule for Transactional pages -->
+<!-- Decorative Image Card (Editorial Style) -->
+<div class="hidden lg:fixed lg:right-12 lg:top-12 lg:bottom-12 lg:w-1/2 lg:flex items-center justify-center">
+<div class="w-full h-full rounded-[32px] overflow-hidden bg-surface-container-low relative">
+<img alt="Editorial Minimalist Aesthetic" class="w-full h-full object-cover grayscale opacity-40 mix-blend-multiply" data-alt="Minimalist architectural detail with sharp shadows on warm beige concrete walls, clean lines and extreme negative space editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9x5FhLzoJq3x2KDG8R_OSFtvvNOnRHc6Kae-rj7H_a3FdMotZZivuBgBDaQ59rYuPhfhJ1JTRnkpQgvCRB7AO8a2uCf8tAGTWwnQmYvYTVM2TfknDLQWxcmut2RajHV56wWZLLFNH0VZ_CI9byto32LokPsr8-tCowK1X283BP_SB1vmzEjD-2KX1wb8-zUtIF6uaT5NDhe9nfxk4KQe_HsjqACJ4ZuVLmYgaP93peby4tSZEZZlMHIWumJyA8LYKq2MIB4hYdGYW"/>
+<div class="absolute inset-0 flex flex-col justify-end p-16 bg-gradient-to-t from-surface via-transparent to-transparent">
+<div class="space-y-4">
+<span class="inline-block px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-widest rounded-full">Editorial Issue 01</span>
+<h2 class="text-5xl font-extrabold tracking-tight text-primary leading-tight">The Art of <br/>Curated Living.</h2>
+</div>
+</div>
+</div>
+</div>
+</body></html>
