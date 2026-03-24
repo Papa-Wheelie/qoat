@@ -22,9 +22,16 @@
 - Font: Plus Jakarta Sans
 - Stitch removed from build plan — Claude Code builds UI directly
 
+### Session 1.3 ✅ — Auth backend wiring
+- NextAuth v5 configured at src/auth.ts
+- API route created at src/app/api/auth/[...nextauth]/route.ts
+- Register API route at src/app/api/register/route.ts
+- Passwords hashed with bcryptjs
+- NEXTAUTH_SECRET confirmed in .env.local
+
 ## Up Next
-### Session 1.3 — Build auth screens with Claude Code
-- [ ] Install and configure NextAuth
-- [ ] Register screen
-- [ ] Login screen
+### Session 1.4 — Build auth UI with Claude Code
+- [ ] Login screen (match src/design/login.html)
+- [ ] Register screen (same design system)
 - [ ] Protected route middleware
+- [ ] Test full register → login flow end to end
