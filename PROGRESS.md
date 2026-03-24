@@ -29,9 +29,20 @@
 - Passwords hashed with bcryptjs
 - NEXTAUTH_SECRET confirmed in .env.local
 
+### Session 1.4 ✅ — Auth UI with Claude Code
+- Login screen built matching Stitch design
+- Register screen built with same design system
+- Font: Plus Jakarta Sans applied globally
+- Input focus ring updated to black #111111
+- Tagline updated to "Know before you pay."
+- Protected routes working — unauthenticated users → /login
+- Temporary logout button on homepage for testing
+- Full register → login → protected route flow tested ✅
+
 ## Up Next
-### Session 1.4 — Build auth UI with Claude Code
-- [ ] Login screen (match src/design/login.html)
-- [ ] Register screen (same design system)
-- [ ] Protected route middleware
-- [ ] Test full register → login flow end to end
+### Session 2.1 — Quote upload backend
+- [ ] Update Prisma schema — add Quote, Category models
+- [ ] Run migration
+- [ ] File upload endpoint — accept PDF and images
+- [ ] Store files in Supabase Storage
+- [ ] Save quote record + file reference to DB
