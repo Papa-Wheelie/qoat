@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-jakarta);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Design system palette */
+  --color-primary: #000000;
+  --color-on-primary: #e5e2e1;
+  --color-primary-container: #3c3b3b;
+  --color-primary-fixed: #5f5e5e;
+  --color-primary-fixed-dim: #474646;
+  --color-on-primary-fixed: #ffffff;
+  --color-on-primary-fixed-variant: #e5e2e1;
+  --color-inverse-primary: #c8c6c5;
+
+  --color-secondary: #006b5b;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #8de5d0;
+  --color-on-secondary-container: #00201a;
+  --color-secondary-fixed: #7fd6c2;
+  --color-secondary-fixed-dim: #63baa7;
+  --color-on-secondary-fixed: #00201a;
+  --color-on-secondary-fixed-variant: #004439;
+
+  --color-tertiary: #602940;
+  --color-on-tertiary: #ffd9e4;
+  --color-tertiary-container: #a3607a;
+  --color-on-tertiary-container: #ffffff;
+  --color-tertiary-fixed: #894b64;
+  --color-tertiary-fixed-dim: #6d344c;
+  --color-on-tertiary-fixed: #ffffff;
+  --color-on-tertiary-fixed-variant: #ffd9e4;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
+
+  --color-background: #f9f9f7;
+  --color-on-background: #1a1c1b;
+
+  --color-surface: #f9f9f7;
+  --color-on-surface: #1a1c1b;
+  --color-surface-variant: #e2e3e1;
+  --color-on-surface-variant: #474747;
+  --color-surface-bright: #f9f9f7;
+  --color-surface-dim: #dadad8;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f4f4f2;
+  --color-surface-container: #eeeeec;
+  --color-surface-container-high: #e8e8e6;
+  --color-surface-container-highest: #e2e3e1;
+  --color-inverse-surface: #2f3130;
+  --color-inverse-on-surface: #f1f1ef;
+
+  --color-outline: #777777;
+  --color-outline-variant: #c6c6c6;
+  --color-surface-tint: #5f5e5e;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
 }
