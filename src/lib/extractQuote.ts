@@ -27,9 +27,12 @@ const ExtractionSchema = z.object({
 export type QuoteExtraction = z.infer<typeof ExtractionSchema>;
 
 const SYSTEM_PROMPT =
-  "You are an expert at reading Australian trade and supplier quotes. Extract structured data from the quote document provided. Always respond with valid JSON only, no markdown, no explanation.";
+  "You are an expert at reading Australian trade and supplier quotes. All dates are in Australian format DD/MM/YYYY. 11/2/2026 means 11 February 2026. Today's date is in 2026. Only flag a quote as future dated if the date is after today when correctly parsed as DD/MM/YYYY. Never flag a past or current date as future dated. Extract structured data from the quote document provided. Always respond with valid JSON only, no markdown, no explanation.";
 
 const USER_PROMPT = `Extract the following from this quote document and return as JSON:
+
+Important: This is an Australian quote. All dates are in Australian format DD/MM/YYYY. For example 11/2/2026 means 11 February 2026, not November 2nd. When identifying red flags do not flag future dated quotes unless the date is genuinely in the future when interpreted as DD/MM/YYYY.
+
 {
   "supplierName": string or null,
   "quoteDate": string or null,
@@ -41,7 +44,7 @@ const USER_PROMPT = `Extract the following from this quote document and return a
   "validUntil": string or null,
   "estimatedTimeframe": string or null,
   "tradeCategory": string or null,
-  "redFlags": [string] any concerning items found,
+  "redFlags": [string] — list any genuinely concerning items such as missing scope, unusual payment terms, exclusions that could surprise the client, or vague timeframes. Do NOT flag the quote date as future dated unless you are certain the date is in the future when read in DD/MM/YYYY Australian format.,
   "summary": string one sentence plain English summary
 }`;
 
