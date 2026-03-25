@@ -48,11 +48,19 @@
 - Unauthorized requests correctly blocked
 - Tested and confirmed ✅
 
+### Session 2.2 ✅ — Quote upload UI
+- Upload page at /upload with drag and drop
+- Category dropdown populated from DB
+- File validated — PDF, jpg, png, webp, max 10MB
+- Files stored in Supabase Storage quotes bucket
+- Quote record saved to database
+- Placeholder quote detail page at /quotes/:id
+- SessionProvider fix applied
+- Full upload flow tested end to end ✅
+
 ## Up Next
-### Session 2.2 — Quote upload UI with Claude Code
-- [ ] Upload page at /upload
-- [ ] Drag and drop file zone
-- [ ] Category selector
-- [ ] Title and description fields
-- [ ] Progress state during upload
-- [ ] Success redirect to quote detail page
+### Session 3.1 — AI extraction with Claude API
+- [ ] Add ANTHROPIC_API_KEY to .env.local
+- [ ] Send uploaded PDF/image to Claude vision API
+- [ ] Extract line items, total price, category, supplier, timeframe
+- [ ] Return structured JSON validated with zod
