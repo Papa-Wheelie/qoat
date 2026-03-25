@@ -26,17 +26,32 @@ model Category {
 }
 
 model Quote {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
   description String?
   fileUrl     String
   fileName    String
   fileType    String
-  status      String   @default("pending")
+  status      String         @default("pending")
   userId      String
   categoryId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-  category    Category @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  user        User           @relation(fields: [userId], references: [id])
+  category    Category       @relation(fields: [categoryId], references: [id])
+  analysis    QuoteAnalysis?
+}
+
+model QuoteAnalysis {
+  id                 String   @id @default(cuid())
+  quoteId            String   @unique
+  quote              Quote    @relation(fields: [quoteId], references: [id])
+  rawExtraction      Json
+  supplierName       String?
+  totalAmount        Float?
+  lineItems          Json
+  redFlags           Json
+  summary            String?
+  estimatedTimeframe String?
+  createdAt          DateTime @default(now())
 }
