@@ -58,9 +58,18 @@
 - SessionProvider fix applied
 - Full upload flow tested end to end ✅
 
+### Session 3.1 ✅ — AI extraction with Claude API
+- Anthropic client configured at src/lib/claude.ts
+- extractQuote.ts sends PDF/image to Claude vision API
+- Extracts supplier, total, line items, timeframe, red flags
+- QuoteAnalysis model added to Prisma schema
+- Quote detail page displays full extraction results
+- Tested with real skylight quote — working perfectly ✅
+
 ## Up Next
-### Session 3.1 — AI extraction with Claude API
-- [ ] Add ANTHROPIC_API_KEY to .env.local
-- [ ] Send uploaded PDF/image to Claude vision API
-- [ ] Extract line items, total price, category, supplier, timeframe
-- [ ] Return structured JSON validated with zod
+### Session 3.2 — Iron triangle scoring
+- [ ] Price score — benchmark against AU market rates
+- [ ] Quality score — completeness and clarity of quote
+- [ ] Time score — estimated timeframe vs typical
+- [ ] Plain English verdict per score
+- [ ] Display iron triangle on quote detail page
