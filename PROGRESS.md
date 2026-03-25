@@ -39,10 +39,20 @@
 - Temporary logout button on homepage for testing
 - Full register → login → protected route flow tested ✅
 
+### Session 2.1 ✅ — Quote upload backend
+- Prisma schema updated — Quote and Category models added
+- 10 categories seeded to database
+- Supabase Storage bucket "quotes" created
+- Upload API route at /api/quotes/upload
+- File validation — PDF, jpg, png, webp, max 10MB
+- Unauthorized requests correctly blocked
+- Tested and confirmed ✅
+
 ## Up Next
-### Session 2.1 — Quote upload backend
-- [ ] Update Prisma schema — add Quote, Category models
-- [ ] Run migration
-- [ ] File upload endpoint — accept PDF and images
-- [ ] Store files in Supabase Storage
-- [ ] Save quote record + file reference to DB
+### Session 2.2 — Quote upload UI with Claude Code
+- [ ] Upload page at /upload
+- [ ] Drag and drop file zone
+- [ ] Category selector
+- [ ] Title and description fields
+- [ ] Progress state during upload
+- [ ] Success redirect to quote detail page
