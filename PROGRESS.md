@@ -65,6 +65,8 @@
 - QuoteAnalysis model added to Prisma schema
 - Quote detail page displays full extraction results
 - Tested with real skylight quote — working perfectly ✅
+- Fixed Australian date format (DD/MM/YYYY) in extraction prompt
+- Red flags no longer incorrectly flag past dates as future dated
 
 ## Up Next
 ### Session 3.2 — Iron triangle scoring
