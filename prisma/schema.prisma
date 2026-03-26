@@ -130,5 +130,10 @@ model QuoteAnalysis {
   timeExplanation    String?
   recommendation     String?
   overallSummary     String?
+  googleRating       Float?
+  googleReviewCount  Int?
+  googlePlaceId      String?
+  googleUrl          String?
+  googleReviews      Json?
   createdAt          DateTime @default(now())
 }

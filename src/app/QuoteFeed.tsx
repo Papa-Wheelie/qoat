@@ -32,21 +32,11 @@ type Props = {
 const AU_STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
 
 
-type ScoreBadgeProps = { score: number | null; bg: string; label: string };
-function ScoreBadge({ score, bg, label }: ScoreBadgeProps) {
-  if (score == null) {
-    return (
-      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant">
-        Pending
-      </span>
-    );
-  }
+function ScoreBadge({ score, label }: { score: number | null; label: string }) {
+  if (score == null) return null;
   return (
-    <span
-      className="px-2 py-0.5 rounded-full text-xs font-bold"
-      style={{ backgroundColor: bg, color: "#111111" }}
-    >
-      {label} {score}/10
+    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-container-low text-on-surface-variant">
+      {label} {score}
     </span>
   );
 }
@@ -83,9 +73,9 @@ function QuoteCard({ quote, currentUserId }: { quote: FeedQuote; currentUserId: 
         )}
 
         <div className="flex flex-wrap gap-1.5">
-          <ScoreBadge score={quote.priceScore} bg="#7DD4C0" label="Price" />
-          <ScoreBadge score={quote.reputationScore} bg="#F4A7C3" label="Rep" />
-          <ScoreBadge score={quote.timeScore} bg="#89CFF0" label="Time" />
+          <ScoreBadge score={quote.priceScore} label="Price" />
+          <ScoreBadge score={quote.reputationScore} label="Rep" />
+          <ScoreBadge score={quote.timeScore} label="Time" />
         </div>
 
         <div className="flex items-center gap-4 pt-1">

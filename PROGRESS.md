@@ -196,14 +196,37 @@
 - Delete quote with cascade + Supabase Storage cleanup
 - Owner actions component — edit, delete, status pills ✅
 
-## Up Next - 2B.2 Re-analyse + quote sharing
-- 2B.3 Email notifications
+### Session 2B.2 ✅ — Re-analyse + quote sharing
+- Re-analyse button — reruns extraction + scoring, 
+  refreshes page on complete
+- Copy URL button — copies quote link to clipboard
+- Download button — generates signed Supabase URL, 
+  opens original file in new tab
+- OpenGraph metadata on quote detail pages
+- Share button visible to non-owners too ✅
 
-### 2C — AI + scoring improvements (4 sessions)
-- 2C.1 Rework score UI
+### Session 2B.3 → Moved to Phase 3 (email notifications)
+
+### Session 2C.1 ✅ — Rework score UI
+- White cards with 4px accent left border (colour = dimension)
+- Score number colour-coded: green ≥8, amber 5-7, red ≤4
+- 10-segment progress bar per score
+- Verdict badges with semantic colours (positive/neutral/negative)
+- QOAT Score — weighted average (Price 40%, Rep 35%, Time 25%)
+- Recommendation section — icon + sentiment-coloured heading
+- Feed cards use neutral grey score badges ✅
+
+## Up Next
+### 2C — AI + scoring improvements
 - 2C.2 Supplier social proof — Google Reviews
-- 2C.3 AI chatbot — ask about your quote
+- 2C.3 → Moved to Phase 3 (AI chatbot)
 - 2C.4 Community data feeds scoring
+- 2C.5 NEW — Richer community engagement:
+  * Upvote only on quotes, up/down on comments
+  * Comment reactions (👍 💡 😱)
+  * "I got a similar quote" button with price input
+  * "This helped me" counter on quotes
+  * Sort comments by most helpful
 
 ### 2D — Discovery + search (2 sessions)
 - 2D.1 Search + sort feed

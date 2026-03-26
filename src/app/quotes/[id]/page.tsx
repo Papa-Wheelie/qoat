@@ -1,15 +1,26 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { notFound } from "next/navigation";
+import { type Metadata } from "next";
+import { type ReactNode } from "react";
 import CommunitySection from "./CommunitySection";
 import QuoteOwnerActions from "./QuoteOwnerActions";
+import ShareButton from "./ShareButton";
 import { formatPublicPrice } from "@/lib/formatPrice";
+import SocialProof from "@/components/SocialProof";
 
 type LineItem = {
   description: string;
   quantity?: number | null;
   unitPrice?: number | null;
   totalPrice?: number | null;
+};
+
+type GoogleReview = {
+  authorName: string;
+  rating: number;
+  text: string;
+  relativePublishTimeDescription: string;
 };
 
 function formatAUD(amount: number) {
@@ -19,65 +30,196 @@ function formatAUD(amount: number) {
   }).format(amount);
 }
 
-const RECOMMENDATION_LABEL: Record<string, string> = {
-  accept: "Accept",
-  negotiate: "Negotiate",
-  reject: "Reject",
-  "get-more-quotes": "Get More Quotes",
+// ── Score helpers ────────────────────────────────────────────────────────────
+
+const VERDICT_SENTIMENT: Record<string, "positive" | "neutral" | "negative"> = {
+  fair: "neutral", low: "positive", high: "negative",
+  competitive: "positive", expensive: "negative",
+  trustworthy: "positive", adequate: "neutral", concerning: "negative", unknown: "neutral",
+  fast: "positive", typical: "neutral", slow: "negative", unspecified: "neutral",
 };
 
-const RECOMMENDATION_STYLE: Record<string, string> = {
-  accept: "bg-[#7DD4C0] text-[#0d3830]",
-  negotiate: "bg-[#F4A7C3] text-[#4a1228]",
-  reject: "bg-red-100 text-red-800",
-  "get-more-quotes": "bg-[#89CFF0] text-[#0a2e42]",
+const SENTIMENT_BADGE: Record<"positive" | "neutral" | "negative", { bg: string; color: string }> = {
+  positive: { bg: "#E1F5EE", color: "#085041" },
+  neutral:  { bg: "#FAEEDA", color: "#633806" },
+  negative: { bg: "#FCEBEB", color: "#791F1F" },
 };
+
+function scoreColor(score: number): string {
+  if (score >= 8) return "#27500A";
+  if (score >= 5) return "#633806";
+  return "#791F1F";
+}
+
+// ── Components ───────────────────────────────────────────────────────────────
+
 
 type ScoreCardProps = {
   label: string;
   score: number | null;
   verdict: string | null;
   explanation: string | null;
-  bg: string;
-  textColor: string;
+  accent: string;
+  extra?: ReactNode;
 };
 
-function ScoreCard({ label, score, verdict, explanation, bg, textColor }: ScoreCardProps) {
+function ScoreCard({ label, score, verdict, explanation, accent, extra }: ScoreCardProps) {
   if (score == null) {
     return (
-      <div className="flex-1 rounded-[16px] bg-surface-container-low px-6 py-6 flex flex-col gap-3 min-w-0">
-        <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
-          {label}
-        </p>
+      <div
+        className="flex-1 rounded-[16px] bg-white px-6 py-6 flex flex-col gap-3 min-w-0"
+        style={{ borderLeft: "4px solid #E0E0E0" }}
+      >
+        <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">{label}</p>
         <p className="text-sm text-on-surface-variant">Scoring…</p>
       </div>
     );
   }
 
+  const sentiment = VERDICT_SENTIMENT[verdict?.toLowerCase() ?? ""] ?? "neutral";
+  const badge = SENTIMENT_BADGE[sentiment];
+
   return (
     <div
-      className="flex-1 rounded-[16px] px-6 py-6 flex flex-col gap-3 min-w-0"
-      style={{ backgroundColor: bg, color: textColor }}
+      className="flex-1 rounded-[16px] bg-white px-6 py-6 flex flex-col gap-3 min-w-0"
+      style={{ borderLeft: `4px solid ${accent}` }}
     >
-      <p className="text-xs font-semibold tracking-widest uppercase opacity-70">
-        {label}
-      </p>
+      <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">{label}</p>
+
       <div className="flex items-end gap-2">
-        <span className="text-5xl font-extrabold tracking-tighter leading-none">
+        <span
+          className="text-5xl font-extrabold tracking-tighter leading-none"
+          style={{ color: scoreColor(score) }}
+        >
           {score}
         </span>
-        <span className="text-lg font-semibold opacity-50 mb-1">/10</span>
+        <span className="text-lg font-semibold text-on-surface-variant mb-1">/10</span>
       </div>
+
+      {/* 10-segment score bar */}
+      <div className="flex gap-[3px]">
+        {Array.from({ length: 10 }, (_, i) => (
+          <div
+            key={i}
+            className="h-1 flex-1 rounded-full"
+            style={{ backgroundColor: i < score ? accent : `${accent}26` }}
+          />
+        ))}
+      </div>
+
       {verdict && (
-        <span className="inline-block self-start px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-black/10">
+        <span
+          className="inline-block self-start px-3 py-1 rounded-full text-xs font-bold capitalize"
+          style={{ backgroundColor: badge.bg, color: badge.color }}
+        >
           {verdict}
         </span>
       )}
       {explanation && (
-        <p className="text-sm leading-relaxed opacity-80 mt-1">{explanation}</p>
+        <p style={{ fontSize: "13px", color: "#444444", lineHeight: "1.5" }}>{explanation}</p>
       )}
+      {extra}
     </div>
   );
+}
+
+function QoatScore({ price, rep, time }: { price: number; rep: number; time: number }) {
+  const raw = price * 0.4 + rep * 0.35 + time * 0.25;
+  const score = Math.round(raw * 10) / 10;
+  const color = scoreColor(Math.round(score));
+
+  return (
+    <div className="bg-white rounded-[16px] px-6 py-6 flex items-center gap-6">
+      <div>
+        <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant mb-2">
+          QOAT Score
+        </p>
+        <div className="flex items-end gap-2">
+          <span className="text-6xl font-extrabold tracking-tighter leading-none" style={{ color }}>
+            {score}
+          </span>
+          <div className="flex flex-col pb-1">
+            <span className="text-lg font-semibold text-on-surface-variant">/10</span>
+            <span className="text-xs text-on-surface-variant">AI analysis</span>
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 text-xs text-on-surface-variant leading-relaxed hidden sm:block">
+        Weighted average of Price (40%), Reputation (35%), and Time (25%).
+      </div>
+    </div>
+  );
+}
+
+// ── Recommendation config ────────────────────────────────────────────────────
+
+type RecommendationConfig = { heading: string; color: string; icon: ReactNode };
+
+const RECOMMENDATION_CONFIG: Record<string, RecommendationConfig> = {
+  accept: {
+    heading: "Looks good to proceed",
+    color: "#085041",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    ),
+  },
+  negotiate: {
+    heading: "Worth negotiating",
+    color: "#633806",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
+        <polyline points="19 8 12 1 5 8" />
+      </svg>
+    ),
+  },
+  reject: {
+    heading: "We suggest rejecting this quote",
+    color: "#791F1F",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    ),
+  },
+  "get-more-quotes": {
+    heading: "Get more quotes first",
+    color: "#791F1F",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
+      </svg>
+    ),
+  },
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const quote = await prisma.quote.findUnique({
+    where: { id },
+    include: { analysis: true },
+  });
+  if (!quote) return { title: "Quote not found — QOAT" };
+  const description =
+    quote.analysis?.publicSummary ?? "Get this quote validated by AI and the community.";
+  return {
+    title: `${quote.title} — QOAT`,
+    description,
+    openGraph: {
+      title: `${quote.title} — QOAT`,
+      description,
+      url: `https://getqoat.com/quotes/${id}`,
+      siteName: "QOAT",
+      type: "article",
+    },
+  };
 }
 
 export default async function QuotePage({
@@ -165,11 +307,13 @@ export default async function QuotePage({
           {quote.description && (
             <p className="text-on-surface-variant">{quote.description}</p>
           )}
-          {isOwner && (
+          {isOwner ? (
             <QuoteOwnerActions
               quoteId={quote.id}
               initialStatus={quote.status as "pending" | "accepted" | "rejected"}
             />
+          ) : (
+            <ShareButton />
           )}
         </header>
 
@@ -227,60 +371,69 @@ export default async function QuotePage({
                   <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
                     Iron Triangle
                   </p>
+
+                  {/* QOAT overall score */}
+                  {hasScores && (
+                    <QoatScore
+                      price={analysis.priceScore!}
+                      rep={analysis.reputationScore!}
+                      time={analysis.timeScore!}
+                    />
+                  )}
+
                   <div className="flex flex-col sm:flex-row gap-4">
                     <ScoreCard
                       label="Price"
                       score={analysis.priceScore}
                       verdict={analysis.priceVerdict}
                       explanation={analysis.priceExplanation}
-                      bg="#7DD4C0"
-                      textColor="#0d3830"
+                      accent="#7DD4C0"
                     />
                     <ScoreCard
                       label="Reputation"
                       score={analysis.reputationScore}
                       verdict={analysis.reputationVerdict}
                       explanation={analysis.reputationExplanation}
-                      bg="#F4A7C3"
-                      textColor="#4a1228"
+                      accent="#F4A7C3"
                     />
                     <ScoreCard
                       label="Time"
                       score={analysis.timeScore}
                       verdict={analysis.timeVerdict}
                       explanation={analysis.timeExplanation}
-                      bg="#89CFF0"
-                      textColor="#0a2e42"
+                      accent="#89CFF0"
                     />
                   </div>
                 </section>
 
                 {/* 3. Overall recommendation */}
-                {hasScores && analysis.recommendation && (
-                  <section className="bg-surface-container-lowest rounded-[16px] px-6 py-6 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
-                        Recommendation
-                      </p>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
-                          RECOMMENDATION_STYLE[analysis.recommendation] ??
-                          "bg-surface-container-low text-on-surface"
-                        }`}
-                      >
-                        {RECOMMENDATION_LABEL[analysis.recommendation] ??
-                          analysis.recommendation}
-                      </span>
-                    </div>
-                    {analysis.overallSummary && (
-                      <p className="text-on-surface leading-relaxed">
-                        {analysis.overallSummary}
-                      </p>
-                    )}
-                  </section>
-                )}
+                {hasScores && analysis.recommendation && (() => {
+                  const config = RECOMMENDATION_CONFIG[analysis.recommendation];
+                  if (!config) return null;
+                  return (
+                    <section className="bg-surface-container-lowest rounded-[16px] px-6 py-6 space-y-3">
+                      <div className="flex items-center gap-3" style={{ color: config.color }}>
+                        {config.icon}
+                        <p className="text-base font-bold">{config.heading}</p>
+                      </div>
+                      {analysis.overallSummary && (
+                        <p className="text-on-surface leading-relaxed" style={{ color: "#444444" }}>
+                          {analysis.overallSummary}
+                        </p>
+                      )}
+                    </section>
+                  );
+                })()}
 
-                {/* 4. Red flags */}
+                {/* 4. Social proof */}
+                <SocialProof
+                  googleRating={analysis.googleRating}
+                  googleReviewCount={analysis.googleReviewCount}
+                  googleUrl={analysis.googleUrl}
+                  googleReviews={analysis.googleReviews as GoogleReview[] | null}
+                />
+
+                {/* 5. Red flags */}
                 {redFlags.length > 0 && (
                   <section className="bg-red-50 rounded-[16px] px-6 py-5 space-y-2">
                     <p className="text-xs font-semibold tracking-widest uppercase text-red-700">
@@ -297,7 +450,7 @@ export default async function QuotePage({
                   </section>
                 )}
 
-                {/* 5. Questions to ask */}
+                {/* 6. Questions to ask */}
                 {questionsToAsk.length > 0 && (
                   <section className="space-y-3">
                     <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">

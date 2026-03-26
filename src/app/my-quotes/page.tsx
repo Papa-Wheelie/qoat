@@ -10,20 +10,11 @@ const STATUS_BADGE: Record<string, { label: string; bg: string; text: string }> 
   rejected: { label: "Rejected", bg: "#F4A7C3", text: "#4a1228" },
 };
 
-function ScoreBadge({ score, bg, label }: { score: number | null; bg: string; label: string }) {
-  if (score == null) {
-    return (
-      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant">
-        Pending
-      </span>
-    );
-  }
+function ScoreBadge({ score, label }: { score: number | null; label: string }) {
+  if (score == null) return null;
   return (
-    <span
-      className="px-2 py-0.5 rounded-full text-xs font-bold"
-      style={{ backgroundColor: bg, color: "#111111" }}
-    >
-      {label} {score}/10
+    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-container-low text-on-surface-variant">
+      {label} {score}
     </span>
   );
 }
@@ -105,9 +96,9 @@ export default async function MyQuotesPage() {
                     )}
 
                     <div className="flex flex-wrap gap-1.5">
-                      <ScoreBadge score={q.analysis?.priceScore ?? null} bg="#7DD4C0" label="Price" />
-                      <ScoreBadge score={q.analysis?.reputationScore ?? null} bg="#F4A7C3" label="Rep" />
-                      <ScoreBadge score={q.analysis?.timeScore ?? null} bg="#89CFF0" label="Time" />
+                      <ScoreBadge score={q.analysis?.priceScore ?? null} label="Price" />
+                      <ScoreBadge score={q.analysis?.reputationScore ?? null} label="Rep" />
+                      <ScoreBadge score={q.analysis?.timeScore ?? null} label="Time" />
                     </div>
 
                     <div className="flex items-center gap-4 pt-1">

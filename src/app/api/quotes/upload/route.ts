@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { extractQuote } from "@/lib/extractQuote";
 import { scoreQuote } from "@/lib/scoreQuote";
+import { findSupplierReviews } from "@/lib/googlePlaces";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -85,11 +86,27 @@ export async function POST(request: Request) {
       .then(async (extraction) => {
         console.log("[upload] extraction succeeded for quote", quote.id, "summary:", extraction.summary);
 
-        // Score in parallel with saving extraction
+        // Fetch Google reviews if supplier name is available
+        let googleReviews = null;
+        if (extraction.supplierName) {
+          console.log("[upload] fetching Google reviews for:", extraction.supplierName);
+          googleReviews = await findSupplierReviews(
+            extraction.supplierName,
+            suburb ?? "",
+            state ?? ""
+          );
+          console.log("[upload] Google reviews:", googleReviews);
+        }
+
+        // Score the quote
         let score;
         try {
           console.log("[upload] starting scoring for quote", quote.id);
-          score = await scoreQuote(extraction, { suburb, state }, description);
+          const googleReviewsForScoring =
+            googleReviews?.rating != null && googleReviews?.reviewCount != null
+              ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
+              : null;
+          score = await scoreQuote(extraction, { suburb, state }, description, googleReviewsForScoring);
           console.log("[upload] scoring succeeded for quote", quote.id, "recommendation:", score.overall.recommendation);
         } catch (err) {
           console.error("[upload] scoring failed for quote", quote.id, err);
@@ -107,6 +124,11 @@ export async function POST(request: Request) {
             summary: extraction.summary ?? undefined,
             publicSummary: extraction.publicSummary ?? undefined,
             estimatedTimeframe: extraction.estimatedTimeframe ?? undefined,
+            googleRating: googleReviews?.rating ?? undefined,
+            googleReviewCount: googleReviews?.reviewCount ?? undefined,
+            googlePlaceId: googleReviews?.placeId ?? undefined,
+            googleUrl: googleReviews?.googleUrl ?? undefined,
+            googleReviews: googleReviews?.reviews ?? undefined,
             ...(score && {
               priceScore: score.price.score,
               priceVerdict: score.price.verdict,
