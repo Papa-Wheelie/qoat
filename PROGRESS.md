@@ -68,10 +68,20 @@
 - Fixed Australian date format (DD/MM/YYYY) in extraction prompt
 - Red flags no longer incorrectly flag past dates as future dated
 
+### Session 3.2 ✅ — Iron triangle scoring
+- scoreQuote.ts built using Claude API
+- Three dimensions: Price, Reputation, Time
+- Quality renamed to Reputation — assesses provider 
+  trustworthiness (ABN, licence, insurance, payment terms)
+- Price benchmarked against AU market rates with $ specifics
+- Time scores realistic timeframe vs industry standard
+- Overall recommendation: accept/negotiate/reject/get-more-quotes
+- Iron triangle cards displayed on quote detail page
+- Tested with real skylight quote ✅
+
 ## Up Next
-### Session 3.2 — Iron triangle scoring
-- [ ] Price score — benchmark against AU market rates
-- [ ] Quality score — completeness and clarity of quote
-- [ ] Time score — estimated timeframe vs typical
-- [ ] Plain English verdict per score
-- [ ] Display iron triangle on quote detail page
+### Session 4.1 — Community comments + upvotes
+- [ ] Comments API — tRPC router
+- [ ] Upvotes API — one vote per user
+- [ ] Community confidence score
+- [ ] Comments UI on quote detail page
