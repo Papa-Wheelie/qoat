@@ -53,5 +53,16 @@ model QuoteAnalysis {
   redFlags           Json
   summary            String?
   estimatedTimeframe String?
+  priceScore         Int?
+  priceVerdict       String?
+  priceExplanation   String?
+  reputationScore       Int?
+  reputationVerdict     String?
+  reputationExplanation String?
+  timeScore          Int?
+  timeVerdict        String?
+  timeExplanation    String?
+  recommendation     String?
+  overallSummary     String?
   createdAt          DateTime @default(now())
 }

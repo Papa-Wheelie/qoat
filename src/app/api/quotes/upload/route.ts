@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { extractQuote } from "@/lib/extractQuote";
+import { scoreQuote } from "@/lib/scoreQuote";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -74,12 +75,23 @@ export async function POST(request: Request) {
       },
     });
 
-    // Run AI extraction — non-blocking, do not fail the upload on error
+    // Run AI extraction + scoring — non-blocking, do not fail the upload on error
     console.log("[upload] starting extraction for quote", quote.id, "path:", storagePath);
     extractQuote(storagePath, file.type)
-      .then((extraction) => {
+      .then(async (extraction) => {
         console.log("[upload] extraction succeeded for quote", quote.id, "summary:", extraction.summary);
-        return prisma.quoteAnalysis.create({
+
+        // Score in parallel with saving extraction
+        let score;
+        try {
+          console.log("[upload] starting scoring for quote", quote.id);
+          score = await scoreQuote(extraction);
+          console.log("[upload] scoring succeeded for quote", quote.id, "recommendation:", score.overall.recommendation);
+        } catch (err) {
+          console.error("[upload] scoring failed for quote", quote.id, err);
+        }
+
+        const saved = await prisma.quoteAnalysis.create({
           data: {
             quoteId: quote.id,
             rawExtraction: extraction,
@@ -89,10 +101,23 @@ export async function POST(request: Request) {
             redFlags: extraction.redFlags,
             summary: extraction.summary ?? undefined,
             estimatedTimeframe: extraction.estimatedTimeframe ?? undefined,
+            ...(score && {
+              priceScore: score.price.score,
+              priceVerdict: score.price.verdict,
+              priceExplanation: score.price.explanation,
+              reputationScore: score.reputation.score,
+              reputationVerdict: score.reputation.verdict,
+              reputationExplanation: score.reputation.explanation,
+              timeScore: score.time.score,
+              timeVerdict: score.time.verdict,
+              timeExplanation: score.time.explanation,
+              recommendation: score.overall.recommendation,
+              overallSummary: score.overall.summary,
+            }),
           },
         });
+        console.log("[upload] analysis saved, id:", saved.id);
       })
-      .then((saved) => console.log("[upload] analysis saved, id:", saved.id))
       .catch((err) => console.error("[upload] extraction failed for quote", quote.id, err));
 
     return Response.json(quote, { status: 201 });
