@@ -8,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   name      String?
   password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   quotes    Quote[]
+  comments  Comment[]
+  votes     Vote[]
 }
 
 model Category {
@@ -33,6 +35,8 @@ model Quote {
   fileName    String
   fileType    String
   status      String         @default("pending")
+  suburb      String?
+  state       String?
   userId      String
   categoryId  String
   createdAt   DateTime       @default(now())
@@ -40,6 +44,37 @@ model Quote {
   user        User           @relation(fields: [userId], references: [id])
   category    Category       @relation(fields: [categoryId], references: [id])
   analysis    QuoteAnalysis?
+  comments    Comment[]
+  votes       Vote[]
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  quoteId   String
+  userId    String
+  parentId  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  quote     Quote     @relation(fields: [quoteId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  votes     Vote[]
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  quoteId   String?
+  commentId String?
+  userId    String
+  createdAt DateTime @default(now())
+  quote     Quote?   @relation(fields: [quoteId], references: [id])
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, quoteId])
+  @@unique([userId, commentId])
 }
 
 model QuoteAnalysis {
@@ -51,7 +86,9 @@ model QuoteAnalysis {
   totalAmount        Float?
   lineItems          Json
   redFlags           Json
+  questionsToAsk     Json?
   summary            String?
+  publicSummary      String?
   estimatedTimeframe String?
   priceScore         Int?
   priceVerdict       String?

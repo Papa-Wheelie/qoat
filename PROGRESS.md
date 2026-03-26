@@ -79,9 +79,27 @@
 - Iron triangle cards displayed on quote detail page
 - Tested with real skylight quote ✅
 
+### Session 4.1 ✅ — Community comments + upvotes
+- Comment model with one level of replies
+- Vote model with unique constraints (no double voting)
+- Community confidence score calculated from votes
+- Optimistic upvote updates on the client
+- Unauthenticated users see Sign in prompts
+
+### Session 4.2 ✅ — Privacy model + location + questions
+- Supplier name owner-only
+- Iron triangle, red flags, recommendation owner-only
+- Public summary generated separately (no supplier mention)
+- Public view shows: total, category, location, line items, 
+  community
+- Suburb + state captured on upload
+- Location-aware price benchmarking in scoring prompt
+- "Questions to ask your supplier" section added
+- AI never mentions supplier in public-facing content
+
 ## Up Next
-### Session 4.1 — Community comments + upvotes
-- [ ] Comments API — tRPC router
-- [ ] Upvotes API — one vote per user
-- [ ] Community confidence score
-- [ ] Comments UI on quote detail page
+### Session 5.1 — Quote feed homepage
+- [ ] List all public quotes
+- [ ] Filter by category
+- [ ] Quote cards with total, location, score, vote count
+- [ ] Search by suburb or category

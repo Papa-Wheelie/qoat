@@ -18,6 +18,8 @@ export default function UploadPage() {
   const [dragging, setDragging] = useState(false);
   const [title, setTitle] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [suburb, setSuburb] = useState("");
+  const [state, setState] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -71,6 +73,8 @@ export default function UploadPage() {
     form.append("title", title.trim());
     form.append("categoryId", categoryId);
     if (description.trim()) form.append("description", description.trim());
+    if (suburb.trim()) form.append("suburb", suburb.trim());
+    if (state) form.append("state", state);
 
     try {
       const res = await fetch("/api/quotes/upload", { method: "POST", credentials: "include", body: form });
@@ -191,6 +195,47 @@ export default function UploadPage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Location */}
+          <div className="flex gap-4">
+            <div className="flex-1 space-y-2">
+              <label htmlFor="suburb" className={labelClass}>
+                Suburb{" "}
+                <span className="normal-case font-normal text-on-surface-variant tracking-normal">
+                  (optional)
+                </span>
+              </label>
+              <input
+                id="suburb"
+                type="text"
+                placeholder="e.g. Mosman"
+                value={suburb}
+                onChange={(e) => setSuburb(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div className="w-40 space-y-2">
+              <label htmlFor="state" className={labelClass}>
+                State
+              </label>
+              <select
+                id="state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">—</option>
+                <option value="NSW">NSW</option>
+                <option value="VIC">VIC</option>
+                <option value="QLD">QLD</option>
+                <option value="WA">WA</option>
+                <option value="SA">SA</option>
+                <option value="TAS">TAS</option>
+                <option value="ACT">ACT</option>
+                <option value="NT">NT</option>
+              </select>
+            </div>
           </div>
 
           {/* Description */}

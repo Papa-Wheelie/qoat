@@ -21,13 +21,15 @@ const ExtractionSchema = z.object({
   estimatedTimeframe: z.string().nullable(),
   tradeCategory: z.string().nullable(),
   redFlags: z.array(z.string()),
+  questionsToAsk: z.array(z.string()),
   summary: z.string(),
+  publicSummary: z.string(),
 });
 
 export type QuoteExtraction = z.infer<typeof ExtractionSchema>;
 
 const SYSTEM_PROMPT =
-  "You are an expert at reading Australian trade and supplier quotes. All dates are in Australian format DD/MM/YYYY. 11/2/2026 means 11 February 2026. Today's date is in 2026. Only flag a quote as future dated if the date is after today when correctly parsed as DD/MM/YYYY. Never flag a past or current date as future dated. Extract structured data from the quote document provided. Always respond with valid JSON only, no markdown, no explanation.";
+  "You are an expert at reading Australian trade and supplier quotes. All dates are in Australian format DD/MM/YYYY. 11/2/2026 means 11 February 2026. Today's date is in 2026. Only flag a quote as future dated if the date is after today when correctly parsed as DD/MM/YYYY. Never flag a past or current date as future dated. Extract structured data from the quote document provided. Always respond with valid JSON only, no markdown, no explanation. When generating the publicSummary, never mention the supplier name, business name, or any identifying details. Describe only the scope of work.";
 
 const USER_PROMPT = `Extract the following from this quote document and return as JSON:
 
@@ -45,7 +47,9 @@ Important: This is an Australian quote. All dates are in Australian format DD/MM
   "estimatedTimeframe": string or null,
   "tradeCategory": string or null,
   "redFlags": [string] — list any genuinely concerning items such as missing scope, unusual payment terms, exclusions that could surprise the client, or vague timeframes. Do NOT flag the quote date as future dated unless you are certain the date is in the future when read in DD/MM/YYYY Australian format.,
-  "summary": string one sentence plain English summary
+  "questionsToAsk": [string] — 3 to 5 specific, practical questions the homeowner should ask this supplier before accepting the quote. Base these on gaps, vague items, or red flags found in the quote. Make them conversational and easy for a non-expert to ask. Example: "Can you provide a written timeframe for completion?",
+  "summary": string one sentence plain English summary (may include supplier name and price context),
+  "publicSummary": string one sentence describing only the job type and scope of work — no supplier name, no price, no opinions. Example: "Supply and installation of 3 skylights with custom flashing and internal finishing."
 }`;
 
 export async function extractQuote(

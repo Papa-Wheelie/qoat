@@ -24,6 +24,8 @@ export async function POST(request: Request) {
     const title = formData.get("title") as string | null;
     const categoryId = formData.get("categoryId") as string | null;
     const description = formData.get("description") as string | null;
+    const suburb = formData.get("suburb") as string | null;
+    const state = formData.get("state") as string | null;
 
     if (!file || !title || !categoryId) {
       return Response.json(
@@ -67,6 +69,8 @@ export async function POST(request: Request) {
       data: {
         title,
         description: description ?? undefined,
+        suburb: suburb ?? undefined,
+        state: state ?? undefined,
         fileUrl: publicUrlData.publicUrl,
         fileName: file.name,
         fileType: file.type,
@@ -85,7 +89,7 @@ export async function POST(request: Request) {
         let score;
         try {
           console.log("[upload] starting scoring for quote", quote.id);
-          score = await scoreQuote(extraction);
+          score = await scoreQuote(extraction, { suburb, state });
           console.log("[upload] scoring succeeded for quote", quote.id, "recommendation:", score.overall.recommendation);
         } catch (err) {
           console.error("[upload] scoring failed for quote", quote.id, err);
@@ -99,7 +103,9 @@ export async function POST(request: Request) {
             totalAmount: extraction.totalAmount ?? undefined,
             lineItems: extraction.lineItems,
             redFlags: extraction.redFlags,
+            questionsToAsk: extraction.questionsToAsk,
             summary: extraction.summary ?? undefined,
+            publicSummary: extraction.publicSummary ?? undefined,
             estimatedTimeframe: extraction.estimatedTimeframe ?? undefined,
             ...(score && {
               priceScore: score.price.score,

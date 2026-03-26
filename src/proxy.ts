@@ -2,12 +2,15 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const publicRoutes = ["/login", "/register"];
+const publicRoutes = ["/", "/login", "/register"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (publicRoutes.includes(pathname)) {
+  if (
+    publicRoutes.includes(pathname) ||
+    pathname.startsWith("/quotes/")
+  ) {
     return NextResponse.next();
   }
 

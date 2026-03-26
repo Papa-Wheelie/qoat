@@ -27,9 +27,17 @@ const ScoreSchema = z.object({
 export type QuoteScore = z.infer<typeof ScoreSchema>;
 
 const SYSTEM_PROMPT =
-  "You are an expert in the Australian trade and construction industry with deep knowledge of fair market pricing, quality workmanship standards, and typical project timeframes across all states. You help Australian consumers understand if they are getting a fair deal. Always respond with valid JSON only, no markdown, no explanation.";
+  "You are an expert in the Australian trade and construction industry with deep knowledge of fair market pricing, quality workmanship standards, and typical project timeframes across all states. You help Australian consumers understand if they are getting a fair deal. Always respond with valid JSON only, no markdown, no explanation. Never mention the supplier name in any explanation or summary text.";
 
-export async function scoreQuote(extraction: QuoteExtraction): Promise<QuoteScore> {
+export async function scoreQuote(
+  extraction: QuoteExtraction,
+  location?: { suburb?: string | null; state?: string | null }
+): Promise<QuoteScore> {
+  const locationLine =
+    location?.suburb || location?.state
+      ? `Location: ${[location.suburb, location.state].filter(Boolean).join(", ")}`
+      : null;
+
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 1024,
@@ -38,7 +46,7 @@ export async function scoreQuote(extraction: QuoteExtraction): Promise<QuoteScor
       {
         role: "user",
         content: `Based on this Australian trade quote, provide an iron triangle assessment. Score each dimension 1-10 where 10 is best.
-
+${locationLine ? `\n${locationLine}\n` : ""}
 Quote data: ${JSON.stringify(extraction, null, 2)}
 
 Return JSON:
