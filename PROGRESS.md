@@ -176,9 +176,15 @@
 - Prisma singleton pattern applied globally
 - Nav wrapped in Suspense boundary in layout ✅
 
+### Session 2A.4 ✅ — Global flows polish
+- Custom 404 page
+- Global error boundary with retry
+- Loading spinner
+- QOAT favicon (bold Q on off-white)
+- SEO metadata + OpenGraph tags
+- Title: "QOAT — Know before you pay"
+
 ## Up Next
-### Session 2A.4 — Nav + global flows polish
-- 2A.4 Nav + global flows polish
 
 ### 2B — Quote management (3 sessions)
 - 2B.1 Quote status + edit + delete

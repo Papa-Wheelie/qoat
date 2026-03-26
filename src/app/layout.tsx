@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
@@ -11,9 +12,23 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const description =
+  "Upload your trade or supplier quote and get an instant AI assessment plus community insight from Australian homeowners.";
+
 export const metadata: Metadata = {
-  title: "QOAT",
-  description: "Quality Of All Things.",
+  title: "QOAT — Know before you pay",
+  description,
+  openGraph: {
+    title: "QOAT — Know before you pay",
+    description,
+    url: "https://getqoat.com",
+    siteName: "QOAT",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#F9F9F7",
 };
 
 export default function RootLayout({
