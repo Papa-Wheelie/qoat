@@ -97,9 +97,23 @@
 - "Questions to ask your supplier" section added
 - AI never mentions supplier in public-facing content
 
+### Session 5.1 ✅ — Quote feed homepage
+- Public feed with category pills and state filter
+- Quote cards with scores, vote count, comment count
+- Nav component reused across pages
+- Hero section for logged out users
+- Smart pricing model:
+  * Owners always see exact prices
+  * Services show 10% range publicly (e.g. $8,500-$10,500)
+  * Products show exact price publicly
+- Privacy model complete:
+  * Supplier name owner only
+  * Iron triangle, red flags, recommendation owner only
+  * Total, line items, community section public
+
 ## Up Next
-### Session 5.1 — Quote feed homepage
-- [ ] List all public quotes
-- [ ] Filter by category
-- [ ] Quote cards with total, location, score, vote count
-- [ ] Search by suburb or category
+### Session 6.1 — End to end test + bug sweep
+- [ ] Walk full user journey end to end
+- [ ] Fix any broken flows
+- [ ] Deploy to Vercel and confirm production works
+- [ ] Add ANTHROPIC_API_KEY to Vercel env vars

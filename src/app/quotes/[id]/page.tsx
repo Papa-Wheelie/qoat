@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import CommunitySection from "./CommunitySection";
+import Nav from "@/components/Nav";
+import { formatPublicPrice } from "@/lib/formatPrice";
 
 type LineItem = {
   description: string;
@@ -143,7 +145,9 @@ export default async function QuotePage({
   }));
 
   return (
-    <main className="min-h-screen bg-surface py-16 px-6 flex flex-col items-center">
+    <>
+    <Nav />
+    <main className="min-h-screen bg-surface pt-14 py-16 px-6 flex flex-col items-center">
       <div className="w-full max-w-2xl space-y-8">
 
         {/* Header */}
@@ -173,42 +177,42 @@ export default async function QuotePage({
           </div>
         ) : (
           <>
-            {/* Public summary — visible to everyone */}
-            {analysis.publicSummary && (
-              <section className="bg-surface-container-lowest rounded-[16px] px-6 py-5">
-                <p className="text-on-surface leading-relaxed">
+            {/* Public summary + total — visible to everyone */}
+            <section className="bg-surface-container-lowest rounded-[16px] px-6 py-6 space-y-4">
+              {analysis.totalAmount != null && (
+                <div>
+                  <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant mb-1">
+                    {isOwner ? "Total" : "Estimated range"}
+                  </p>
+                  <p className="text-2xl font-extrabold tracking-tight text-primary">
+                    {isOwner
+                      ? formatAUD(analysis.totalAmount)
+                      : formatPublicPrice(analysis.totalAmount, quote.category.slug)}
+                  </p>
+                </div>
+              )}
+              {analysis.publicSummary && (
+                <p className="text-on-surface leading-relaxed border-t border-outline-variant/20 pt-4">
                   {analysis.publicSummary}
                 </p>
-              </section>
-            )}
+              )}
+            </section>
 
             {/* Owner-only block */}
             {isOwner ? (
               <>
-                {/* 1. Supplier + total + AI summary */}
-                <section className="bg-surface-container-lowest rounded-[16px] px-6 py-6 space-y-4">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div>
-                      <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant mb-1">
-                        Supplier
-                      </p>
-                      <p className="text-lg font-bold text-on-surface">
-                        {analysis.supplierName ?? "Unknown"}
-                      </p>
-                    </div>
-                    {analysis.totalAmount != null && (
-                      <div className="text-right">
-                        <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant mb-1">
-                          Total
-                        </p>
-                        <p className="text-2xl font-extrabold tracking-tight text-primary">
-                          {formatAUD(analysis.totalAmount)}
-                        </p>
-                      </div>
-                    )}
+                {/* 1. Supplier + AI summary */}
+                <section className="bg-surface-container-lowest rounded-[16px] px-6 py-6 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant mb-1">
+                      Supplier
+                    </p>
+                    <p className="text-lg font-bold text-on-surface">
+                      {analysis.supplierName ?? "Unknown"}
+                    </p>
                   </div>
                   {analysis.summary && (
-                    <p className="text-on-surface leading-relaxed pt-4 border-t border-outline-variant/20">
+                    <p className="text-on-surface leading-relaxed pt-3 border-t border-outline-variant/20">
                       {analysis.summary}
                     </p>
                   )}
@@ -357,13 +361,13 @@ export default async function QuotePage({
                       <p className="text-xs text-on-surface-variant mt-0.5">
                         Qty: {item.quantity}
                         {item.unitPrice != null &&
-                          ` × ${formatAUD(item.unitPrice)}`}
+                          ` × ${isOwner ? formatAUD(item.unitPrice) : formatPublicPrice(item.unitPrice, quote.category.slug)}`}
                       </p>
                     )}
                   </div>
                   {item.totalPrice != null && (
                     <p className="text-sm font-semibold text-on-surface whitespace-nowrap">
-                      {formatAUD(item.totalPrice)}
+                      {isOwner ? formatAUD(item.totalPrice) : formatPublicPrice(item.totalPrice, quote.category.slug)}
                     </p>
                   )}
                 </div>
@@ -382,5 +386,6 @@ export default async function QuotePage({
         />
       </div>
     </main>
+    </>
   );
 }
