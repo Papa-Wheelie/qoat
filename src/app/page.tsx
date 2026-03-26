@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import Nav from "@/components/Nav";
 import QuoteFeed, { type FeedQuote } from "./QuoteFeed";
 
 export default async function HomePage() {
@@ -51,9 +50,7 @@ export default async function HomePage() {
   const initialTotalPages = Math.ceil(totalCount / 20);
 
   return (
-    <>
-      <Nav />
-      <main className="min-h-screen bg-surface pt-14">
+    <main className="min-h-screen bg-surface pt-14">
         {/* Hero — logged out only */}
         {!isLoggedIn && (
           <section className="max-w-5xl mx-auto px-6 pt-20 pb-16">
@@ -83,7 +80,6 @@ export default async function HomePage() {
             currentUserId={currentUserId}
           />
         </section>
-      </main>
-    </>
+    </main>
   );
 }

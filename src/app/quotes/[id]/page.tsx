@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import CommunitySection from "./CommunitySection";
-import Nav from "@/components/Nav";
 import { formatPublicPrice } from "@/lib/formatPrice";
 
 type LineItem = {
@@ -145,8 +144,6 @@ export default async function QuotePage({
   }));
 
   return (
-    <>
-    <Nav />
     <main className="min-h-screen bg-surface pt-14 py-16 px-6 flex flex-col items-center">
       <div className="w-full max-w-2xl space-y-8">
 
@@ -386,6 +383,5 @@ export default async function QuotePage({
         />
       </div>
     </main>
-    </>
   );
 }

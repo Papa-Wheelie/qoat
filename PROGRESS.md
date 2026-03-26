@@ -166,11 +166,18 @@
 - Prisma singleton pattern fixed in src/lib/prisma.ts
 - Google button on login + register pages ✅
 
-## Up Next
-### Session 2A.3 — User profile + account settings
+### Session 2A.3 ✅ — User profile + account settings
+- My Quotes page at /my-quotes
+- Profile page — avatar, stats, edit name
+- Account settings — email verified badge, change password,
+  delete account with confirmation modal
+- Nav dropdown — initials avatar, My Quotes, Profile, 
+  Settings, Sign Out
+- Prisma singleton pattern applied globally
+- Nav wrapped in Suspense boundary in layout ✅
 
-- 2A.2 Google + Apple OAuth
-- 2A.3 User profile + account settings
+## Up Next
+### Session 2A.4 — Nav + global flows polish
 - 2A.4 Nav + global flows polish
 
 ### 2B — Quote management (3 sessions)

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import Providers from "./providers";
+import Nav from "@/components/Nav";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -22,8 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-          <Providers>{children}</Providers>
-        </body>
+        <Providers>
+          <Suspense fallback={<div className="h-14" />}>
+            <Nav />
+          </Suspense>
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

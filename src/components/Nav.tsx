@@ -1,12 +1,12 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import SignOutButton from "./SignOutButton";
+import UserMenu from "./UserMenu";
 import VerificationBanner from "./VerificationBanner";
 
 export default async function Nav() {
   const session = await auth();
-  const isLoggedIn = !!session?.user;
+  const isLoggedIn = !!session?.user?.id;
 
   let showVerificationBanner = false;
   if (isLoggedIn && session.user?.id) {
@@ -30,7 +30,10 @@ export default async function Nav() {
 
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
-              <SignOutButton />
+              <UserMenu
+                name={session.user.name ?? null}
+                image={session.user.image ?? null}
+              />
             ) : (
               <Link
                 href="/login"

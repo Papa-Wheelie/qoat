@@ -1,12 +1,14 @@
 const productCategories = ["supplier-products", "automotive", "insurance"];
 
-const aud = (n: number) =>
+export const formatAUD = (n: number) =>
   new Intl.NumberFormat("en-AU", {
     style: "currency",
     currency: "AUD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(n);
+
+const aud = formatAUD;
 
 export function formatPublicPrice(amount: number, categorySlug: string): string {
   if (productCategories.includes(categorySlug)) {
