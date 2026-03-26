@@ -4,6 +4,12 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { formatAUD } from "@/lib/formatPrice";
 
+const STATUS_BADGE: Record<string, { label: string; bg: string; text: string }> = {
+  pending:  { label: "Pending",  bg: "#E8E8E6", text: "#555555" },
+  accepted: { label: "Accepted", bg: "#7DD4C0", text: "#0d3830" },
+  rejected: { label: "Rejected", bg: "#F4A7C3", text: "#4a1228" },
+};
+
 function ScoreBadge({ score, bg, label }: { score: number | null; bg: string; label: string }) {
   if (score == null) {
     return (
@@ -32,6 +38,7 @@ export default async function MyQuotesPage() {
     select: {
       id: true,
       title: true,
+      status: true,
       suburb: true,
       state: true,
       createdAt: true,
@@ -116,9 +123,17 @@ export default async function MyQuotesPage() {
                         </svg>
                         {q._count.comments}
                       </span>
-                      <span className="text-xs text-on-surface-variant ml-auto">
-                        {new Date(q.createdAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                      </span>
+                      {(() => {
+                        const badge = STATUS_BADGE[q.status] ?? STATUS_BADGE.pending;
+                        return (
+                          <span
+                            className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
+                            style={{ backgroundColor: badge.bg, color: badge.text }}
+                          >
+                            {badge.label}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
                 </Link>

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import CommunitySection from "./CommunitySection";
+import QuoteOwnerActions from "./QuoteOwnerActions";
 import { formatPublicPrice } from "@/lib/formatPrice";
 
 type LineItem = {
@@ -148,8 +149,8 @@ export default async function QuotePage({
       <div className="w-full max-w-2xl space-y-8">
 
         {/* Header */}
-        <header>
-          <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant mb-2">
+        <header className="space-y-3">
+          <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
             {quote.category.name}
             {(quote.suburb || quote.state) && (
               <span className="font-normal normal-case tracking-normal">
@@ -162,7 +163,13 @@ export default async function QuotePage({
             {quote.title}
           </h1>
           {quote.description && (
-            <p className="mt-2 text-on-surface-variant">{quote.description}</p>
+            <p className="text-on-surface-variant">{quote.description}</p>
+          )}
+          {isOwner && (
+            <QuoteOwnerActions
+              quoteId={quote.id}
+              initialStatus={quote.status as "pending" | "accepted" | "rejected"}
+            />
           )}
         </header>
 

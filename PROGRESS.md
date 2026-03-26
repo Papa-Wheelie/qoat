@@ -184,11 +184,19 @@
 - SEO metadata + OpenGraph tags
 - Title: "QOAT — Know before you pay"
 
-## Up Next
 
 ### 2B — Quote management (3 sessions)
-- 2B.1 Quote status + edit + delete
-- 2B.2 Re-analyse + quote sharing
+
+### Session 2B.1 ✅ — Quote status + edit + delete
+- Status field: pending / accepted / rejected
+- Status pill selector on quote detail (owner only)
+- Optimistic status updates
+- Status badge on My Quotes cards
+- Edit quote page at /quotes/:id/edit
+- Delete quote with cascade + Supabase Storage cleanup
+- Owner actions component — edit, delete, status pills ✅
+
+## Up Next - 2B.2 Re-analyse + quote sharing
 - 2B.3 Email notifications
 
 ### 2C — AI + scoring improvements (4 sessions)
