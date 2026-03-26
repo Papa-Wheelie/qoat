@@ -157,8 +157,17 @@
 - Verification banner in nav for unverified users
 - Resend/verify endpoints working end to end ✅
 
+### Session 2A.2 ✅ — Google OAuth
+- Google provider added to NextAuth v5
+- Account model added to Prisma schema
+- Account linking — existing email/password users can 
+  sign in with Google without duplicate user created
+- Google OAuth users get emailVerified set automatically
+- Prisma singleton pattern fixed in src/lib/prisma.ts
+- Google button on login + register pages ✅
+
 ## Up Next
-### Session 2A.2 — Google + Apple OAuth
+### Session 2A.3 — User profile + account settings
 
 - 2A.2 Google + Apple OAuth
 - 2A.3 User profile + account settings
