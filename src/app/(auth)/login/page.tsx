@@ -62,6 +62,7 @@ export default function LoginPage() {
               name="email"
               type="email"
               required
+              autoComplete="email"
               placeholder="hello@qoat.com"
               className="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200"
             />
@@ -81,6 +82,7 @@ export default function LoginPage() {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 required
+                autoComplete="off"
                 placeholder="••••••••"
                 className="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200"
               />
@@ -105,12 +107,12 @@ export default function LoginPage() {
               </button>
             </div>
             <div className="flex justify-end pt-1">
-              <a
-                href="#"
+              <Link
+                href="/forgot-password"
                 className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
           </div>
 

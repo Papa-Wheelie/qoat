@@ -88,6 +88,7 @@ export default function RegisterPage() {
               name="email"
               type="email"
               required
+              autoComplete="email"
               placeholder="hello@qoat.com"
               className="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200"
             />
@@ -107,6 +108,7 @@ export default function RegisterPage() {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 required
+                autoComplete="off"
                 placeholder="••••••••"
                 className="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200"
               />
@@ -146,6 +148,7 @@ export default function RegisterPage() {
                 name="confirm"
                 type={showConfirm ? "text" : "password"}
                 required
+                autoComplete="off"
                 placeholder="••••••••"
                 className="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200"
               />

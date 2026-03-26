@@ -146,7 +146,20 @@
 
 ## Phase 2 Plan
 ### 2A — Auth + accounts (4 sessions)
-- 2A.1 Forgot password + email verification
+
+### Session 2A.1 ✅ — Forgot password + email verification
+- Resend configured for transactional email
+- Domain getqoat.com verified in Resend
+- Sending from noreply@getqoat.com
+- Forgot password flow — email with reset link, 1hr expiry
+- Reset password page — validates token, updates password
+- Email verification on register — 24hr expiry
+- Verification banner in nav for unverified users
+- Resend/verify endpoints working end to end ✅
+
+## Up Next
+### Session 2A.2 — Google + Apple OAuth
+
 - 2A.2 Google + Apple OAuth
 - 2A.3 User profile + account settings
 - 2A.4 Nav + global flows polish
@@ -182,8 +195,5 @@
 ## Suggested order:
 2A → 2B → 2C.1 → 2F → 2E → 2C.2-4 → 2D → 2G
 
-## Up Next
-### Session 2A.1 — Forgot password + email verification
-- [ ] Set up Resend for transactional email
-- [ ] Password reset via email link
-- [ ] Email verification on register
+
+
