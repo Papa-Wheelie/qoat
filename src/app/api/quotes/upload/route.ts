@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
     // Run AI extraction + scoring — non-blocking, do not fail the upload on error
     console.log("[upload] starting extraction for quote", quote.id, "path:", storagePath);
-    extractQuote(storagePath, file.type)
+    extractQuote(storagePath, file.type, description)
       .then(async (extraction) => {
         console.log("[upload] extraction succeeded for quote", quote.id, "summary:", extraction.summary);
 
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
         let score;
         try {
           console.log("[upload] starting scoring for quote", quote.id);
-          score = await scoreQuote(extraction, { suburb, state });
+          score = await scoreQuote(extraction, { suburb, state }, description);
           console.log("[upload] scoring succeeded for quote", quote.id, "recommendation:", score.overall.recommendation);
         } catch (err) {
           console.error("[upload] scoring failed for quote", quote.id, err);

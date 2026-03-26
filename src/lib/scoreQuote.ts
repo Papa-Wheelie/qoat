@@ -31,12 +31,17 @@ const SYSTEM_PROMPT =
 
 export async function scoreQuote(
   extraction: QuoteExtraction,
-  location?: { suburb?: string | null; state?: string | null }
+  location?: { suburb?: string | null; state?: string | null },
+  description?: string | null
 ): Promise<QuoteScore> {
   const locationLine =
     location?.suburb || location?.state
       ? `Location: ${[location.suburb, location.state].filter(Boolean).join(", ")}`
       : null;
+
+  const descriptionLine = description?.trim()
+    ? `User provided context: ${description.trim()}`
+    : null;
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
@@ -46,7 +51,7 @@ export async function scoreQuote(
       {
         role: "user",
         content: `Based on this Australian trade quote, provide an iron triangle assessment. Score each dimension 1-10 where 10 is best.
-${locationLine ? `\n${locationLine}\n` : ""}
+${locationLine ? `\n${locationLine}\n` : ""}${descriptionLine ? `\n${descriptionLine}\n` : ""}
 Quote data: ${JSON.stringify(extraction, null, 2)}
 
 Return JSON:

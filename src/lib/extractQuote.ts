@@ -54,7 +54,8 @@ Important: This is an Australian quote. All dates are in Australian format DD/MM
 
 export async function extractQuote(
   storagePath: string,
-  fileType: string
+  fileType: string,
+  description?: string | null
 ): Promise<QuoteExtraction> {
   // Generate a 60-second signed URL so the file is accessible regardless of bucket visibility
   console.log("[extractQuote] generating signed URL for", storagePath);
@@ -95,6 +96,10 @@ export async function extractQuote(
         },
       });
 
+  const userPromptText = description?.trim()
+    ? `User provided context: ${description.trim()}\n\n${USER_PROMPT}`
+    : USER_PROMPT;
+
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 2048,
@@ -102,7 +107,7 @@ export async function extractQuote(
     messages: [
       {
         role: "user",
-        content: [fileBlock, { type: "text", text: USER_PROMPT }],
+        content: [fileBlock, { type: "text", text: userPromptText }],
       },
     ],
   });
