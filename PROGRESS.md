@@ -1,10 +1,35 @@
 # QOAT — Progress Tracker
 
 ## Project
-- Repo: github.com/YOUR_ORG/qoat
-- Live: your-qoat-url.vercel.app
+- Repo: github.com/Papa-Wheelie/qoat
+- Live: qoat.vercel.app
 - Supabase: db.iotmnxydsnvirfrefuyk.supabase.co
-- Stack: Next.js 14, TypeScript, Prisma, Supabase, NextAuth, tRPC, Claude API, Vercel
+- Stack: Next.js 16, TypeScript, Prisma 6, Supabase, 
+  NextAuth v5, Tailwind CSS, Anthropic Claude API, Vercel
+
+## Design System
+- Font: Plus Jakarta Sans
+- Background: #F9F9F7
+- Inputs: white bg, #C6C6C6 border, 12px radius, 16px padding
+- Primary button: black #111111, white text, 12px radius
+- Accent colours: #7DD4C0 (price), #F4A7C3 (reputation), 
+  #89CFF0 (time)
+- No divider lines — whitespace only
+- Reference: src/design/DESIGN.md + src/design/login.html
+
+## Key Decisions
+- Pricing: exact for owners, 10% range for services publicly,
+  exact for products publicly
+- Privacy: supplier name, iron triangle, red flags, 
+  recommendation owner-only
+- Public: total, line items, public summary, community
+- Location: suburb + state captured on upload
+- Dates: Australian format DD/MM/YYYY in all AI prompts
+- Categories: 10 AU trade categories seeded in DB
+- Auth: proxy.ts (not middleware.ts) for Next.js 16
+- DB: pooler connection string for Vercel production
+
+
 
 ## Sessions
 
@@ -111,9 +136,54 @@
   * Iron triangle, red flags, recommendation owner only
   * Total, line items, community section public
 
-## Up Next
-### Session 6.1 — End to end test + bug sweep
+### Session 6.1 ✅ — End to end test + bug sweep
 - [ ] Walk full user journey end to end
 - [ ] Fix any broken flows
 - [ ] Deploy to Vercel and confirm production works
 - [ ] Add ANTHROPIC_API_KEY to Vercel env vars
+
+
+
+## Phase 2 Plan
+### 2A — Auth + accounts (4 sessions)
+- 2A.1 Forgot password + email verification
+- 2A.2 Google + Apple OAuth
+- 2A.3 User profile + account settings
+- 2A.4 Nav + global flows polish
+
+### 2B — Quote management (3 sessions)
+- 2B.1 Quote status + edit + delete
+- 2B.2 Re-analyse + quote sharing
+- 2B.3 Email notifications
+
+### 2C — AI + scoring improvements (4 sessions)
+- 2C.1 Rework score UI
+- 2C.2 Supplier social proof — Google Reviews
+- 2C.3 AI chatbot — ask about your quote
+- 2C.4 Community data feeds scoring
+
+### 2D — Discovery + search (2 sessions)
+- 2D.1 Search + sort feed
+- 2D.2 Compare quotes side by side
+
+### 2E — Trust + safety (2 sessions)
+- 2E.1 Report + moderation tools
+- 2E.2 Verified professional badge
+
+### 2F — Marketing + legal (3 sessions)
+- 2F.1 Landing + how it works page
+- 2F.2 FAQ + contact form
+- 2F.3 Terms of service + privacy policy
+
+### 2G — Mobile + polish (2 sessions)
+- 2G.1 Full mobile responsive polish
+- 2G.2 Performance + launch checklist
+
+## Suggested order:
+2A → 2B → 2C.1 → 2F → 2E → 2C.2-4 → 2D → 2G
+
+## Up Next
+### Session 2A.1 — Forgot password + email verification
+- [ ] Set up Resend for transactional email
+- [ ] Password reset via email link
+- [ ] Email verification on register
