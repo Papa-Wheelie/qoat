@@ -230,8 +230,14 @@
 
 ## Up Next
 ### 2C — AI + scoring improvements
-- 2C.4 Community data feeds scoring
-- 2C.5 NEW — Richer community engagement:
+- 2C.4 Community data feeds price scoring
+- 2C.7 NEW — Contractor reputation scoring (composite:
+  Google rating + years in business + licence status +
+  QOAT job-completion data)
+- 2C.6 NEW — Permits + certification compliance flagging
+  (does job need a council permit? is it in the quote?
+  electrical/plumbing certificate of compliance referenced?)
+- 2C.5 Richer community engagement:
   * Upvote only on quotes, up/down on comments
   * Comment reactions (👍 💡 😱)
   * "I got a similar quote" button with price input
@@ -255,8 +261,43 @@
 - 2G.1 Full mobile responsive polish
 - 2G.2 Performance + launch checklist
 
-## Suggested order:
-2A → 2B → 2C.1 → 2F → 2E → 2C.2-4 → 2D → 2G
+## Revised build order:
+2C.4 → 2C.7 → 2C.6 → 2C.5 → 2D → 2E → 2F → 2G
 
+## Phase 3 (deferred from Phase 2)
+- Email notifications (was 2B.3)
+- AI chatbot — ask about your quote (was 2C.3)
+- Email digest — similar quotes in your area
+
+## Future phases (noted, not now)
+### Phase 4 — Freemium (~6 months) — $9-19/mo
+- Video upload — film space, AI extracts dimensions + scope
+- Unlimited submissions (free tier: 3/month)
+- AI chatbot, quote history/portfolio, priority analysis
+- Stripe subscription billing
+
+### Phase 5 — Send to tender (~12 months) — B2B leads
+- Consumer publishes job brief, contractors compete
+- Contractor onboarding + licence verification
+- Contractor subscription $99-299/mo for tender invites
+- Bid management — iron triangle auto-scores each bid
+- B2B for property managers / strata / agents (consumer first, then B2B)
+
+### Phase 6 — QOAT Guarantee (~18 months) — insurance
+- Partner with AU underwriter, risk from QOAT data
+- Consumer pays 1-2% premium for price + completion guarantee
+- AFS licence required — begin BD at Phase 5 launch
+
+### Phase 7 — Scale (~24 months) — enterprise
+- QOAT Pricing API for banks, conveyancers, insurers
+- White label for home loan apps, property platforms
+- React Native mobile app, NZ expansion
+
+## Parked ideas (need data density or experiments)
+- Seasonal pricing intelligence (e.g. "plumbers 30% pricier
+  in winter") — marketing flywheel, needs 1000s of quotes
+- Homeowner-bids-for-contractor-attention — test inside
+  tender platform, not standalone
+- Council permit API integration — deeper version of 2C.6
 
 
