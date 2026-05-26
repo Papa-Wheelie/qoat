@@ -216,10 +216,20 @@
 - Recommendation section — icon + sentiment-coloured heading
 - Feed cards use neutral grey score badges ✅
 
+### Session 2C.2 ✅ — Supplier social proof + Google Reviews
+- Google Places API integrated
+- Rating, review count, review snippets fetched
+- Dedicated "Supplier reputation" section on quote detail
+- Shows: star rating, review count, 3 review snippets
+- First names only for reviewer privacy
+- "View on Google Maps" and "See all reviews" links
+- Feeds into Reputation score prompt
+- Owner only — supplier data stays private ✅
+
+### Session 2C.3 → Moved to Phase 3 (AI chatbot)
+
 ## Up Next
 ### 2C — AI + scoring improvements
-- 2C.2 Supplier social proof — Google Reviews
-- 2C.3 → Moved to Phase 3 (AI chatbot)
 - 2C.4 Community data feeds scoring
 - 2C.5 NEW — Richer community engagement:
   * Upvote only on quotes, up/down on comments
