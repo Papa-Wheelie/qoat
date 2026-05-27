@@ -388,6 +388,25 @@ export default async function QuotePage({
                       verdict={analysis.priceVerdict}
                       explanation={analysis.priceExplanation}
                       accent="#7DD4C0"
+                      extra={
+                        analysis.priceScore != null ? (
+                          analysis.priceSampleSize != null && analysis.priceSampleSize >= 3 ? (
+                            <p style={{ fontSize: "12px", color: "#888888", display: "flex", alignItems: "center", gap: "4px" }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+                              </svg>
+                              Benchmarked against {analysis.priceSampleSize} similar jobs
+                            </p>
+                          ) : (
+                            <p style={{ fontSize: "12px", color: "#888888", display: "flex", alignItems: "center", gap: "4px" }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                              </svg>
+                              Based on AI market estimate
+                            </p>
+                          )
+                        ) : null
+                      }
                     />
                     <ScoreCard
                       label="Reputation"

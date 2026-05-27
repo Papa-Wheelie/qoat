@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase";
 import { extractQuote } from "@/lib/extractQuote";
 import { scoreQuote } from "@/lib/scoreQuote";
 import { findSupplierReviews } from "@/lib/googlePlaces";
+import { getComparableQuotes } from "@/lib/getComparables";
+import { generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -98,6 +100,33 @@ export async function POST(request: Request) {
           console.log("[upload] Google reviews:", googleReviews);
         }
 
+        // Fetch category name for embedding text
+        const category = await prisma.category.findUnique({
+          where: { id: categoryId },
+          select: { name: true },
+        });
+        const categoryName = category?.name ?? "trade";
+
+        // Generate embedding for semantic comparable lookup
+        const embeddingText = buildEmbeddingText(
+          categoryName,
+          extraction.publicSummary,
+          extraction.lineItems as Array<{ description?: string | null }>
+        );
+        let embedding: number[] | null = null;
+        try {
+          embedding = await generateEmbedding(embeddingText);
+          console.log("[upload] embedding generated for quote", quote.id);
+        } catch (err) {
+          console.error("[upload] embedding generation failed for quote", quote.id, err);
+        }
+
+        // Fetch comparable quotes for price benchmarking
+        const comparables = embedding
+          ? await getComparableQuotes(embedding, quote.id)
+          : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null };
+        console.log("[upload] comparables for quote", quote.id, "sampleSize:", comparables.sampleSize);
+
         // Score the quote
         let score;
         try {
@@ -106,7 +135,7 @@ export async function POST(request: Request) {
             googleReviews?.rating != null && googleReviews?.reviewCount != null
               ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
               : null;
-          score = await scoreQuote(extraction, { suburb, state }, description, googleReviewsForScoring);
+          score = await scoreQuote(extraction, { suburb, state }, description, googleReviewsForScoring, comparables);
           console.log("[upload] scoring succeeded for quote", quote.id, "recommendation:", score.overall.recommendation);
         } catch (err) {
           console.error("[upload] scoring failed for quote", quote.id, err);
@@ -130,6 +159,7 @@ export async function POST(request: Request) {
             googleUrl: googleReviews?.googleUrl ?? undefined,
             googleReviews: googleReviews?.reviews ?? undefined,
             ...(score && {
+              priceSampleSize: comparables.sampleSize >= 3 ? comparables.sampleSize : null,
               priceScore: score.price.score,
               priceVerdict: score.price.verdict,
               priceExplanation: score.price.explanation,
@@ -144,6 +174,15 @@ export async function POST(request: Request) {
             }),
           },
         });
+        // Store embedding via raw SQL (vector type unsupported in Prisma ORM)
+        if (embedding) {
+          await prisma.$executeRawUnsafe(
+            `UPDATE "QuoteAnalysis" SET embedding = $1::vector WHERE id = $2`,
+            `[${embedding.join(",")}]`,
+            saved.id
+          );
+          console.log("[upload] embedding stored for analysis", saved.id);
+        }
         console.log("[upload] analysis saved, id:", saved.id);
       })
       .catch((err) => console.error("[upload] extraction failed for quote", quote.id, err));

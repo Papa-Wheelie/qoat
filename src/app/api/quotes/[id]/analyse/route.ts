@@ -4,6 +4,8 @@ import { Prisma } from "@prisma/client";
 import { extractQuote } from "@/lib/extractQuote";
 import { scoreQuote } from "@/lib/scoreQuote";
 import { findSupplierReviews } from "@/lib/googlePlaces";
+import { getComparableQuotes } from "@/lib/getComparables";
+import { generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
 
 export async function POST(
   _request: Request,
@@ -24,6 +26,7 @@ export async function POST(
       description: true,
       suburb: true,
       state: true,
+      categoryId: true,
     },
   });
 
@@ -54,11 +57,34 @@ export async function POST(
       ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
       : null;
 
+  // Generate embedding for semantic comparable lookup
+  const category = await prisma.category.findUnique({
+    where: { id: quote.categoryId },
+    select: { name: true },
+  });
+  const categoryName = category?.name ?? "trade";
+  const embeddingText = buildEmbeddingText(
+    categoryName,
+    extraction.publicSummary,
+    extraction.lineItems as Array<{ description?: string | null }>
+  );
+  let embedding: number[] | null = null;
+  try {
+    embedding = await generateEmbedding(embeddingText);
+  } catch (err) {
+    console.error("[analyse] embedding generation failed:", err);
+  }
+
+  const comparables = embedding
+    ? await getComparableQuotes(embedding, id)
+    : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null };
+
   const score = await scoreQuote(
     extraction,
     { suburb: quote.suburb ?? undefined, state: quote.state ?? undefined },
     quote.description,
-    googleReviewsForScoring
+    googleReviewsForScoring,
+    comparables
   );
 
   const data = {
@@ -76,6 +102,7 @@ export async function POST(
     googlePlaceId: googleReviews?.placeId ?? null,
     googleUrl: googleReviews?.googleUrl ?? null,
     googleReviews: googleReviews?.reviews ?? Prisma.DbNull,
+    priceSampleSize: comparables.sampleSize >= 3 ? comparables.sampleSize : null,
     priceScore: score.price.score,
     priceVerdict: score.price.verdict,
     priceExplanation: score.price.explanation,
@@ -94,6 +121,15 @@ export async function POST(
     create: { quoteId: id, ...data },
     update: data,
   });
+
+  // Store embedding via raw SQL (vector type unsupported in Prisma ORM)
+  if (embedding) {
+    await prisma.$executeRawUnsafe(
+      `UPDATE "QuoteAnalysis" SET embedding = $1::vector WHERE id = $2`,
+      `[${embedding.join(",")}]`,
+      analysis.id
+    );
+  }
 
   return Response.json(analysis);
 }
