@@ -228,6 +228,18 @@
 
 ### Session 2C.3 → Moved to Phase 3 (AI chatbot)
 
+### Session 2C.4 ✅ — Community data feeds price scoring
+- Semantic job-type matching via Voyage AI embeddings
+- pgvector(1024) column + HNSW index in Supabase
+- getComparables uses cosine similarity (threshold 0.75)
+- Comparable price stats fed into scoreQuote prompt
+- Data confidence line: "Benchmarked against N similar jobs"
+- Verified working at 0.5 threshold (3 matches found)
+- Reverted to 0.75 for accuracy during testing phase
+- Switched embeddings OpenAI → Voyage (Anthropic ecosystem)
+- NOTE: local dev needs hotspot — work firewall blocks DB ports
+- NOTE: Supabase free tier pauses when idle — restore before dev
+
 ## Up Next
 ### 2C — AI + scoring improvements
 - 2C.4 Community data feeds price scoring
