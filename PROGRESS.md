@@ -277,11 +277,19 @@
 - Result count + empty state + clear all
 - URL state — shareable, survives refresh ✅
 
+
+### Session 2D.2 ✅ — Compare quotes side by side
+- Checkbox selection on feed + My Quotes cards (max 4)
+- Floating compare bar with chips, persists via sessionStorage
+- Compare page /compare?ids=... — side-by-side table
+- Per-quote privacy: own quotes full, others public-only
+- Best value highlighting (lowest total, best QOAT score)
+- Owner-only fields show "Private" for non-owned quotes
+- Shareable comparison URLs ✅
+
+## 2D COMPLETE ✅
+
 ## Up Next
-### 2D.2 — Compare quotes side by side
-
-- 2D.2 Compare quotes side by side
-
 ### 2E — Trust + safety (2 sessions)
 - 2E.1 Report + moderation tools
 - 2E.2 Verified professional badge
