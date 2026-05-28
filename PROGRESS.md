@@ -240,15 +240,22 @@
 - NOTE: local dev needs hotspot — work firewall blocks DB ports
 - NOTE: Supabase free tier pauses when idle — restore before dev
 
+### Session 2C.6 ✅ — Permit + certification compliance flagging
+- assessCompliance.ts — dedicated Claude call for AU regs
+- Flags: permit likely required + mentioned + responsibility
+- Flags: certificate of compliance (electrical/plumbing/gas)
+- Compliance check section on quote detail (owner only)
+- Green check / amber warning / grey dash status model
+- "Guidance only — confirm with council" disclaimer
+- Missing permit/cert also surfaces in red flags
+- ABN verification portion still parked (awaiting ABR GUID)
+- Tested on insulation quote — correctly assessed both ✅
+
 ## Up Next
 ### 2C — AI + scoring improvements
-- 2C.4 Community data feeds price scoring
 - 2C.7 NEW — Contractor reputation scoring (composite:
   Google rating + years in business + licence status +
   QOAT job-completion data)
-- 2C.6 NEW — Permits + certification compliance flagging
-  (does job need a council permit? is it in the quote?
-  electrical/plumbing certificate of compliance referenced?)
 - 2C.5 Richer community engagement:
   * Upvote only on quotes, up/down on comments
   * Comment reactions (👍 💡 😱)
