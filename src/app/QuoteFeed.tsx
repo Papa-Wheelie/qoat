@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { formatPublicPrice } from "@/lib/formatPrice";
 
 type Category = { id: string; name: string; slug: string };
+export type SortOption = "newest" | "oldest" | "price-high" | "price-low" | "most-helpful" | "most-discussed";
+
+const SORT_LABELS: Record<SortOption, string> = {
+  newest:           "Newest",
+  oldest:           "Oldest",
+  "price-high":     "Price: High to Low",
+  "price-low":      "Price: Low to High",
+  "most-helpful":   "Most Helpful",
+  "most-discussed": "Most Discussed",
+};
 
 export type FeedQuote = {
   id: string;
@@ -27,12 +37,16 @@ export type FeedQuote = {
 type Props = {
   initialQuotes: FeedQuote[];
   initialTotalPages: number;
+  initialTotalCount: number;
   categories: Category[];
   currentUserId: string | null;
+  initialSearch: string;
+  initialSort: SortOption;
+  initialCategory: string | null;
+  initialState: string;
 };
 
 const AU_STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
-
 
 function ScoreBadge({ score, label }: { score: number | null; label: string }) {
   if (score == null) return null;
@@ -119,73 +133,126 @@ function QuoteCard({ quote, currentUserId }: { quote: FeedQuote; currentUserId: 
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="col-span-2 flex flex-col items-center py-24 gap-4">
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-on-surface-variant/30">
-        <rect x="10" y="8" width="36" height="44" rx="3" stroke="currentColor" strokeWidth="2.5"/>
-        <line x1="18" y1="20" x2="38" y2="20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <line x1="18" y1="28" x2="38" y2="28" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <line x1="18" y1="36" x2="28" y2="36" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="46" cy="46" r="9" stroke="currentColor" strokeWidth="2.5"/>
-        <line x1="52.5" y1="52.5" x2="58" y2="58" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-      </svg>
-      <p className="text-on-surface-variant font-medium">No quotes yet. Be the first to submit one.</p>
-      <Link
-        href="/upload"
-        className="px-5 py-2.5 bg-[#111111] text-white rounded-[12px] text-sm font-bold hover:opacity-90 transition-opacity"
-      >
-        Submit a Quote
-      </Link>
-    </div>
-  );
-}
-
-export default function QuoteFeed({ initialQuotes, initialTotalPages, categories, currentUserId }: Props) {
+export default function QuoteFeed({
+  initialQuotes,
+  initialTotalPages,
+  initialTotalCount,
+  categories,
+  currentUserId,
+  initialSearch,
+  initialSort,
+  initialCategory,
+  initialState,
+}: Props) {
   const [quotes, setQuotes] = useState<FeedQuote[]>(initialQuotes);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeState, setActiveState] = useState<string>("");
+  const [totalCount, setTotalCount] = useState(initialTotalCount);
+  const [activeCategory, setActiveCategory] = useState<string | null>(initialCategory);
+  const [activeState, setActiveState] = useState<string>(initialState);
+  const [sortOrder, setSortOrder] = useState<SortOption>(initialSort);
+  const [searchInput, setSearchInput] = useState(initialSearch);
   const [loadingMore, setLoadingMore] = useState(false);
   const [filtering, setFiltering] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function fetchQuotes(category: string | null, state: string, pageNum: number, append = false) {
+  const hasActiveFilters = !!(searchInput || activeCategory || activeState || sortOrder !== "newest");
+
+  // On mount: if URL has non-default params, fetch filtered results
+  // (SSR always returns newest/unfiltered; client applies URL params)
+  useEffect(() => {
+    if (initialSearch || initialSort !== "newest" || initialCategory || initialState) {
+      fetchQuotes(initialCategory, initialState, initialSearch, initialSort, 1);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function updateURL(category: string | null, state: string, search: string, sort: SortOption) {
     const params = new URLSearchParams();
     if (category) params.set("category", category);
     if (state) params.set("state", state);
-    if (pageNum > 1) params.set("page", String(pageNum));
+    if (search) params.set("search", search);
+    if (sort !== "newest") params.set("sort", sort);
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  }
 
-    const res = await fetch(`/api/quotes?${params}`);
-    const data = await res.json();
+  async function fetchQuotes(
+    category: string | null,
+    state: string,
+    search: string,
+    sort: SortOption,
+    pageNum: number,
+    append = false
+  ) {
+    if (!append) setFiltering(true);
+    else setLoadingMore(true);
 
-    if (append) {
-      setQuotes((prev) => [...prev, ...data.quotes]);
-    } else {
-      setQuotes(data.quotes);
+    try {
+      const params = new URLSearchParams();
+      if (category) params.set("category", category);
+      if (state) params.set("state", state);
+      if (search) params.set("search", search);
+      if (sort !== "newest") params.set("sort", sort);
+      if (pageNum > 1) params.set("page", String(pageNum));
+
+      const res = await fetch(`/api/quotes?${params}`);
+      const data = await res.json();
+
+      if (append) {
+        setQuotes((prev) => [...prev, ...data.quotes]);
+      } else {
+        setQuotes(data.quotes);
+      }
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+      setTotalCount(data.totalCount);
+    } finally {
+      setFiltering(false);
+      setLoadingMore(false);
     }
-    setPage(data.page);
-    setTotalPages(data.totalPages);
+  }
+
+  function handleSearchChange(value: string) {
+    setSearchInput(value);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      fetchQuotes(activeCategory, activeState, value, sortOrder, 1);
+      updateURL(activeCategory, activeState, value, sortOrder);
+    }, 300);
   }
 
   async function handleCategoryChange(slug: string | null) {
     setActiveCategory(slug);
-    setFiltering(true);
-    await fetchQuotes(slug, activeState, 1);
-    setFiltering(false);
+    fetchQuotes(slug, activeState, searchInput, sortOrder, 1);
+    updateURL(slug, activeState, searchInput, sortOrder);
   }
 
   async function handleStateChange(state: string) {
     setActiveState(state);
-    setFiltering(true);
-    await fetchQuotes(activeCategory, state, 1);
-    setFiltering(false);
+    fetchQuotes(activeCategory, state, searchInput, sortOrder, 1);
+    updateURL(activeCategory, state, searchInput, sortOrder);
+  }
+
+  async function handleSortChange(sort: SortOption) {
+    setSortOrder(sort);
+    fetchQuotes(activeCategory, activeState, searchInput, sort, 1);
+    updateURL(activeCategory, activeState, searchInput, sort);
   }
 
   async function handleLoadMore() {
     setLoadingMore(true);
-    await fetchQuotes(activeCategory, activeState, page + 1, true);
+    await fetchQuotes(activeCategory, activeState, searchInput, sortOrder, page + 1, true);
     setLoadingMore(false);
+  }
+
+  function handleClearAll() {
+    setSearchInput("");
+    setActiveCategory(null);
+    setActiveState("");
+    setSortOrder("newest");
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    fetchQuotes(null, "", "", "newest", 1);
+    window.history.replaceState(null, "", window.location.pathname);
   }
 
   const pillBase = "px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer";
@@ -193,8 +260,49 @@ export default function QuoteFeed({ initialQuotes, initialTotalPages, categories
   const pillInactive = "bg-surface text-on-surface hover:bg-surface-container-low";
 
   return (
-    <div className="space-y-6">
-      {/* Filter bar */}
+    <div className="space-y-4">
+      {/* Row 1: Search + Sort */}
+      <div className="flex gap-3 items-center">
+        {/* Search bar */}
+        <div className="flex-1 relative">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search by job type, suburb, or keyword…"
+            className="w-full bg-white border border-outline-variant rounded-[12px] pl-10 pr-9 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+          />
+          {searchInput && (
+            <button
+              onClick={() => handleSearchChange("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
+              aria-label="Clear search"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Sort dropdown */}
+        <select
+          value={sortOrder}
+          onChange={(e) => handleSortChange(e.target.value as SortOption)}
+          className="shrink-0 bg-white border border-outline-variant rounded-[12px] px-3 py-2.5 text-sm font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+        >
+          {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Row 2: Category pills + state filter */}
       <div className="flex items-center gap-3">
         <div className="flex-1 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           <button
@@ -226,17 +334,44 @@ export default function QuoteFeed({ initialQuotes, initialTotalPages, categories
         </select>
       </div>
 
+      {/* Result count + clear all */}
+      <div className="flex items-center justify-between min-h-[20px]">
+        <p className="text-xs text-on-surface-variant">
+          {filtering ? "Searching…" : `${totalCount.toLocaleString()} ${totalCount === 1 ? "quote" : "quotes"}`}
+        </p>
+        {hasActiveFilters && !filtering && (
+          <button
+            onClick={handleClearAll}
+            className="text-xs font-semibold text-primary hover:underline underline-offset-2 transition-colors"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
+
       {/* Grid */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-opacity ${filtering ? "opacity-50" : "opacity-100"}`}>
-        {quotes.length === 0 ? (
-          <EmptyState />
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-opacity duration-150 ${filtering ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
+        {quotes.length === 0 && !filtering ? (
+          <div className="col-span-2 flex flex-col items-center py-24 gap-4">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-on-surface-variant/30">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p className="text-on-surface-variant font-medium text-sm">No quotes match your search.</p>
+            <p className="text-xs text-on-surface-variant">Try different keywords or clear your filters.</p>
+            <button
+              onClick={handleClearAll}
+              className="px-5 py-2.5 bg-[#111111] text-white rounded-[12px] text-sm font-bold hover:opacity-90 transition-opacity"
+            >
+              Clear filters
+            </button>
+          </div>
         ) : (
           quotes.map((q) => <QuoteCard key={q.id} quote={q} currentUserId={currentUserId} />)
         )}
       </div>
 
       {/* Load more */}
-      {page < totalPages && (
+      {page < totalPages && !filtering && (
         <div className="flex justify-center pt-4">
           <button
             onClick={handleLoadMore}

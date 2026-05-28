@@ -265,9 +265,21 @@
 
 ## 2C COMPLETE ✅ (except parked ABN verification)
 
-## Up Next
+
 ### 2D — Discovery + search (2 sessions)
-- 2D.1 Search + sort feed
+
+### Session 2D.1 ✅ — Search + sort feed
+- Keyword search: title, category, suburb, publicSummary
+  (supplier name excluded for privacy)
+- Debounced 300ms search with clear button
+- Sort: newest, oldest, price high/low, most helpful, most discussed
+- Combines with category + state filters
+- Result count + empty state + clear all
+- URL state — shareable, survives refresh ✅
+
+## Up Next
+### 2D.2 — Compare quotes side by side
+
 - 2D.2 Compare quotes side by side
 
 ### 2E — Trust + safety (2 sessions)
