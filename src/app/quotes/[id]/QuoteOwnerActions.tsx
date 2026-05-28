@@ -70,6 +70,7 @@ export default function QuoteOwnerActions({
   const [status, setStatus] = useState<Status>(initialStatus);
   const [showDelete, setShowDelete] = useState(false);
   const [analysing, setAnalysing] = useState(false);
+  const [analyseError, setAnalyseError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -84,8 +85,13 @@ export default function QuoteOwnerActions({
 
   async function handleReanalyse() {
     setAnalysing(true);
-    await fetch(`/api/quotes/${quoteId}/analyse`, { method: "POST" });
+    setAnalyseError(false);
+    const res = await fetch(`/api/quotes/${quoteId}/analyse`, { method: "POST" });
     setAnalysing(false);
+    if (!res.ok) {
+      setAnalyseError(true);
+      return;
+    }
     router.refresh();
   }
 
@@ -138,7 +144,7 @@ export default function QuoteOwnerActions({
           <button
             onClick={handleReanalyse}
             disabled={analysing}
-            className={ghostBtn}
+            className={analyseError ? "px-3 py-1.5 rounded-[12px] text-xs font-bold border border-red-400 bg-white text-red-600 flex items-center gap-1.5" : ghostBtn}
           >
             {analysing ? (
               <>
@@ -147,6 +153,8 @@ export default function QuoteOwnerActions({
                 </svg>
                 Analysing…
               </>
+            ) : analyseError ? (
+              "Analysis failed — retry"
             ) : (
               "Re-analyse"
             )}

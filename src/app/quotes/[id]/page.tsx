@@ -8,6 +8,8 @@ import QuoteOwnerActions from "./QuoteOwnerActions";
 import ShareButton from "./ShareButton";
 import { formatPublicPrice } from "@/lib/formatPrice";
 import SocialProof from "@/components/SocialProof";
+import type { ReputationSignals } from "@/lib/getReputationSignals";
+import type { ComplianceFlags } from "@/lib/assessCompliance";
 
 type LineItem = {
   description: string;
@@ -444,12 +446,93 @@ export default async function QuotePage({
                   );
                 })()}
 
-                {/* 4. Social proof */}
+                {/* 4. Compliance check */}
+                {analysis.complianceFlags && (() => {
+                  const flags = analysis.complianceFlags as ComplianceFlags;
+
+                  const CheckIcon = () => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#085041" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  );
+                  const WarnIcon = () => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                  );
+                  const DashIcon = () => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888888" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  );
+
+                  const permitIcon = flags.permitLikelyRequired
+                    ? flags.permitMentionedInQuote ? <CheckIcon /> : <WarnIcon />
+                    : <DashIcon />;
+                  const permitText = flags.permitLikelyRequired
+                    ? flags.permitMentionedInQuote
+                      ? `Permit likely required — addressed in quote${flags.permitResponsibility && flags.permitResponsibility !== "unclear" ? ` (${flags.permitResponsibility} responsible)` : ""}`
+                      : "Permit likely required — not mentioned in quote. Ask who is responsible."
+                    : "No permit typically required for this work";
+                  const permitColor = flags.permitLikelyRequired
+                    ? flags.permitMentionedInQuote ? "#085041" : "#92400E"
+                    : "#444444";
+
+                  const certLabel = flags.certificateType ?? "Certificate of compliance";
+                  const certIcon = flags.certificateRequired
+                    ? flags.certificateMentionedInQuote ? <CheckIcon /> : <WarnIcon />
+                    : <DashIcon />;
+                  const certText = flags.certificateRequired
+                    ? flags.certificateMentionedInQuote
+                      ? `${certLabel} required — addressed in quote`
+                      : `${certLabel} required — not mentioned in quote. Ask your supplier to confirm they will provide it.`
+                    : "No compliance certificate required for this work";
+                  const certColor = flags.certificateRequired
+                    ? flags.certificateMentionedInQuote ? "#085041" : "#92400E"
+                    : "#444444";
+
+                  return (
+                    <section className="bg-surface-container-lowest rounded-[16px] px-6 py-6 space-y-4">
+                      <div>
+                        <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
+                          Compliance check
+                        </p>
+                        <p style={{ fontSize: "12px", color: "#888888" }} className="mt-1">
+                          Guidance only — always confirm requirements with your local council.
+                        </p>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex gap-3">
+                          {permitIcon}
+                          <div className="space-y-0.5">
+                            <p style={{ fontSize: "13px", fontWeight: 600, color: permitColor }}>{permitText}</p>
+                            {flags.permitNote && (
+                              <p style={{ fontSize: "12px", color: "#888888" }}>{flags.permitNote}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          {certIcon}
+                          <div className="space-y-0.5">
+                            <p style={{ fontSize: "13px", fontWeight: 600, color: certColor }}>{certText}</p>
+                            {flags.certificateNote && (
+                              <p style={{ fontSize: "12px", color: "#888888" }}>{flags.certificateNote}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  );
+                })()}
+
+                {/* 5. Social proof */}
                 <SocialProof
                   googleRating={analysis.googleRating}
                   googleReviewCount={analysis.googleReviewCount}
                   googleUrl={analysis.googleUrl}
                   googleReviews={analysis.googleReviews as GoogleReview[] | null}
+                  reputationSignals={analysis.reputationSignals as ReputationSignals | null}
                 />
 
                 {/* 5. Red flags */}

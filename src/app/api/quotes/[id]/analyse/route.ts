@@ -6,6 +6,8 @@ import { scoreQuote } from "@/lib/scoreQuote";
 import { findSupplierReviews } from "@/lib/googlePlaces";
 import { getComparableQuotes } from "@/lib/getComparables";
 import { generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
+import { getReputationSignals } from "@/lib/getReputationSignals";
+import { assessCompliance } from "@/lib/assessCompliance";
 
 export async function POST(
   _request: Request,
@@ -27,6 +29,7 @@ export async function POST(
       suburb: true,
       state: true,
       categoryId: true,
+      category: { select: { name: true, slug: true } },
     },
   });
 
@@ -52,17 +55,9 @@ export async function POST(
     );
   }
 
-  const googleReviewsForScoring =
-    googleReviews?.rating != null && googleReviews?.reviewCount != null
-      ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
-      : null;
-
   // Generate embedding for semantic comparable lookup
-  const category = await prisma.category.findUnique({
-    where: { id: quote.categoryId },
-    select: { name: true },
-  });
-  const categoryName = category?.name ?? "trade";
+  const categoryName = quote.category?.name ?? "trade";
+  const categorySlug = quote.category?.slug ?? "";
   const embeddingText = buildEmbeddingText(
     categoryName,
     extraction.publicSummary,
@@ -79,12 +74,42 @@ export async function POST(
     ? await getComparableQuotes(embedding, id)
     : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null };
 
+  const googleDataForSignals =
+    googleReviews?.rating != null && googleReviews?.reviewCount != null
+      ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
+      : null;
+  let reputationSignals = null;
+  try {
+    reputationSignals = await getReputationSignals({
+      extraction,
+      googleData: googleDataForSignals,
+      categorySlug,
+      supplierName: extraction.supplierName ?? null,
+      excludeQuoteId: id,
+    });
+    console.log("[analyse] reputation signals built:", JSON.stringify(reputationSignals));
+  } catch (err) {
+    console.error("[analyse] getReputationSignals failed:", err);
+  }
+
+  let complianceFlags = null;
+  try {
+    complianceFlags = await assessCompliance(extraction, {
+      suburb: quote.suburb ?? null,
+      state: quote.state ?? null,
+    });
+    console.log("[analyse] compliance flags assessed");
+  } catch (err) {
+    console.error("[analyse] assessCompliance failed:", err);
+  }
+
   const score = await scoreQuote(
     extraction,
     { suburb: quote.suburb ?? undefined, state: quote.state ?? undefined },
     quote.description,
-    googleReviewsForScoring,
-    comparables
+    null,
+    comparables,
+    reputationSignals
   );
 
   const data = {
@@ -102,6 +127,8 @@ export async function POST(
     googlePlaceId: googleReviews?.placeId ?? null,
     googleUrl: googleReviews?.googleUrl ?? null,
     googleReviews: googleReviews?.reviews ?? Prisma.DbNull,
+    reputationSignals: reputationSignals ?? undefined,
+    complianceFlags: complianceFlags ?? undefined,
     priceSampleSize: comparables.sampleSize >= 3 ? comparables.sampleSize : null,
     priceScore: score.price.score,
     priceVerdict: score.price.verdict,

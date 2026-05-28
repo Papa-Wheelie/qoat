@@ -2,6 +2,7 @@ import { z } from "zod";
 import { anthropic } from "./claude";
 import type { QuoteExtraction } from "./extractQuote";
 import type { ComparableStats } from "./getComparables";
+import type { ReputationSignals } from "./getReputationSignals";
 
 const ScoreSchema = z.object({
   price: z.object({
@@ -35,7 +36,8 @@ export async function scoreQuote(
   location?: { suburb?: string | null; state?: string | null },
   description?: string | null,
   googleReviews?: { rating: number; reviewCount: number } | null,
-  comparables?: ComparableStats | null
+  comparables?: ComparableStats | null,
+  reputationSignals?: ReputationSignals | null
 ): Promise<QuoteScore> {
   const locationLine =
     location?.suburb || location?.state
@@ -50,6 +52,17 @@ export async function scoreQuote(
     googleReviews?.rating != null && googleReviews?.reviewCount != null
       ? `Google Reviews: ${googleReviews.rating}/5 stars from ${googleReviews.reviewCount.toLocaleString()} reviews`
       : null;
+
+  const reputationLine = reputationSignals != null
+    ? `Reputation signals for this supplier:
+- Google: ${reputationSignals.googleRating != null ? `${reputationSignals.googleRating}/5 from ${reputationSignals.googleReviewCount?.toLocaleString()} reviews` : "not found"}
+- ABN provided: ${reputationSignals.hasABN ? `yes (${reputationSignals.abnNumber})` : "no"}
+- Licence number provided: ${reputationSignals.hasLicence ? `yes (${reputationSignals.licenceNumber})` : "no"} (licence required for this trade: ${reputationSignals.licenceRequired ? "yes" : "no"})
+- Insurance mentioned: ${reputationSignals.hasInsurance ? "yes" : "no"}
+- Seen in ${reputationSignals.qoatQuoteCount} other QOAT quote${reputationSignals.qoatQuoteCount !== 1 ? "s" : ""}
+
+Score reputation 1-10. A licensed, insured supplier with an ABN and strong Google reviews scores high. Missing a legally-required licence is a major red flag. No Google presence for an established-seeming business is a concern.`
+    : null;
 
   const categoryName = (extraction as { category?: string }).category ?? "trade";
   const stateName = location?.state ?? null;
@@ -66,7 +79,7 @@ export async function scoreQuote(
       {
         role: "user",
         content: `Based on this Australian trade quote, provide an iron triangle assessment. Score each dimension 1-10 where 10 is best.
-${locationLine ? `\n${locationLine}\n` : ""}${descriptionLine ? `\n${descriptionLine}\n` : ""}${googleLine ? `\n${googleLine}\n` : ""}${communityLine ? `\n${communityLine}\n` : ""}
+${locationLine ? `\n${locationLine}\n` : ""}${descriptionLine ? `\n${descriptionLine}\n` : ""}${reputationLine ? `\n${reputationLine}\n` : googleLine ? `\n${googleLine}\n` : ""}${communityLine ? `\n${communityLine}\n` : ""}
 Quote data: ${JSON.stringify(extraction, null, 2)}
 
 Return JSON:
@@ -79,7 +92,7 @@ Return JSON:
   "reputation": {
     "score": number 1-10,
     "verdict": "trustworthy" | "adequate" | "concerning",
-    "explanation": string (1-2 sentences — assess based on: is ABN present, is licence number mentioned, is insurance referenced, are payment terms reasonable, does the business appear legitimate and professional)
+    "explanation": string (1-2 sentences — reference specific signals: ABN, licence, insurance, Google presence. Mention the most important factor driving the score.)
   },
   "time": {
     "score": number 1-10,

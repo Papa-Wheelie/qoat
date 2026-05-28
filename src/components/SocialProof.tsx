@@ -1,4 +1,5 @@
 import StarRating from "@/components/StarRating";
+import type { ReputationSignals } from "@/lib/getReputationSignals";
 
 type GoogleReview = {
   authorName: string;
@@ -12,7 +13,48 @@ type Props = {
   googleReviewCount: number | null;
   googleUrl: string | null;
   googleReviews: GoogleReview[] | null;
+  reputationSignals?: ReputationSignals | null;
 };
+
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#085041" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function CrossIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#791F1F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function DashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888888" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+type SignalRowProps = { label: string; value: string; status: "positive" | "negative" | "neutral" };
+
+function SignalRow({ label, value, status }: SignalRowProps) {
+  const icon = status === "positive" ? <CheckIcon /> : status === "negative" ? <CrossIcon /> : <DashIcon />;
+  const valueColor = status === "positive" ? "#085041" : status === "negative" ? "#791F1F" : "#666666";
+  return (
+    <div className="flex items-center justify-between gap-4 py-3">
+      <span style={{ fontSize: "13px", color: "#444444" }}>{label}</span>
+      <span className="flex items-center gap-1.5">
+        {icon}
+        <span style={{ fontSize: "13px", fontWeight: 600, color: valueColor }}>{value}</span>
+      </span>
+    </div>
+  );
+}
 
 function GoogleG() {
   return (
@@ -34,7 +76,7 @@ function truncate(text: string, max: number): { short: string; truncated: boolea
   return { short: text.slice(0, max).trimEnd(), truncated: true };
 }
 
-export default function SocialProof({ googleRating, googleReviewCount, googleUrl, googleReviews }: Props) {
+export default function SocialProof({ googleRating, googleReviewCount, googleUrl, googleReviews, reputationSignals }: Props) {
   const hasListing = googleRating != null;
   const reviews = (googleReviews ?? []).slice(0, 3);
 
@@ -43,6 +85,65 @@ export default function SocialProof({ googleRating, googleReviewCount, googleUrl
       <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
         Supplier reputation
       </p>
+
+      {/* Signals checklist */}
+      {reputationSignals && (
+        <div className="bg-white rounded-[16px] px-6 divide-y divide-outline-variant/10">
+          <SignalRow
+            label="ABN provided"
+            value={reputationSignals.hasABN ? reputationSignals.abnNumber ?? "Yes" : "No"}
+            status={reputationSignals.hasABN ? "positive" : "negative"}
+          />
+          <SignalRow
+            label="Licence number"
+            value={
+              reputationSignals.hasLicence
+                ? reputationSignals.licenceNumber ?? "Yes"
+                : reputationSignals.licenceRequired
+                ? "No (required for this trade)"
+                : "Not required for this trade"
+            }
+            status={
+              reputationSignals.hasLicence
+                ? "positive"
+                : reputationSignals.licenceRequired
+                ? "negative"
+                : "neutral"
+            }
+          />
+          <SignalRow
+            label="Insurance mentioned"
+            value={reputationSignals.hasInsurance ? "Yes" : "No"}
+            status={reputationSignals.hasInsurance ? "positive" : "negative"}
+          />
+          <SignalRow
+            label="Google reviews"
+            value={
+              reputationSignals.googleRating != null
+                ? `${reputationSignals.googleRating} (${reputationSignals.googleReviewCount?.toLocaleString()} reviews)`
+                : "Not found"
+            }
+            status={
+              reputationSignals.googleRating != null
+                ? reputationSignals.googleRating >= 4
+                  ? "positive"
+                  : reputationSignals.googleRating >= 3
+                  ? "neutral"
+                  : "negative"
+                : "neutral"
+            }
+          />
+          <SignalRow
+            label="Seen in QOAT before"
+            value={
+              reputationSignals.qoatQuoteCount === 0
+                ? "First time"
+                : `${reputationSignals.qoatQuoteCount} previous quote${reputationSignals.qoatQuoteCount !== 1 ? "s" : ""}`
+            }
+            status={reputationSignals.qoatQuoteCount > 0 ? "positive" : "neutral"}
+          />
+        </div>
+      )}
 
       {/* Summary card */}
       {hasListing ? (

@@ -313,3 +313,17 @@
 - Council permit API integration — deeper version of 2C.6
 
 
+## Parked — waiting on external dependency
+### ABN Lookup verification (part of 2C.6)
+- Registered for ABR Web Services GUID — 5 day approval wait
+- When GUID arrives: add ABR_API_GUID to .env.local + Vercel
+- Build: verify ABN valid + active via ABR API
+- Capture registered name → name-mismatch flag + better Google search
+- Confidence model: Verified / Claimed / Not found
+- Currently: licence/ABN signals reflect quote contents only
+
+### Licence verification (future dedicated project)
+- Multi-state, fragmented (NSW Fair Trading, VIC VBA, QLD QBCC...)
+- No national registry — significant ongoing integration
+- Reuse the Verified/Claimed/Not found pattern from ABN
+- Likely Phase 5 (pairs with contractor onboarding)

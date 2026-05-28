@@ -6,6 +6,8 @@ import { scoreQuote } from "@/lib/scoreQuote";
 import { findSupplierReviews } from "@/lib/googlePlaces";
 import { getComparableQuotes } from "@/lib/getComparables";
 import { generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
+import { getReputationSignals } from "@/lib/getReputationSignals";
+import { assessCompliance } from "@/lib/assessCompliance";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -100,12 +102,13 @@ export async function POST(request: Request) {
           console.log("[upload] Google reviews:", googleReviews);
         }
 
-        // Fetch category name for embedding text
+        // Fetch category for embedding text + reputation signals
         const category = await prisma.category.findUnique({
           where: { id: categoryId },
-          select: { name: true },
+          select: { name: true, slug: true },
         });
         const categoryName = category?.name ?? "trade";
+        const categorySlug = category?.slug ?? "";
 
         // Generate embedding for semantic comparable lookup
         const embeddingText = buildEmbeddingText(
@@ -127,15 +130,39 @@ export async function POST(request: Request) {
           : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null };
         console.log("[upload] comparables for quote", quote.id, "sampleSize:", comparables.sampleSize);
 
+        // Build reputation signals composite
+        const googleDataForSignals =
+          googleReviews?.rating != null && googleReviews?.reviewCount != null
+            ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
+            : null;
+        let reputationSignals = null;
+        try {
+          reputationSignals = await getReputationSignals({
+            extraction,
+            googleData: googleDataForSignals,
+            categorySlug,
+            supplierName: extraction.supplierName ?? null,
+            excludeQuoteId: quote.id,
+          });
+          console.log("[upload] reputation signals built for quote", quote.id);
+        } catch (err) {
+          console.error("[upload] getReputationSignals failed for quote", quote.id, err);
+        }
+
+        // Compliance assessment
+        let complianceFlags = null;
+        try {
+          complianceFlags = await assessCompliance(extraction, { suburb, state });
+          console.log("[upload] compliance flags assessed for quote", quote.id);
+        } catch (err) {
+          console.error("[upload] assessCompliance failed for quote", quote.id, err);
+        }
+
         // Score the quote
         let score;
         try {
           console.log("[upload] starting scoring for quote", quote.id);
-          const googleReviewsForScoring =
-            googleReviews?.rating != null && googleReviews?.reviewCount != null
-              ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
-              : null;
-          score = await scoreQuote(extraction, { suburb, state }, description, googleReviewsForScoring, comparables);
+          score = await scoreQuote(extraction, { suburb, state }, description, null, comparables, reputationSignals);
           console.log("[upload] scoring succeeded for quote", quote.id, "recommendation:", score.overall.recommendation);
         } catch (err) {
           console.error("[upload] scoring failed for quote", quote.id, err);
@@ -158,6 +185,8 @@ export async function POST(request: Request) {
             googlePlaceId: googleReviews?.placeId ?? undefined,
             googleUrl: googleReviews?.googleUrl ?? undefined,
             googleReviews: googleReviews?.reviews ?? undefined,
+            reputationSignals: reputationSignals ?? undefined,
+            complianceFlags: complianceFlags ?? undefined,
             ...(score && {
               priceSampleSize: comparables.sampleSize >= 3 ? comparables.sampleSize : null,
               priceScore: score.price.score,
