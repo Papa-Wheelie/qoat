@@ -24,7 +24,7 @@ export default async function HomePage() {
         analysis: {
           select: { totalAmount: true, priceScore: true, reputationScore: true, timeScore: true },
         },
-        _count: { select: { votes: true, comments: true } },
+        _count: { select: { votes: true, comments: true, helpfulMarks: true, similarQuotes: true } },
       },
     }),
   ]);
@@ -45,6 +45,8 @@ export default async function HomePage() {
     timeScore: q.analysis?.timeScore ?? null,
     voteCount: q._count.votes,
     commentCount: q._count.comments,
+    helpfulCount: q._count.helpfulMarks,
+    similarCount: q._count.similarQuotes,
   }));
 
   const initialTotalPages = Math.ceil(totalCount / 20);

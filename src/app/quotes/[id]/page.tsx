@@ -233,7 +233,7 @@ export default async function QuotePage({
   const session = await auth();
   const currentUserId = session?.user?.id ?? null;
 
-  const [quote, initialComments, quoteVoteCount, userVote] = await Promise.all([
+  const [quote, initialComments, quoteVoteCount, userVote, helpfulCount, userHelpful, similarQuotes] = await Promise.all([
     prisma.quote.findUnique({
       where: { id },
       include: { analysis: true, category: true },
@@ -243,12 +243,14 @@ export default async function QuotePage({
       orderBy: { createdAt: "asc" },
       include: {
         user: { select: { name: true } },
-        votes: { select: { userId: true } },
+        votes: { select: { userId: true, value: true } },
+        reactions: { select: { userId: true, emoji: true } },
         replies: {
           orderBy: { createdAt: "asc" },
           include: {
             user: { select: { name: true } },
-            votes: { select: { userId: true } },
+            votes: { select: { userId: true, value: true } },
+            reactions: { select: { userId: true, emoji: true } },
           },
         },
       },
@@ -259,6 +261,17 @@ export default async function QuotePage({
           where: { userId_quoteId: { userId: currentUserId, quoteId: id } },
         })
       : null,
+    prisma.helpfulMark.count({ where: { quoteId: id } }),
+    currentUserId
+      ? prisma.helpfulMark.findUnique({
+          where: { quoteId_userId: { quoteId: id, userId: currentUserId } },
+        })
+      : null,
+    prisma.similarQuote.findMany({
+      where: { quoteId: id },
+      select: { price: true, note: true, createdAt: true, userId: true },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   if (!quote) notFound();
@@ -270,22 +283,54 @@ export default async function QuotePage({
   const hasScores = analysis?.priceScore != null;
   const isOwner = currentUserId === quote.userId;
 
+  const REACTION_EMOJIS = ["👍", "💡", "😱"];
+
+  type VoteLike = { userId: string; value: number };
+  type ReactionLike = { userId: string; emoji: string };
+
+  function serializeVotesAndReactions(
+    votes: VoteLike[],
+    reactions: ReactionLike[]
+  ) {
+    const netScore = votes.reduce((sum, v) => sum + v.value, 0);
+    const userVote = currentUserId ? votes.find((v) => v.userId === currentUserId) : null;
+    return {
+      netScore,
+      userUpvoted: userVote?.value === 1,
+      userDownvoted: userVote?.value === -1,
+      reactions: REACTION_EMOJIS.map((emoji) => ({
+        emoji,
+        count: reactions.filter((r) => r.emoji === emoji).length,
+        userReacted: currentUserId ? reactions.some((r) => r.emoji === emoji && r.userId === currentUserId) : false,
+      })),
+    };
+  }
+
   const serializedComments = initialComments.map((c) => ({
     id: c.id,
     content: c.content,
     createdAt: c.createdAt.toISOString(),
     user: { name: c.user.name },
-    voteCount: c.votes.length,
-    userVoted: currentUserId ? c.votes.some((v) => v.userId === currentUserId) : false,
+    ...serializeVotesAndReactions(c.votes, c.reactions),
     replies: c.replies.map((r) => ({
       id: r.id,
       content: r.content,
       createdAt: r.createdAt.toISOString(),
       user: { name: r.user.name },
-      voteCount: r.votes.length,
-      userVoted: currentUserId ? r.votes.some((v) => v.userId === currentUserId) : false,
+      ...serializeVotesAndReactions(r.votes, r.reactions),
       replies: [],
     })),
+  }));
+
+  const similarPrices = similarQuotes.map((s) => s.price).filter((p): p is number => p != null);
+  const similarAvgPrice = similarPrices.length > 0
+    ? similarPrices.reduce((a, b) => a + b, 0) / similarPrices.length
+    : null;
+  const serializedSimilarQuotes = similarQuotes.map((s) => ({
+    price: s.price,
+    note: s.note,
+    createdAt: s.createdAt.toISOString(),
+    isOwn: s.userId === currentUserId,
   }));
 
   return (
@@ -642,6 +687,10 @@ export default async function QuotePage({
           initialVoteCount={quoteVoteCount}
           initialUserVoted={!!userVote}
           currentUserId={currentUserId}
+          initialHelpfulCount={helpfulCount}
+          initialUserMarkedHelpful={!!userHelpful}
+          initialSimilarQuotes={serializedSimilarQuotes}
+          similarAvgPrice={similarAvgPrice}
         />
       </div>
     </main>

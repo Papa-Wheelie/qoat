@@ -37,7 +37,7 @@ export default async function MyQuotesPage() {
       analysis: {
         select: { totalAmount: true, priceScore: true, reputationScore: true, timeScore: true },
       },
-      _count: { select: { votes: true, comments: true } },
+      _count: { select: { votes: true, comments: true, helpfulMarks: true, similarQuotes: true } },
     },
   });
 
@@ -101,7 +101,7 @@ export default async function MyQuotesPage() {
                       <ScoreBadge score={q.analysis?.timeScore ?? null} label="Time" />
                     </div>
 
-                    <div className="flex items-center gap-4 pt-1">
+                    <div className="flex items-center gap-3 pt-1 flex-wrap">
                       <span className="text-xs text-on-surface-variant flex items-center gap-1">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M12 19V5M5 12l7-7 7 7"/>
@@ -114,6 +114,26 @@ export default async function MyQuotesPage() {
                         </svg>
                         {q._count.comments}
                       </span>
+                      {q._count.helpfulMarks > 0 && (
+                        <span className="text-xs text-on-surface-variant flex items-center gap-1">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                            <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                          </svg>
+                          {q._count.helpfulMarks}
+                        </span>
+                      )}
+                      {q._count.similarQuotes > 0 && (
+                        <span className="text-xs text-on-surface-variant flex items-center gap-1">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                          {q._count.similarQuotes}
+                        </span>
+                      )}
                       {(() => {
                         const badge = STATUS_BADGE[q.status] ?? STATUS_BADGE.pending;
                         return (

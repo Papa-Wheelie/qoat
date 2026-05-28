@@ -20,6 +20,8 @@ export type FeedQuote = {
   timeScore: number | null;
   voteCount: number;
   commentCount: number;
+  helpfulCount: number;
+  similarCount: number;
 };
 
 type Props = {
@@ -78,7 +80,7 @@ function QuoteCard({ quote, currentUserId }: { quote: FeedQuote; currentUserId: 
           <ScoreBadge score={quote.timeScore} label="Time" />
         </div>
 
-        <div className="flex items-center gap-4 pt-1">
+        <div className="flex items-center gap-3 pt-1 flex-wrap">
           <span className="text-xs text-on-surface-variant flex items-center gap-1">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 19V5M5 12l7-7 7 7"/>
@@ -91,6 +93,26 @@ function QuoteCard({ quote, currentUserId }: { quote: FeedQuote; currentUserId: 
             </svg>
             {quote.commentCount}
           </span>
+          {quote.helpfulCount > 0 && (
+            <span className="text-xs text-on-surface-variant flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+              </svg>
+              {quote.helpfulCount}
+            </span>
+          )}
+          {quote.similarCount > 0 && (
+            <span className="text-xs text-on-surface-variant flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              {quote.similarCount}
+            </span>
+          )}
         </div>
       </div>
     </Link>

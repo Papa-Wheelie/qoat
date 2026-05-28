@@ -80,13 +80,16 @@ export async function POST(request: Request) {
     include: { user: { select: { name: true } } },
   });
 
+  const REACTION_EMOJIS = ["👍", "💡", "😱"];
   return Response.json({
     id: comment.id,
     content: comment.content,
     createdAt: comment.createdAt,
     user: { name: comment.user.name },
-    voteCount: 0,
-    userVoted: false,
+    netScore: 0,
+    userUpvoted: false,
+    userDownvoted: false,
+    reactions: REACTION_EMOJIS.map((emoji) => ({ emoji, count: 0, userReacted: false })),
     replies: [],
   }, { status: 201 });
 }

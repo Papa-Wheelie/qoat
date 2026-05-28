@@ -251,18 +251,21 @@
 - ABN verification portion still parked (awaiting ABR GUID)
 - Tested on insulation quote — correctly assessed both ✅
 
-## Up Next
-### 2C — AI + scoring improvements
-- 2C.7 NEW — Contractor reputation scoring (composite:
-  Google rating + years in business + licence status +
-  QOAT job-completion data)
-- 2C.5 Richer community engagement:
-  * Upvote only on quotes, up/down on comments
-  * Comment reactions (👍 💡 😱)
-  * "I got a similar quote" button with price input
-  * "This helped me" counter on quotes
-  * Sort comments by most helpful
+### Session 2C.5 ✅ — Richer community engagement
+- Up/down voting on comments (Vote.value +1/-1)
+- Comment reactions: 👍 💡 😱 with counts + active state
+- Sort comments: Most helpful / Newest / Oldest
+- "This helped me" toggle + counter on quotes
+- "I got a similar quote" — price + note, shows aggregate
+  (real crowd-sourced pricing data for future benchmarking)
+- "Looks fair" quote upvote
+- Engagement signals on feed + My Quotes cards
+- Optimistic updates throughout
+- New models: CommentReaction, HelpfulMark, SimilarQuote
 
+## 2C COMPLETE ✅ (except parked ABN verification)
+
+## Up Next
 ### 2D — Discovery + search (2 sessions)
 - 2D.1 Search + sort feed
 - 2D.2 Compare quotes side by side

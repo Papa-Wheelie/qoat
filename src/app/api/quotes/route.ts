@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
           },
         },
         _count: {
-          select: { votes: true, comments: true },
+          select: { votes: true, comments: true, helpfulMarks: true, similarQuotes: true },
         },
       },
     }),
@@ -58,6 +58,8 @@ export async function GET(request: NextRequest) {
     timeScore: q.analysis?.timeScore ?? null,
     voteCount: q._count.votes,
     commentCount: q._count.comments,
+    helpfulCount: q._count.helpfulMarks,
+    similarCount: q._count.similarQuotes,
   }));
 
   return Response.json({
