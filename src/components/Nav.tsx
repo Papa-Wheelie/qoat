@@ -9,12 +9,14 @@ export default async function Nav() {
   const isLoggedIn = !!session?.user?.id;
 
   let showVerificationBanner = false;
+  let isAdmin = false;
   if (isLoggedIn && session.user?.id) {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { emailVerified: true },
+      select: { emailVerified: true, role: true },
     });
     showVerificationBanner = !user?.emailVerified;
+    isAdmin = user?.role === "admin";
   }
 
   return (
@@ -33,6 +35,7 @@ export default async function Nav() {
               <UserMenu
                 name={session.user.name ?? null}
                 image={session.user.image ?? null}
+                isAdmin={isAdmin}
               />
             ) : (
               <Link

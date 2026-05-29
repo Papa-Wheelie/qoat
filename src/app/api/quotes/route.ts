@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
 
@@ -15,12 +16,19 @@ const SORT_OPTIONS = {
 type SortKey = keyof typeof SORT_OPTIONS;
 
 export async function GET(request: NextRequest) {
+  const session = await auth();
+  const currentUserId = session?.user?.id ?? null;
+  const role = session?.user?.role ?? "user";
+  const isPrivileged = role === "admin" || role === "moderator";
+
   const { searchParams } = request.nextUrl;
   const categorySlug = searchParams.get("category") ?? undefined;
   const state = searchParams.get("state") ?? undefined;
   const search = searchParams.get("search")?.trim() ?? undefined;
   const sortKey = (searchParams.get("sort") ?? "newest") as SortKey;
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+  // includeHidden only honoured for admin/moderator — ignored otherwise
+  const includeHidden = isPrivileged && searchParams.get("includeHidden") === "true";
 
   const orderBy = SORT_OPTIONS[sortKey] ?? SORT_OPTIONS.newest;
 
@@ -35,7 +43,14 @@ export async function GET(request: NextRequest) {
       }
     : {};
 
+  // includeHidden=true (privileged only): no hidden filter
+  // Otherwise: show non-hidden + the current user's own hidden quotes
+  const visibilityFilter = includeHidden
+    ? {}
+    : { OR: [{ hidden: false }, ...(currentUserId ? [{ userId: currentUserId }] : [])] };
+
   const where = {
+    ...visibilityFilter,
     ...(categorySlug && { category: { slug: categorySlug } }),
     ...(state && { state }),
     ...searchFilter,
@@ -51,6 +66,7 @@ export async function GET(request: NextRequest) {
         id: true,
         userId: true,
         title: true,
+        hidden: true,
         suburb: true,
         state: true,
         createdAt: true,
@@ -75,6 +91,7 @@ export async function GET(request: NextRequest) {
     id: q.id,
     userId: q.userId,
     title: q.title,
+    hidden: q.hidden,
     suburb: q.suburb,
     state: q.state,
     createdAt: q.createdAt,

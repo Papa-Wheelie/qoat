@@ -87,20 +87,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
 
-    async jwt({ token, account }) {
+    async jwt({ token, account, trigger }) {
       // On Google sign-in, resolve our internal user ID from email
       if (account?.provider === "google" && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email },
-          select: { id: true },
+          select: { id: true, role: true },
         });
-        if (dbUser) token.sub = dbUser.id;
+        if (dbUser) {
+          token.sub = dbUser.id;
+          token.role = dbUser.role;
+        }
+      }
+      // Refresh role on session refresh or initial sign-in
+      if (trigger === "signIn" || trigger === "update") {
+        if (token.sub) {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { role: true },
+          });
+          if (dbUser) token.role = dbUser.role;
+        }
       }
       return token;
     },
 
     session({ session, token }) {
       if (token.sub) session.user.id = token.sub;
+      if (token.role) session.user.role = token.role as string;
       return session;
     },
   },

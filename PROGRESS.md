@@ -289,10 +289,27 @@
 
 ## 2D COMPLETE ✅
 
+## 2E — Trust + safety (2 sessions)
+
+### Session 2E.1 ✅ — Report + moderation tools
+- Role field on User (user/moderator/admin)
+- Report model: reasons (spam/offensive/misleading/privacy/other)
+- Report buttons on quotes + comments
+- One report per user per item
+- Admin dashboard at /admin (role-protected)
+- Hide/Unhide/Dismiss actions, resolvedBy + resolvedAt tracked
+- Hidden content filter rules:
+  * Public: never sees hidden
+  * Owner: always sees own with badge
+  * Admin/mod: normal feed by default, "Include hidden" toggle
+- Badge: "Hidden by moderation" (responsive)
+- Detail banner: "Hidden by a moderator on [AU date]"
+- JWT carries user role (re-login required after migration)
+- Privileged-only check enforced at API layer (not just UI)
+- joseph@papawheelie.com.au promoted to admin ✅
+
 ## Up Next
-### 2E — Trust + safety (2 sessions)
-- 2E.1 Report + moderation tools
-- 2E.2 Verified professional badge
+### 2E.2 — Verified professional badge
 
 ### 2F — Marketing + legal (3 sessions)
 - 2F.1 Landing + how it works page

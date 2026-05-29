@@ -22,6 +22,7 @@ export type FeedQuote = {
   id: string;
   userId: string;
   title: string;
+  hidden: boolean;
   suburb: string | null;
   state: string | null;
   createdAt: string;
@@ -42,6 +43,7 @@ type Props = {
   initialTotalCount: number;
   categories: Category[];
   currentUserId: string | null;
+  isPrivileged: boolean;
   initialSearch: string;
   initialSort: SortOption;
   initialCategory: string | null;
@@ -150,6 +152,12 @@ function QuoteCard({ quote, currentUserId, isSelected, atMax, onToggle }: QuoteC
                 {quote.similarCount}
               </span>
             )}
+            {quote.hidden && (
+              <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">
+                <span className="hidden sm:inline">Hidden by moderation</span>
+                <span className="sm:hidden">Hidden</span>
+              </span>
+            )}
           </div>
         </div>
       </Link>
@@ -163,6 +171,7 @@ export default function QuoteFeed({
   initialTotalCount,
   categories,
   currentUserId,
+  isPrivileged,
   initialSearch,
   initialSort,
   initialCategory,
@@ -178,7 +187,15 @@ export default function QuoteFeed({
   const [searchInput, setSearchInput] = useState(initialSearch);
   const [loadingMore, setLoadingMore] = useState(false);
   const [filtering, setFiltering] = useState(false);
+  const [includeHidden, setIncludeHidden] = useState(false);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Persist includeHidden toggle in sessionStorage for privileged users
+  useEffect(() => {
+    if (!isPrivileged) return;
+    const stored = sessionStorage.getItem("qoat_include_hidden");
+    if (stored === "true") setIncludeHidden(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { selected, toggle, remove, clear } = useCompareSelection();
   const atMax = selected.length >= 4;
@@ -201,7 +218,8 @@ export default function QuoteFeed({
     search: string,
     sort: SortOption,
     pageNum: number,
-    append = false
+    append = false,
+    withHidden = includeHidden
   ) {
     if (!append) setFiltering(true);
     else setLoadingMore(true);
@@ -213,6 +231,7 @@ export default function QuoteFeed({
       if (search) params.set("search", search);
       if (sort !== "newest") params.set("sort", sort);
       if (pageNum > 1) params.set("page", String(pageNum));
+      if (withHidden) params.set("includeHidden", "true");
 
       const res = await fetch(`/api/quotes?${params}`);
       const data = await res.json();
@@ -266,7 +285,13 @@ export default function QuoteFeed({
   }
 
   async function handleLoadMore() {
-    await fetchQuotes(activeCategory, activeState, searchInput, sortOrder, page + 1, true);
+    await fetchQuotes(activeCategory, activeState, searchInput, sortOrder, page + 1, true, includeHidden);
+  }
+
+  function handleIncludeHiddenToggle(checked: boolean) {
+    setIncludeHidden(checked);
+    sessionStorage.setItem("qoat_include_hidden", checked ? "true" : "false");
+    fetchQuotes(activeCategory, activeState, searchInput, sortOrder, 1, false, checked);
   }
 
   function handleClearAll() {
@@ -275,7 +300,7 @@ export default function QuoteFeed({
     setActiveState("");
     setSortOrder("newest");
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-    fetchQuotes(null, "", "", "newest", 1);
+    fetchQuotes(null, "", "", "newest", 1, false, includeHidden);
     window.history.replaceState(null, "", window.location.pathname);
   }
 
@@ -322,6 +347,20 @@ export default function QuoteFeed({
               <option key={v} value={v}>{l}</option>
             ))}
           </select>
+          {isPrivileged && (
+            <label className="shrink-0 flex items-center gap-2 cursor-pointer select-none" title="Show hidden quotes (admin/moderator only)">
+              <div
+                onClick={() => handleIncludeHiddenToggle(!includeHidden)}
+                className={`relative w-8 h-4.5 rounded-full transition-colors ${includeHidden ? "bg-red-500" : "bg-outline-variant"}`}
+                style={{ width: 32, height: 18 }}
+              >
+                <div className={`absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-transform ${includeHidden ? "translate-x-[14px]" : "translate-x-0.5"}`} />
+              </div>
+              <span className="text-xs font-semibold text-on-surface-variant hidden sm:inline">
+                Include hidden
+              </span>
+            </label>
+          )}
         </div>
 
         {/* Row 2: Category pills + state */}

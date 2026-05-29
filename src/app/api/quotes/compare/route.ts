@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const session = await auth();
   const userId = session?.user?.id ?? null;
+  const isAdmin = session?.user?.role === "admin";
 
   const idsParam = request.nextUrl.searchParams.get("ids") ?? "";
   const ids = idsParam.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 4);
@@ -15,7 +16,10 @@ export async function GET(request: NextRequest) {
 
   const [quotes, similarGroups] = await Promise.all([
     prisma.quote.findMany({
-      where: { id: { in: ids } },
+      where: {
+        id: { in: ids },
+        ...(isAdmin ? {} : { OR: [{ hidden: false }, ...(userId ? [{ userId }] : [])] }),
+      },
       select: {
         id: true,
         title: true,

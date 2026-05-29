@@ -13,6 +13,7 @@ model User {
   name          String?
   password      String?
   emailVerified DateTime?
+  role          String            @default("user")
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   quotes        Quote[]
@@ -22,6 +23,8 @@ model User {
   reactions     CommentReaction[]
   helpfulMarks  HelpfulMark[]
   similarQuotes SimilarQuote[]
+  reportsMade     Report[]        @relation("ReportsMade")
+  reportsResolved Report[]        @relation("ReportsResolved")
 }
 
 model Account {
@@ -67,6 +70,7 @@ model Quote {
   fileName      String
   fileType      String
   status        String         @default("pending")
+  hidden        Boolean        @default(false)
   suburb        String?
   state         String?
   userId        String
@@ -80,6 +84,7 @@ model Quote {
   votes         Vote[]
   helpfulMarks  HelpfulMark[]
   similarQuotes SimilarQuote[]
+  reports       Report[]
 }
 
 model Comment {
@@ -88,6 +93,7 @@ model Comment {
   quoteId   String
   userId    String
   parentId  String?
+  hidden    Boolean           @default(false)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   quote     Quote             @relation(fields: [quoteId], references: [id])
@@ -96,6 +102,7 @@ model Comment {
   replies   Comment[]         @relation("CommentReplies")
   votes     Vote[]
   reactions CommentReaction[]
+  reports   Report[]
 }
 
 model Vote {
@@ -147,6 +154,26 @@ model SimilarQuote {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([quoteId, userId])
+}
+
+model Report {
+  id           String    @id @default(cuid())
+  reporterId   String
+  reason       String
+  details      String?
+  status       String    @default("pending")
+  quoteId      String?
+  commentId    String?
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  reporter     User      @relation("ReportsMade", fields: [reporterId], references: [id])
+  resolvedBy   User?     @relation("ReportsResolved", fields: [resolvedById], references: [id])
+  quote        Quote?    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  comment      Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([reporterId, quoteId])
+  @@unique([reporterId, commentId])
 }
 
 model QuoteAnalysis {

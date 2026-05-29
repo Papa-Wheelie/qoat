@@ -7,9 +7,10 @@ import { signOut } from "next-auth/react";
 type Props = {
   name: string | null;
   image: string | null;
+  isAdmin?: boolean;
 };
 
-export default function UserMenu({ name, image }: Props) {
+export default function UserMenu({ name, image, isAdmin }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -61,6 +62,7 @@ export default function UserMenu({ name, image }: Props) {
             { label: "My Quotes", href: "/my-quotes" },
             { label: "Profile", href: "/profile" },
             { label: "Settings", href: "/settings" },
+            ...(isAdmin ? [{ label: "Moderation", href: "/admin" }] : []),
           ].map(({ label, href }) => (
             <Link
               key={href}

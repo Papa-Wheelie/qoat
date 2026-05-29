@@ -9,6 +9,7 @@ export type MyQuoteData = {
   id: string;
   title: string;
   status: string;
+  hidden: boolean;
   suburb: string | null;
   state: string | null;
   createdAt: string;
@@ -147,12 +148,20 @@ export default function MyQuotesList({ quotes }: { quotes: MyQuoteData[] }) {
                         {q.similarCount}
                       </span>
                     )}
-                    <span
-                      className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
-                      style={{ backgroundColor: badge.bg, color: badge.text }}
-                    >
-                      {badge.label}
-                    </span>
+                    <div className="ml-auto flex items-center gap-1.5">
+                      {q.hidden && (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">
+                          <span className="hidden sm:inline">Hidden by moderation</span>
+                          <span className="sm:hidden">Hidden</span>
+                        </span>
+                      )}
+                      <span
+                        className="px-2 py-0.5 rounded-full text-xs font-bold"
+                        style={{ backgroundColor: badge.bg, color: badge.text }}
+                      >
+                        {badge.label}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Link>

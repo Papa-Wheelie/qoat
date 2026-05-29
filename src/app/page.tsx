@@ -17,16 +17,23 @@ export default async function HomePage({
   const session = await auth();
   const isLoggedIn = !!session?.user;
   const currentUserId = session?.user?.id ?? null;
+  const role = session?.user?.role ?? "user";
+  const isPrivileged = role === "admin" || role === "moderator";
+
+  // SSR initial load always uses default visibility (toggle=off); client refetches if toggle was on
+  const visibilityWhere = { OR: [{ hidden: false }, ...(currentUserId ? [{ userId: currentUserId }] : [])] };
 
   const [categories, initialData, totalCount] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, slug: true } }),
     prisma.quote.findMany({
+      where: visibilityWhere,
       orderBy: { createdAt: "desc" },
       take: 20,
       select: {
         id: true,
         userId: true,
         title: true,
+        hidden: true,
         suburb: true,
         state: true,
         createdAt: true,
@@ -37,13 +44,14 @@ export default async function HomePage({
         _count: { select: { votes: true, comments: true, helpfulMarks: true, similarQuotes: true } },
       },
     }),
-    prisma.quote.count(),
+    prisma.quote.count({ where: visibilityWhere }),
   ]);
 
   const initialQuotes: FeedQuote[] = initialData.map((q) => ({
     id: q.id,
     userId: q.userId,
     title: q.title,
+    hidden: q.hidden,
     suburb: q.suburb,
     state: q.state,
     createdAt: q.createdAt.toISOString(),
@@ -93,6 +101,7 @@ export default async function HomePage({
           initialTotalCount={totalCount}
           categories={categories}
           currentUserId={currentUserId}
+          isPrivileged={isPrivileged}
           initialSearch={sp.search ?? ""}
           initialSort={initialSort}
           initialCategory={sp.category ?? null}

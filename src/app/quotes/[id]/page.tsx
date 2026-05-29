@@ -233,19 +233,20 @@ export default async function QuotePage({
   const session = await auth();
   const currentUserId = session?.user?.id ?? null;
 
-  const [quote, initialComments, quoteVoteCount, userVote, helpfulCount, userHelpful, similarQuotes] = await Promise.all([
+  const [quote, initialComments, quoteVoteCount, userVote, helpfulCount, userHelpful, similarQuotes, hiddenReport] = await Promise.all([
     prisma.quote.findUnique({
       where: { id },
       include: { analysis: true, category: true },
     }),
     prisma.comment.findMany({
-      where: { quoteId: id, parentId: null },
+      where: { quoteId: id, parentId: null, hidden: false },
       orderBy: { createdAt: "asc" },
       include: {
         user: { select: { name: true } },
         votes: { select: { userId: true, value: true } },
         reactions: { select: { userId: true, emoji: true } },
         replies: {
+          where: { hidden: false },
           orderBy: { createdAt: "asc" },
           include: {
             user: { select: { name: true } },
@@ -272,16 +273,25 @@ export default async function QuotePage({
       select: { price: true, note: true, createdAt: true, userId: true },
       orderBy: { createdAt: "asc" },
     }),
+    prisma.report.findFirst({
+      where: { quoteId: id, status: "actioned" },
+      orderBy: { resolvedAt: "desc" },
+      select: { resolvedAt: true },
+    }),
   ]);
 
   if (!quote) notFound();
+
+  const isOwner = currentUserId === quote.userId;
+
+  // Hidden quotes: owner sees a notice, everyone else gets 404
+  if (quote.hidden && !isOwner) notFound();
 
   const analysis = quote.analysis;
   const lineItems = analysis ? (analysis.lineItems as LineItem[]) : [];
   const redFlags = analysis ? (analysis.redFlags as string[]) : [];
   const questionsToAsk = analysis ? (analysis.questionsToAsk as string[] | null) ?? [] : [];
   const hasScores = analysis?.priceScore != null;
-  const isOwner = currentUserId === quote.userId;
 
   const REACTION_EMOJIS = ["👍", "💡", "😱"];
 
@@ -363,6 +373,24 @@ export default async function QuotePage({
             <ShareButton />
           )}
         </header>
+
+        {/* Hidden notice for owner */}
+        {quote.hidden && isOwner && (
+          <div className="bg-red-50 border border-red-200 rounded-[12px] px-5 py-4 flex items-start gap-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#991B1B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>
+              <p className="text-sm font-semibold text-red-800">
+                {hiddenReport?.resolvedAt
+                  ? `Hidden by a moderator on ${hiddenReport.resolvedAt.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}`
+                  : "Hidden by a moderator"}
+              </p>
+              <p className="text-xs text-red-700 mt-0.5">This quote is no longer visible to the public. If you believe this is an error, please contact us.</p>
+            </div>
+          </div>
+        )}
 
         {!analysis ? (
           <div className="bg-surface-container-low rounded-[16px] px-6 py-12 text-center">

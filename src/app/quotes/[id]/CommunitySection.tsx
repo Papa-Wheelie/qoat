@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import ReportModal from "@/components/ReportModal";
 
 export type ReactionData = {
   emoji: string;
@@ -119,6 +120,7 @@ function CommentItem({ comment, quoteId, currentUserId, isReply, onReplyPosted }
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   async function handleVote(value: 1 | -1) {
     if (!currentUserId) return;
@@ -271,8 +273,21 @@ function CommentItem({ comment, quoteId, currentUserId, isReply, onReplyPosted }
               Reply
             </button>
           )}
+          {currentUserId && (
+            <button
+              onClick={() => setShowReport(true)}
+              className="text-xs text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+              title="Report comment"
+            >
+              Report
+            </button>
+          )}
         </div>
       </div>
+
+      {showReport && (
+        <ReportModal commentId={comment.id} onClose={() => setShowReport(false)} />
+      )}
 
       {showReplyBox && (
         <form onSubmit={submitReply} className="mt-3 space-y-2">
@@ -409,6 +424,25 @@ function SimilarQuoteForm({ quoteId, onSubmitted, hasOwn }: SimilarFormProps) {
         </button>
       </div>
     </form>
+  );
+}
+
+// ── Report quote button ───────────────────────────────────────────────────────
+
+function ReportQuoteButton({ quoteId }: { quoteId: string }) {
+  const [showReport, setShowReport] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setShowReport(true)}
+        className="text-xs text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+      >
+        Report this quote
+      </button>
+      {showReport && (
+        <ReportModal quoteId={quoteId} onClose={() => setShowReport(false)} />
+      )}
+    </>
   );
 }
 
@@ -657,6 +691,9 @@ export default function CommunitySection({
           </p>
         )}
       </div>
+
+      {/* Report quote */}
+      {currentUserId && <ReportQuoteButton quoteId={quoteId} />}
 
       {/* Comments header + sort */}
       <div className="flex items-center justify-between gap-2">
