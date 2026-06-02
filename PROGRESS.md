@@ -308,13 +308,31 @@
 - Privileged-only check enforced at API layer (not just UI)
 - joseph@papawheelie.com.au promoted to admin ✅
 
-## Up Next
-### 2E.2 — Verified professional badge
+### Session 2E.2 ✅ — Source attribution + methodology + scale-aware Time
+- Methodology versioning: methodologyVersion, modelVersion, 
+  analysedAt stamped on every analysis
+- Public /methodology page with changelog
+- Methodology stamp on quote detail (owner only)
+- Source attribution: priceComparableIds persisted on analysis
+- "Benchmarked against N similar jobs" now clickable — opens 
+  modal listing comparable quotes (title, location, range, 
+  similarity %)
+- /api/quotes/[id]/comparables endpoint (owner-only)
+- Scale-aware Time scoring: jobSize extracted (quantity, unit, 
+  descriptor, sizeBand)
+- Time prompt now factors job size — reasons about time-per-unit
+- Time card shows "[size] job · [descriptor]" 
+- Verified pro badge form deferred to Phase 5 (contractor onboarding)
+- MODEL_VERSION consolidated to src/lib/methodology.ts
 
-### 2F — Marketing + legal (3 sessions)
+## 2E COMPLETE ✅
+
+## Up Next
+### 2F — Marketing + legal
 - 2F.1 Landing + how it works page
 - 2F.2 FAQ + contact form
 - 2F.3 Terms of service + privacy policy
+
 
 ### 2G — Mobile + polish (2 sessions)
 - 2G.1 Full mobile responsive polish

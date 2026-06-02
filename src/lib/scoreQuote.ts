@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { anthropic } from "./claude";
+import { MODEL_VERSION } from "./methodology";
 import type { QuoteExtraction } from "./extractQuote";
 import type { ComparableStats } from "./getComparables";
 import type { ReputationSignals } from "./getReputationSignals";
@@ -37,7 +38,8 @@ export async function scoreQuote(
   description?: string | null,
   googleReviews?: { rating: number; reviewCount: number } | null,
   comparables?: ComparableStats | null,
-  reputationSignals?: ReputationSignals | null
+  reputationSignals?: ReputationSignals | null,
+  jobSize?: QuoteExtraction["jobSize"] | null
 ): Promise<QuoteScore> {
   const locationLine =
     location?.suburb || location?.state
@@ -71,15 +73,20 @@ Score reputation 1-10. A licensed, insured supplier with an ABN and strong Googl
       ? `QOAT community data: Based on ${comparables.sampleSize} semantically similar jobs, the typical range is $${Math.round(comparables.minTotal!).toLocaleString()} to $${Math.round(comparables.maxTotal!).toLocaleString()}, averaging $${Math.round(comparables.averageTotal!).toLocaleString()}. These are real quotes for comparable work. Factor this into your price assessment alongside your general knowledge. Weight the community data more heavily when the sample size is large.`
       : null;
 
+  const jobSizeLine = jobSize != null
+    ? `Job size: ${jobSize.descriptor} (${jobSize.sizeBand})${jobSize.quantity != null && jobSize.unit ? `. Quantity: ${jobSize.quantity} ${jobSize.unit}` : ""}.
+Score Time on the realism of the estimated timeframe RELATIVE TO this job's size. A long timeframe for a large job may be reasonable; the same timeframe for a small job is slow. Where you have quantitative units, compute and reference time-per-unit in your explanation when helpful. Example: "16 weeks for 3 skylights is slow — typical pace is 2-3 weeks for this volume."`
+    : null;
+
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: MODEL_VERSION,
     max_tokens: 1024,
     system: SYSTEM_PROMPT,
     messages: [
       {
         role: "user",
         content: `Based on this Australian trade quote, provide an iron triangle assessment. Score each dimension 1-10 where 10 is best.
-${locationLine ? `\n${locationLine}\n` : ""}${descriptionLine ? `\n${descriptionLine}\n` : ""}${reputationLine ? `\n${reputationLine}\n` : googleLine ? `\n${googleLine}\n` : ""}${communityLine ? `\n${communityLine}\n` : ""}
+${locationLine ? `\n${locationLine}\n` : ""}${descriptionLine ? `\n${descriptionLine}\n` : ""}${reputationLine ? `\n${reputationLine}\n` : googleLine ? `\n${googleLine}\n` : ""}${communityLine ? `\n${communityLine}\n` : ""}${jobSizeLine ? `\n${jobSizeLine}\n` : ""}
 Quote data: ${JSON.stringify(extraction, null, 2)}
 
 Return JSON:

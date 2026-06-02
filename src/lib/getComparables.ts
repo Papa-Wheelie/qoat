@@ -8,9 +8,11 @@ export type ComparableStats = {
   maxTotal: number | null;
   sampleSize: number;
   avgSimilarity: number | null;
+  comparableIds: string[];
 };
 
 type SimilarRow = {
+  quoteId: string;
   totalAmount: number | string;
   similarity: number | string;
 };
@@ -22,7 +24,8 @@ export async function getComparableQuotes(
   const vectorStr = `[${embedding.join(",")}]`;
 
   const rows = await prisma.$queryRawUnsafe<SimilarRow[]>(
-    `SELECT qa."totalAmount",
+    `SELECT qa."quoteId",
+            qa."totalAmount",
             1 - (qa.embedding <=> $1::vector) AS similarity
      FROM "QuoteAnalysis" qa
      JOIN "Quote" q ON q.id = qa."quoteId"
@@ -48,11 +51,13 @@ export async function getComparableQuotes(
       maxTotal: null,
       sampleSize: 0,
       avgSimilarity: null,
+      comparableIds: [],
     };
   }
 
   const amounts = rows.map((r) => Number(r.totalAmount));
   const similarities = rows.map((r) => Number(r.similarity));
+  const comparableIds = rows.map((r) => r.quoteId);
 
   const sorted = [...amounts].sort((a, b) => a - b);
   const sum = amounts.reduce((acc, v) => acc + v, 0);
@@ -68,5 +73,6 @@ export async function getComparableQuotes(
     maxTotal: sorted[count - 1],
     sampleSize: count,
     avgSimilarity: avgSim,
+    comparableIds,
   };
 }

@@ -8,6 +8,7 @@ import { getComparableQuotes } from "@/lib/getComparables";
 import { generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
 import { getReputationSignals } from "@/lib/getReputationSignals";
 import { assessCompliance } from "@/lib/assessCompliance";
+import { CURRENT_METHODOLOGY_VERSION, MODEL_VERSION } from "@/lib/methodology";
 
 export async function POST(
   _request: Request,
@@ -72,7 +73,7 @@ export async function POST(
 
   const comparables = embedding
     ? await getComparableQuotes(embedding, id)
-    : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null };
+    : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null, comparableIds: [] as string[] };
 
   const googleDataForSignals =
     googleReviews?.rating != null && googleReviews?.reviewCount != null
@@ -109,7 +110,8 @@ export async function POST(
     quote.description,
     null,
     comparables,
-    reputationSignals
+    reputationSignals,
+    extraction.jobSize
   );
 
   const data = {
@@ -129,6 +131,10 @@ export async function POST(
     googleReviews: googleReviews?.reviews ?? Prisma.DbNull,
     reputationSignals: reputationSignals ?? undefined,
     complianceFlags: complianceFlags ?? undefined,
+    methodologyVersion: CURRENT_METHODOLOGY_VERSION,
+    modelVersion: MODEL_VERSION,
+    jobSize: extraction.jobSize ?? undefined,
+    priceComparableIds: comparables.comparableIds,
     priceSampleSize: comparables.sampleSize >= 3 ? comparables.sampleSize : null,
     priceScore: score.price.score,
     priceVerdict: score.price.verdict,

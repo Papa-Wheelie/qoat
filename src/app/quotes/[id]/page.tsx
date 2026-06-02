@@ -3,9 +3,11 @@ import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import { type Metadata } from "next";
 import { type ReactNode } from "react";
+import Link from "next/link";
 import CommunitySection from "./CommunitySection";
 import QuoteOwnerActions from "./QuoteOwnerActions";
 import ShareButton from "./ShareButton";
+import ComparablesPanel from "./ComparablesPanel";
 import { formatPublicPrice } from "@/lib/formatPrice";
 import SocialProof from "@/components/SocialProof";
 import type { ReputationSignals } from "@/lib/getReputationSignals";
@@ -466,12 +468,7 @@ export default async function QuotePage({
                       extra={
                         analysis.priceScore != null ? (
                           analysis.priceSampleSize != null && analysis.priceSampleSize >= 3 ? (
-                            <p style={{ fontSize: "12px", color: "#888888", display: "flex", alignItems: "center", gap: "4px" }}>
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-                              </svg>
-                              Benchmarked against {analysis.priceSampleSize} similar jobs
-                            </p>
+                            <ComparablesPanel quoteId={quote.id} sampleSize={analysis.priceSampleSize} />
                           ) : (
                             <p style={{ fontSize: "12px", color: "#888888", display: "flex", alignItems: "center", gap: "4px" }}>
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -496,6 +493,16 @@ export default async function QuotePage({
                       verdict={analysis.timeVerdict}
                       explanation={analysis.timeExplanation}
                       accent="#89CFF0"
+                      extra={(() => {
+                        const js = analysis.jobSize as { quantity: number | null; unit: string | null; descriptor: string; sizeBand: string } | null;
+                        if (!js) return null;
+                        const label = js.quantity != null && js.unit
+                          ? `${js.sizeBand.charAt(0).toUpperCase() + js.sizeBand.slice(1)}-sized job · ${js.descriptor}`
+                          : `${js.sizeBand.charAt(0).toUpperCase() + js.sizeBand.slice(1)}-sized job`;
+                        return (
+                          <p style={{ fontSize: "12px", color: "#888888" }}>{label}</p>
+                        );
+                      })()}
                     />
                   </div>
                 </section>
@@ -642,6 +649,24 @@ export default async function QuotePage({
                       ))}
                     </div>
                   </section>
+                )}
+
+                {/* Methodology stamp */}
+                {analysis.analysedAt && (
+                  <p style={{ fontSize: "12px", color: "#AAAAAA", textAlign: "center" }}>
+                    Analysed{" "}
+                    {new Date(analysis.analysedAt).toLocaleDateString("en-AU", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    ·{" "}
+                    QOAT{" "}
+                    <Link href="/methodology" style={{ color: "#AAAAAA", textDecoration: "underline", textDecorationColor: "#CCCCCC" }}>
+                      methodology
+                    </Link>{" "}
+                    {analysis.methodologyVersion ?? "v1.0"}
+                  </p>
                 )}
               </>
             ) : (

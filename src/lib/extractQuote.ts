@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { anthropic } from "./claude";
 import { supabase } from "./supabase";
+import { MODEL_VERSION } from "./methodology";
 
 const LineItemSchema = z.object({
   description: z.string(),
@@ -27,6 +28,12 @@ const ExtractionSchema = z.object({
   questionsToAsk: z.array(z.string()),
   summary: z.string(),
   publicSummary: z.string(),
+  jobSize: z.object({
+    quantity: z.number().nullable(),
+    unit: z.string().nullable(),
+    descriptor: z.string(),
+    sizeBand: z.enum(["small", "medium", "large"]),
+  }).catch({ quantity: null, unit: null, descriptor: "unspecified", sizeBand: "medium" }),
 });
 
 export type QuoteExtraction = z.infer<typeof ExtractionSchema>;
@@ -55,7 +62,14 @@ Important: This is an Australian quote. All dates are in Australian format DD/MM
   "redFlags": [string] — list any genuinely concerning items such as missing scope, unusual payment terms, exclusions that could surprise the client, or vague timeframes. Do NOT flag the quote date as future dated unless you are certain the date is in the future when read in DD/MM/YYYY Australian format.,
   "questionsToAsk": [string] — 3 to 5 specific, practical questions the homeowner should ask this supplier before accepting the quote. Base these on gaps, vague items, or red flags found in the quote. Make them conversational and easy for a non-expert to ask. Example: "Can you provide a written timeframe for completion?",
   "summary": string one sentence plain English summary (may include supplier name and price context),
-  "publicSummary": string one sentence describing only the job type and scope of work — no supplier name, no price, no opinions. Example: "Supply and installation of 3 skylights with custom flashing and internal finishing."
+  "publicSummary": string one sentence describing only the job type and scope of work — no supplier name, no price, no opinions. Example: "Supply and installation of 3 skylights with custom flashing and internal finishing.",
+  "jobSize": {
+    "quantity": number or null — a measurable quantity if present (e.g. 3 for "3 skylights", 45 for "45m²"),
+    "unit": string or null — the unit for quantity (e.g. "skylights", "m²", "hours", "lineal metres"),
+    "descriptor": string — human-readable size description (e.g. "3 skylights", "45m² of decking", "full kitchen renovation", "replace 2 taps"),
+    "sizeBand": "small" | "medium" | "large" — estimate the overall scale: small = minor repairs/single items, medium = room-scale or multi-item, large = whole-home, structural, or major renovation
+  }
+  Guidance for jobSize: extract quantitative measures wherever possible (count, area, volume). Where the job is a scope without clear units (e.g. "renovate bathroom"), set quantity and unit to null and describe the scope in descriptor. Always provide descriptor and sizeBand.
 }`;
 
 export async function extractQuote(
@@ -107,7 +121,7 @@ export async function extractQuote(
     : USER_PROMPT;
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: MODEL_VERSION,
     max_tokens: 2048,
     system: SYSTEM_PROMPT,
     messages: [

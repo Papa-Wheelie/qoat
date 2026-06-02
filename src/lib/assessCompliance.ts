@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { anthropic } from "./claude";
+import { MODEL_VERSION } from "./methodology";
 import type { QuoteExtraction } from "./extractQuote";
 
 const ComplianceFlagsSchema = z.object({
@@ -28,7 +29,7 @@ export async function assessCompliance(
       : "";
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: MODEL_VERSION,
     max_tokens: 512,
     system: SYSTEM_PROMPT,
     messages: [

@@ -8,6 +8,7 @@ import { getComparableQuotes } from "@/lib/getComparables";
 import { generateEmbedding, buildEmbeddingText } from "@/lib/embeddings";
 import { getReputationSignals } from "@/lib/getReputationSignals";
 import { assessCompliance } from "@/lib/assessCompliance";
+import { CURRENT_METHODOLOGY_VERSION, MODEL_VERSION } from "@/lib/methodology";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -127,7 +128,7 @@ export async function POST(request: Request) {
         // Fetch comparable quotes for price benchmarking
         const comparables = embedding
           ? await getComparableQuotes(embedding, quote.id)
-          : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null };
+          : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null, comparableIds: [] as string[] };
         console.log("[upload] comparables for quote", quote.id, "sampleSize:", comparables.sampleSize);
 
         // Build reputation signals composite
@@ -162,7 +163,7 @@ export async function POST(request: Request) {
         let score;
         try {
           console.log("[upload] starting scoring for quote", quote.id);
-          score = await scoreQuote(extraction, { suburb, state }, description, null, comparables, reputationSignals);
+          score = await scoreQuote(extraction, { suburb, state }, description, null, comparables, reputationSignals, extraction.jobSize);
           console.log("[upload] scoring succeeded for quote", quote.id, "recommendation:", score.overall.recommendation);
         } catch (err) {
           console.error("[upload] scoring failed for quote", quote.id, err);
@@ -187,6 +188,10 @@ export async function POST(request: Request) {
             googleReviews: googleReviews?.reviews ?? undefined,
             reputationSignals: reputationSignals ?? undefined,
             complianceFlags: complianceFlags ?? undefined,
+            methodologyVersion: CURRENT_METHODOLOGY_VERSION,
+            modelVersion: MODEL_VERSION,
+            jobSize: extraction.jobSize ?? undefined,
+            priceComparableIds: comparables.comparableIds,
             ...(score && {
               priceSampleSize: comparables.sampleSize >= 3 ? comparables.sampleSize : null,
               priceScore: score.price.score,
