@@ -222,7 +222,7 @@ export default function RegisterPage() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-12 text-center pb-8">
+      <footer className="mt-12 text-center pb-8 space-y-4">
         <p className="text-on-surface-variant font-medium">
           Already have an account?{" "}
           <Link
@@ -231,6 +231,17 @@ export default function RegisterPage() {
           >
             Sign In
           </Link>
+        </p>
+        <p className="text-xs text-on-surface-variant leading-relaxed max-w-xs mx-auto">
+          By signing up, you agree to QOAT&apos;s{" "}
+          <Link href="/terms" className="underline underline-offset-2 hover:text-primary transition-colors">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline underline-offset-2 hover:text-primary transition-colors">
+            Privacy Policy
+          </Link>
+          .
         </p>
       </footer>
     </main>

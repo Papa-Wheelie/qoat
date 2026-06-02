@@ -351,18 +351,44 @@
 - Contact link in user menu
 - NOTE: FAQ content + voice review pre-launch
 
-## Up Next
-### 2F.3 — Terms of service + privacy policy
+### Session 2F.3 ✅ — Terms + privacy policy
+- /privacy with 13 sections incl Cookies (AU Privacy Act + APPs)
+- All third-party processors named (Supabase, Vercel, Anthropic, 
+  Voyage, Google, Resend)
+- /terms with 15 sections, GOVERNING_STATE constant for easy edit
+- Draft callout banner on both pages
+- Table of contents with anchor links
+- Register page links to ToS + Privacy
+- Public routes in proxy.ts
+- NOTE: Lawyer review required pre-launch
+- NOTE: No cookie banner needed (no analytics/tracking yet)
 
-### 2F.4 NEW — Streamlined upload flow (after 2F.3)
+## 2F COMPLETE ✅
+
+## Up Next
+### 2F.4 NEW — Streamlined upload flow
 - Single-tap photo/PDF upload → immediate submission
 - AI infers: title, category, supplier, location
 - Review screen with editable AI-inferred fields
 - Prompt for location only if not on quote
 - Mobile-first
+
 ### 2G — Mobile + polish (2 sessions)
-- 2G.1 Full mobile responsive polish
+- 2G.1 Full mobile responsive polish + PWA basics
+  * Mobile responsive audit across every page
+  * manifest.json, icons, splash screens
+  * Add to Home Screen support (iOS + Android)
+  * Basic offline shell for cached views
+  * Camera capture preferred on mobile upload
 - 2G.2 Performance + launch checklist
+
+## Native apps — deferred to Phase 4+
+- React Native app sharing API with web
+- Camera-first upload UX
+- Native push notifications
+- App Store + Play Store distribution
+- Triggered by signal: 1000+ active users + 
+  clear App Store search demand
 
 
 ## Deferred — Dedicated design sprint (post Phase 2 or 3)
