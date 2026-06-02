@@ -62,6 +62,7 @@ export default function UserMenu({ name, image, isAdmin }: Props) {
             { label: "My Quotes", href: "/my-quotes" },
             { label: "Profile", href: "/profile" },
             { label: "Settings", href: "/settings" },
+            { label: "Contact", href: "/contact" },
             ...(isAdmin ? [{ label: "Moderation", href: "/admin" }] : []),
           ].map(({ label, href }) => (
             <Link

@@ -341,8 +341,17 @@
 - NOTE: Visual polish deferred to dedicated design sprint
   (after Phase 2 / 3 — wireframe-quality is OK for launch)
 
+### Session 2F.2 ✅ — FAQ + contact form
+- /faq with 23 Q&As across 5 categories (src/lib/faq.ts editable)
+- Accordion: multiple-open, keyboard accessible
+- /contact form with honeypot + rate limit (3/hour/email)
+- Pre-fills name + email when logged in
+- Resend email with Reply-To header for direct reply
+- Public access in proxy.ts
+- Contact link in user menu
+- NOTE: FAQ content + voice review pre-launch
+
 ## Up Next
-### 2F.2 — FAQ + contact form
 ### 2F.3 — Terms of service + privacy policy
 
 ### 2F.4 NEW — Streamlined upload flow (after 2F.3)
