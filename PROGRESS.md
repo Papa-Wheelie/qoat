@@ -327,16 +327,43 @@
 
 ## 2E COMPLETE ✅
 
+### Session 2F.1 ✅ — Landing + how it works page
+- Logged-out homepage = marketing page; logged-in = feed
+- Hero with live mock iron triangle illustration
+- "How it works" 3-step section
+- "See it in action" — configurable example quote 
+  via EXAMPLE_QUOTE_ID env var
+- "Why trust QOAT" — methodology, attribution, privacy
+- Recent community quotes (6) below the fold
+- Footer with all marketing links
+- /feed route for full feed access (any auth state)
+- SEO + OpenGraph metadata on marketing page
+- NOTE: Visual polish deferred to dedicated design sprint
+  (after Phase 2 / 3 — wireframe-quality is OK for launch)
+
 ## Up Next
-### 2F — Marketing + legal
-- 2F.1 Landing + how it works page
-- 2F.2 FAQ + contact form
-- 2F.3 Terms of service + privacy policy
+### 2F.2 — FAQ + contact form
+### 2F.3 — Terms of service + privacy policy
 
-
+### 2F.4 NEW — Streamlined upload flow (after 2F.3)
+- Single-tap photo/PDF upload → immediate submission
+- AI infers: title, category, supplier, location
+- Review screen with editable AI-inferred fields
+- Prompt for location only if not on quote
+- Mobile-first
 ### 2G — Mobile + polish (2 sessions)
 - 2G.1 Full mobile responsive polish
 - 2G.2 Performance + launch checklist
+
+
+## Deferred — Dedicated design sprint (post Phase 2 or 3)
+- Visual polish: typography (Fraunces + Plus Jakarta Sans), 
+  hero composition, section rhythm, footer, craft details
+- Deep discovery first: 8-15 references, design principles, 
+  voice
+- Targets: Stripe precision + Monzo warmth
+- Marketing + app polish (consistent feel everywhere)
+- Iterate ourselves across multiple sessions
 
 ## Revised build order:
 2C.4 → 2C.7 → 2C.6 → 2C.5 → 2D → 2E → 2F → 2G
