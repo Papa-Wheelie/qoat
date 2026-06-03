@@ -1,6 +1,19 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const quote = await prisma.quote.findUnique({
+    where: { id },
+    select: { analysisStatus: true, userId: true, hidden: true },
+  });
+  if (!quote) return Response.json({ error: "Not found" }, { status: 404 });
+  return Response.json({ analysisStatus: quote.analysisStatus });
+}
+
 const VALID_STATUSES = ["pending", "accepted", "rejected"] as const;
 type Status = (typeof VALID_STATUSES)[number];
 

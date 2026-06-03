@@ -365,13 +365,24 @@
 
 ## 2F COMPLETE ✅
 
+### Session 2F.4c ✅ — Take-over + polling + remove banner
+- Full-screen analysing take-over (replaces in-page card)
+- Linear progress bar with stage transitions
+- Reliable auto-reload via window.location.reload()
+- Failure state with "Try re-analysing"
+- Welcome banner removed (was ceremony)
+- Targeted AddLocationPrompt only when location missing
+- Dismissible with persistence (locationPromptDismissed flag)
+- NOTE: deeper UX polish deferred to dedicated design sprint
+
 ## Up Next
-### 2F.4 NEW — Streamlined upload flow
-- Single-tap photo/PDF upload → immediate submission
-- AI infers: title, category, supplier, location
-- Review screen with editable AI-inferred fields
-- Prompt for location only if not on quote
-- Mobile-first
+### 2F.4d — Google match tuning (Royal Crest Blinds case)
+- Broaden business type whitelist (window_treatment, etc)
+- Make location proximity a soft signal, not hard fail
+- Keep name similarity strict (primary defence)
+- Test against: Royal Crest Blinds (should match), 
+  Matt Caminiti (should not match), Yeti Foam (should match)
+
 
 ### 2G — Mobile + polish (2 sessions)
 - 2G.1 Full mobile responsive polish + PWA basics

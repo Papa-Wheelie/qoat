@@ -35,6 +35,7 @@ export type FeedQuote = {
   commentCount: number;
   helpfulCount: number;
   similarCount: number;
+  analysisComplete: boolean;
 };
 
 type Props = {
@@ -114,9 +115,17 @@ function QuoteCard({ quote, currentUserId, isSelected, atMax, onToggle }: QuoteC
           )}
 
           <div className="flex flex-wrap gap-1.5">
-            <ScoreBadge score={quote.priceScore} label="Price" />
-            <ScoreBadge score={quote.reputationScore} label="Rep" />
-            <ScoreBadge score={quote.timeScore} label="Time" />
+            {!quote.analysisComplete ? (
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: "#FFF3CD", color: "#856404" }}>
+                Analysing…
+              </span>
+            ) : (
+              <>
+                <ScoreBadge score={quote.priceScore} label="Price" />
+                <ScoreBadge score={quote.reputationScore} label="Rep" />
+                <ScoreBadge score={quote.timeScore} label="Time" />
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-3 pt-1 flex-wrap">

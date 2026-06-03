@@ -22,6 +22,7 @@ export type MyQuoteData = {
   commentCount: number;
   helpfulCount: number;
   similarCount: number;
+  analysisComplete: boolean;
 };
 
 const STATUS_BADGE: Record<string, { label: string; bg: string; text: string }> = {
@@ -110,9 +111,17 @@ export default function MyQuotesList({ quotes }: { quotes: MyQuoteData[] }) {
                   )}
 
                   <div className="flex flex-wrap gap-1.5">
-                    <ScoreBadge score={q.priceScore} label="Price" />
-                    <ScoreBadge score={q.reputationScore} label="Rep" />
-                    <ScoreBadge score={q.timeScore} label="Time" />
+                    {!q.analysisComplete ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: "#FFF3CD", color: "#856404" }}>
+                        Analysing…
+                      </span>
+                    ) : (
+                      <>
+                        <ScoreBadge score={q.priceScore} label="Price" />
+                        <ScoreBadge score={q.reputationScore} label="Rep" />
+                        <ScoreBadge score={q.timeScore} label="Time" />
+                      </>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3 pt-1 flex-wrap">

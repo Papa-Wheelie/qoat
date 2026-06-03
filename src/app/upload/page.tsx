@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-type Category = { id: string; name: string; slug: string };
-
 const ACCEPTED = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -13,33 +11,18 @@ export default function UploadPage() {
   const { status } = useSession();
   const router = useRouter();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [title, setTitle] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [suburb, setSuburb] = useState("");
-  const [state, setState] = useState("");
-  const [description, setDescription] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auth guard
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/login");
   }, [status, router]);
 
-  // Fetch categories
-  useEffect(() => {
-    fetch("/api/categories")
-      .then((r) => r.json())
-      .then(setCategories)
-      .catch(() => {});
-  }, []);
-
-  function pickFile(f: File) {
+  async function handleFile(f: File) {
     setError("");
     if (!ACCEPTED.includes(f.type)) {
       setError("Only PDF, JPG, PNG, or WebP files are accepted.");
@@ -49,247 +32,154 @@ export default function UploadPage() {
       setError("File must be under 10 MB.");
       return;
     }
-    setFile(f);
+
+    setFileName(f.name);
+    setUploading(true);
+
+    const form = new FormData();
+    form.append("file", f);
+
+    try {
+      const res = await fetch("/api/quotes/upload", {
+        method: "POST",
+        credentials: "include",
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Upload failed.");
+        setUploading(false);
+        setFileName(null);
+        return;
+      }
+      router.push(`/quotes/${data.id}`);
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setUploading(false);
+      setFileName(null);
+    }
   }
 
   function onDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragging(false);
+    if (uploading) return;
     const f = e.dataTransfer.files[0];
-    if (f) pickFile(f);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-
-    if (!file) { setError("Please select a file."); return; }
-    if (!title.trim()) { setError("Title is required."); return; }
-    if (!categoryId) { setError("Please select a category."); return; }
-
-    setLoading(true);
-    const form = new FormData();
-    form.append("file", file);
-    form.append("title", title.trim());
-    form.append("categoryId", categoryId);
-    if (description.trim()) form.append("description", description.trim());
-    if (suburb.trim()) form.append("suburb", suburb.trim());
-    if (state) form.append("state", state);
-
-    try {
-      const res = await fetch("/api/quotes/upload", { method: "POST", credentials: "include", body: form });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Upload failed."); setLoading(false); return; }
-      router.push(`/quotes/${data.id}`);
-    } catch {
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
-    }
+    if (f) handleFile(f);
   }
 
   if (status === "loading" || status === "unauthenticated") return null;
 
-  const inputClass =
-    "w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200";
-  const labelClass =
-    "block text-sm font-semibold tracking-wide text-primary/70 uppercase px-1 mb-2";
-
   return (
-    <main className="min-h-screen bg-surface py-16 px-6 flex flex-col items-center">
+    <main className="min-h-screen bg-surface pt-14 flex flex-col items-center justify-center px-6 pb-20">
       <div className="w-full max-w-lg">
         {/* Header */}
-        <header className="mb-12">
+        <header className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold tracking-tighter text-primary">
-            Submit a Quote
+            Upload your quote
           </h1>
-          <p className="mt-3 text-on-surface-variant font-medium">
-            Know before you pay.
+          <p className="mt-3 text-on-surface-variant font-medium text-lg">
+            Take a photo or upload a PDF — we&apos;ll do the rest.
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Drop zone */}
-          <div className="space-y-2">
-            <label className={labelClass}>Quote File</label>
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => inputRef.current?.click()}
-              onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={onDrop}
-              className={[
-                "relative flex flex-col items-center justify-center gap-3 rounded-[12px] border-2 border-dashed px-6 py-10 cursor-pointer transition-all duration-200 select-none",
-                dragging
-                  ? "border-primary bg-surface-container-low"
-                  : "border-outline-variant bg-surface-container-lowest hover:border-primary/50",
-              ].join(" ")}
-            >
-              <input
-                ref={inputRef}
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.webp"
-                className="sr-only"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); }}
-              />
-              {file ? (
-                <>
-                  <FileIcon />
-                  <p className="text-sm font-semibold text-on-surface text-center break-all">
-                    {file.name}
-                  </p>
-                  <p className="text-xs text-on-surface-variant">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB — click to change
-                  </p>
-                </>
-              ) : (
-                <>
-                  <UploadIcon />
-                  <p className="text-sm font-semibold text-on-surface">
-                    Drag &amp; drop or{" "}
-                    <span className="text-primary underline underline-offset-2">browse</span>
-                  </p>
-                  <p className="text-xs text-on-surface-variant">
-                    PDF, JPG, PNG, WebP — max 10 MB
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
+        {/* Dropzone */}
+        <div
+          role="button"
+          tabIndex={uploading ? -1 : 0}
+          onClick={() => !uploading && inputRef.current?.click()}
+          onKeyDown={(e) => !uploading && e.key === "Enter" && inputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          className={[
+            "relative flex flex-col items-center justify-center gap-4 rounded-[20px] border-2 border-dashed px-8 py-16 transition-all duration-200 select-none",
+            uploading
+              ? "border-primary/40 bg-surface-container-low cursor-default"
+              : dragging
+                ? "border-primary bg-[#E8F5F2] cursor-pointer"
+                : "border-outline-variant bg-white hover:border-primary/50 hover:bg-surface-container-lowest cursor-pointer",
+          ].join(" ")}
+        >
+          {/* Hidden file input — no capture so PDF + gallery + camera all work */}
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
+            className="sr-only"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+          />
 
-          {/* Title */}
-          <div className="space-y-2">
-            <label htmlFor="title" className={labelClass}>
-              Title
-            </label>
-            <input
-              id="title"
-              type="text"
-              required
-              placeholder="e.g. Kitchen renovation quote"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          {/* Category */}
-          <div className="space-y-2">
-            <label htmlFor="category" className={labelClass}>
-              Category
-            </label>
-            <select
-              id="category"
-              required
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className={inputClass}
-            >
-              <option value="" disabled>
-                Select a category
-              </option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Location */}
-          <div className="flex gap-4">
-            <div className="flex-1 space-y-2">
-              <label htmlFor="suburb" className={labelClass}>
-                Suburb{" "}
-                <span className="normal-case font-normal text-on-surface-variant tracking-normal">
-                  (optional)
-                </span>
-              </label>
-              <input
-                id="suburb"
-                type="text"
-                placeholder="e.g. Mosman"
-                value={suburb}
-                onChange={(e) => setSuburb(e.target.value)}
-                className={inputClass}
-              />
-            </div>
-            <div className="w-40 space-y-2">
-              <label htmlFor="state" className={labelClass}>
-                State
-              </label>
-              <select
-                id="state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className={inputClass}
-              >
-                <option value="">—</option>
-                <option value="NSW">NSW</option>
-                <option value="VIC">VIC</option>
-                <option value="QLD">QLD</option>
-                <option value="WA">WA</option>
-                <option value="SA">SA</option>
-                <option value="TAS">TAS</option>
-                <option value="ACT">ACT</option>
-                <option value="NT">NT</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <label htmlFor="description" className={labelClass}>
-              Description{" "}
-              <span className="normal-case font-normal text-on-surface-variant tracking-normal">
-                (optional)
-              </span>
-            </label>
-            <textarea
-              id="description"
-              rows={3}
-              placeholder="Any context that might help the analysis…"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className={inputClass + " resize-none"}
-            />
-          </div>
-
-          {/* Error */}
-          {error && (
-            <p className="text-sm text-error font-medium px-1">{error}</p>
+          {uploading ? (
+            <>
+              <Spinner />
+              <div className="text-center space-y-1">
+                <p className="text-sm font-semibold text-on-surface break-all max-w-xs">
+                  {fileName}
+                </p>
+                <p className="text-sm text-on-surface-variant font-medium">
+                  Analysing your quote…
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <UploadIcon active={dragging} />
+              <div className="text-center space-y-1">
+                <p className="text-base font-bold text-on-surface">
+                  {dragging ? "Drop to upload" : (
+                    <>
+                      Drag &amp; drop, or{" "}
+                      <span className="text-primary underline underline-offset-2">choose a file</span>
+                    </>
+                  )}
+                </p>
+                <p className="text-sm text-on-surface-variant">
+                  PDF, JPG, PNG, WebP — max 10 MB
+                </p>
+              </div>
+            </>
           )}
+        </div>
 
-          {/* Submit */}
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary text-on-primary py-4 rounded-[12px] font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-black/5 disabled:opacity-60"
-            >
-              {loading ? "Submitting…" : "Submit Quote"}
-            </button>
+        {/* Mobile camera shortcut */}
+        {!uploading && (
+          <div className="mt-4 flex justify-center sm:hidden">
+            <label className="flex items-center gap-2 px-5 py-3 bg-primary text-on-primary rounded-[12px] font-bold text-sm cursor-pointer active:scale-[0.98] transition-all shadow-md shadow-black/10">
+              <CameraIcon />
+              Take a photo
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+              />
+            </label>
           </div>
-        </form>
+        )}
+
+        {error && (
+          <p className="mt-4 text-sm text-error font-medium text-center">{error}</p>
+        )}
       </div>
     </main>
   );
 }
 
-function UploadIcon() {
+function UploadIcon({ active }: { active: boolean }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="32"
-      height="32"
+      width="40"
+      height="40"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="text-on-surface-variant"
+      className={active ? "text-primary" : "text-on-surface-variant"}
     >
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
       <polyline points="17 8 12 3 7 8" />
@@ -298,22 +188,29 @@ function UploadIcon() {
   );
 }
 
-function FileIcon() {
+function CameraIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+  );
+}
+
+function Spinner() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="32"
-      height="32"
+      width="36"
+      height="36"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="2"
       strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-primary"
+      className="text-primary animate-spin"
     >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
     </svg>
   );
 }

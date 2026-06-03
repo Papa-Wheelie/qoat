@@ -43,6 +43,7 @@ export default async function MyQuotesPage() {
     commentCount: q._count.comments,
     helpfulCount: q._count.helpfulMarks,
     similarCount: q._count.similarQuotes,
+    analysisComplete: q.analysis !== null,
   }));
 
   return (

@@ -5,9 +5,11 @@ import { type Metadata } from "next";
 import { type ReactNode } from "react";
 import Link from "next/link";
 import CommunitySection from "./CommunitySection";
-import QuoteOwnerActions from "./QuoteOwnerActions";
 import ShareButton from "./ShareButton";
 import ComparablesPanel from "./ComparablesPanel";
+import QuoteEditableHeader from "./QuoteEditableHeader";
+import AnalysingTakeover, { AnalysisFailed } from "@/components/AnalysingTakeover";
+import AddLocationPrompt from "@/components/AddLocationPrompt";
 import { formatPublicPrice } from "@/lib/formatPrice";
 import SocialProof from "@/components/SocialProof";
 import type { ReputationSignals } from "@/lib/getReputationSignals";
@@ -235,7 +237,7 @@ export default async function QuotePage({
   const session = await auth();
   const currentUserId = session?.user?.id ?? null;
 
-  const [quote, initialComments, quoteVoteCount, userVote, helpfulCount, userHelpful, similarQuotes, hiddenReport] = await Promise.all([
+  const [quote, initialComments, quoteVoteCount, userVote, helpfulCount, userHelpful, similarQuotes, hiddenReport, categories] = await Promise.all([
     prisma.quote.findUnique({
       where: { id },
       include: { analysis: true, category: true },
@@ -280,6 +282,7 @@ export default async function QuotePage({
       orderBy: { resolvedAt: "desc" },
       select: { resolvedAt: true },
     }),
+    prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, slug: true } }),
   ]);
 
   if (!quote) notFound();
@@ -288,6 +291,19 @@ export default async function QuotePage({
 
   // Hidden quotes: owner sees a notice, everyone else gets 404
   if (quote.hidden && !isOwner) notFound();
+
+  // Owner-only full-screen take-over while analysis is in progress
+  type AnalysisStatus = "pending" | "extracting" | "scoring" | "complete" | "failed";
+  const analysisStatus = quote.analysisStatus as AnalysisStatus;
+  const PENDING_STATUSES: AnalysisStatus[] = ["pending", "extracting", "scoring"];
+
+  if (isOwner && PENDING_STATUSES.includes(analysisStatus)) {
+    return <AnalysingTakeover quoteId={quote.id} initialStatus={analysisStatus} />;
+  }
+
+  if (isOwner && analysisStatus === "failed") {
+    return <AnalysisFailed quoteId={quote.id} />;
+  }
 
   const analysis = quote.analysis;
   const lineItems = analysis ? (analysis.lineItems as LineItem[]) : [];
@@ -350,31 +366,41 @@ export default async function QuotePage({
       <div className="w-full max-w-2xl space-y-8">
 
         {/* Header */}
-        <header className="space-y-3">
-          <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
-            {quote.category.name}
-            {(quote.suburb || quote.state) && (
-              <span className="font-normal normal-case tracking-normal">
-                {" · "}
-                {[quote.suburb, quote.state].filter(Boolean).join(", ")}
-              </span>
+        {isOwner ? (
+          <QuoteEditableHeader
+            quoteId={quote.id}
+            initialTitle={quote.title}
+            initialPrivateNickname={quote.privateNickname ?? null}
+            initialCategoryId={quote.categoryId}
+            initialCategoryName={quote.category.name}
+            initialSuburb={quote.suburb}
+            initialState={quote.state}
+            initialDescription={quote.description ?? null}
+            categoryEdited={quote.categoryEdited}
+            locationEdited={quote.locationEdited}
+            initialStatus={quote.status as "pending" | "accepted" | "rejected"}
+            categories={categories}
+          />
+        ) : (
+          <header className="space-y-3">
+            <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
+              {quote.category.name}
+              {(quote.suburb || quote.state) && (
+                <span className="font-normal normal-case tracking-normal">
+                  {" · "}
+                  {[quote.suburb, quote.state].filter(Boolean).join(", ")}
+                </span>
+              )}
+            </p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-primary">
+              {quote.title}
+            </h1>
+            {quote.description && (
+              <p className="text-on-surface-variant">{quote.description}</p>
             )}
-          </p>
-          <h1 className="text-3xl font-extrabold tracking-tight text-primary">
-            {quote.title}
-          </h1>
-          {quote.description && (
-            <p className="text-on-surface-variant">{quote.description}</p>
-          )}
-          {isOwner ? (
-            <QuoteOwnerActions
-              quoteId={quote.id}
-              initialStatus={quote.status as "pending" | "accepted" | "rejected"}
-            />
-          ) : (
             <ShareButton />
-          )}
-        </header>
+          </header>
+        )}
 
         {/* Hidden notice for owner */}
         {quote.hidden && isOwner && (
@@ -396,9 +422,7 @@ export default async function QuotePage({
 
         {!analysis ? (
           <div className="bg-surface-container-low rounded-[16px] px-6 py-12 text-center">
-            <p className="text-on-surface-variant font-medium">
-              AI analysis pending…
-            </p>
+            <p className="text-on-surface-variant font-medium">AI analysis pending…</p>
           </div>
         ) : (
           <>
@@ -422,6 +446,11 @@ export default async function QuotePage({
                 </p>
               )}
             </section>
+
+            {/* Location prompt — owner only, when location missing and not dismissed */}
+            {isOwner && !quote.suburb && !quote.state && !quote.locationPromptDismissed && (
+              <AddLocationPrompt quoteId={quote.id} />
+            )}
 
             {/* Owner-only block */}
             {isOwner ? (
@@ -612,6 +641,8 @@ export default async function QuotePage({
                   googleReviewCount={analysis.googleReviewCount}
                   googleUrl={analysis.googleUrl}
                   googleReviews={analysis.googleReviews as GoogleReview[] | null}
+                  googleMatchConfident={analysis.googleMatchConfident}
+                  supplierName={analysis.supplierName}
                   reputationSignals={analysis.reputationSignals as ReputationSignals | null}
                 />
 

@@ -34,6 +34,10 @@ const ExtractionSchema = z.object({
     descriptor: z.string(),
     sizeBand: z.enum(["small", "medium", "large"]),
   }).catch({ quantity: null, unit: null, descriptor: "unspecified", sizeBand: "medium" }),
+  inferredTitle: z.string().catch("New quote"),
+  inferredCategorySlug: z.string().catch("other"),
+  suburb: z.string().nullable().catch(null),
+  state: z.string().nullable().catch(null),
 });
 
 export type QuoteExtraction = z.infer<typeof ExtractionSchema>;
@@ -70,6 +74,10 @@ Important: This is an Australian quote. All dates are in Australian format DD/MM
     "sizeBand": "small" | "medium" | "large" — estimate the overall scale: small = minor repairs/single items, medium = room-scale or multi-item, large = whole-home, structural, or major renovation
   }
   Guidance for jobSize: extract quantitative measures wherever possible (count, area, volume). Where the job is a scope without clear units (e.g. "renovate bathroom"), set quantity and unit to null and describe the scope in descriptor. Always provide descriptor and sizeBand.
+  "inferredTitle": string — a short, descriptive title for this quote (5–7 words max) describing the scope of work, e.g. "3 Velux skylight installation", "Bathroom waterproofing and tiling", "Backyard landscaping and retaining wall". NEVER include the supplier name, business name, street address, suburb, postcode, or price in the title. The title must describe what is being done, not who is doing it or where.
+  "inferredCategorySlug": string — MUST be exactly one of: electrical, plumbing, building-construction, hvac-heating, painting-decorating, landscaping, automotive, insurance, supplier-products, other
+  "suburb": string or null — the suburb of the job location if mentioned anywhere in the document (Australian suburb name only, no street address or postcode),
+  "state": string or null — the Australian state abbreviation of the job location if mentioned (one of: NSW, VIC, QLD, WA, SA, TAS, ACT, NT)
 }`;
 
 export async function extractQuote(

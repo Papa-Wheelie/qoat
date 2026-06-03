@@ -44,7 +44,15 @@ export async function POST(
 
   if (!storagePath) return Response.json({ error: "File not found" }, { status: 400 });
 
-  const extraction = await extractQuote(storagePath, quote.fileType, quote.description);
+  await prisma.quote.update({ where: { id }, data: { analysisStatus: "extracting" } });
+  let extraction;
+  try {
+    extraction = await extractQuote(storagePath, quote.fileType, quote.description);
+  } catch (err) {
+    await prisma.quote.update({ where: { id }, data: { analysisStatus: "failed" } });
+    throw err;
+  }
+  await prisma.quote.update({ where: { id }, data: { analysisStatus: "scoring" } });
 
   // Fetch fresh Google reviews
   let googleReviews = null;
@@ -52,7 +60,8 @@ export async function POST(
     googleReviews = await findSupplierReviews(
       extraction.supplierName,
       quote.suburb ?? "",
-      quote.state ?? ""
+      quote.state ?? "",
+      quote.category?.slug ?? "other"
     );
   }
 
@@ -76,7 +85,7 @@ export async function POST(
     : { count: 0, averageTotal: null, medianTotal: null, minTotal: null, maxTotal: null, sampleSize: 0, avgSimilarity: null, comparableIds: [] as string[] };
 
   const googleDataForSignals =
-    googleReviews?.rating != null && googleReviews?.reviewCount != null
+    googleReviews?.confident && googleReviews?.rating != null && googleReviews?.reviewCount != null
       ? { rating: googleReviews.rating, reviewCount: googleReviews.reviewCount }
       : null;
   let reputationSignals = null;
@@ -124,11 +133,12 @@ export async function POST(
     summary: extraction.summary ?? undefined,
     publicSummary: extraction.publicSummary ?? undefined,
     estimatedTimeframe: extraction.estimatedTimeframe ?? undefined,
-    googleRating: googleReviews?.rating ?? null,
-    googleReviewCount: googleReviews?.reviewCount ?? null,
-    googlePlaceId: googleReviews?.placeId ?? null,
-    googleUrl: googleReviews?.googleUrl ?? null,
-    googleReviews: googleReviews?.reviews ?? Prisma.DbNull,
+    googleRating: googleReviews?.confident ? (googleReviews.rating ?? null) : null,
+    googleReviewCount: googleReviews?.confident ? (googleReviews.reviewCount ?? null) : null,
+    googlePlaceId: googleReviews?.confident ? (googleReviews.placeId ?? null) : null,
+    googleUrl: googleReviews?.confident ? (googleReviews.googleUrl ?? null) : null,
+    googleReviews: googleReviews?.confident ? (googleReviews.reviews ?? Prisma.DbNull) : Prisma.DbNull,
+    googleMatchConfident: googleReviews?.confident ?? false,
     reputationSignals: reputationSignals ?? undefined,
     complianceFlags: complianceFlags ?? undefined,
     methodologyVersion: CURRENT_METHODOLOGY_VERSION,
@@ -163,6 +173,8 @@ export async function POST(
       analysis.id
     );
   }
+
+  await prisma.quote.update({ where: { id }, data: { analysisStatus: "complete" } });
 
   return Response.json(analysis);
 }

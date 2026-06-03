@@ -69,10 +69,17 @@ model Quote {
   fileUrl       String
   fileName      String
   fileType      String
-  status        String         @default("pending")
-  hidden        Boolean        @default(false)
-  suburb        String?
-  state         String?
+  status              String         @default("pending")
+  hidden              Boolean        @default(false)
+  suburb              String?
+  state               String?
+  welcomeAcknowledged Boolean        @default(false)
+  titleEdited         Boolean        @default(false)
+  categoryEdited      Boolean        @default(false)
+  locationEdited      Boolean        @default(false)
+  analysisStatus          String         @default("pending")
+  privateNickname         String?
+  locationPromptDismissed Boolean        @default(false)
   userId        String
   categoryId    String
   createdAt     DateTime       @default(now())
@@ -200,11 +207,12 @@ model QuoteAnalysis {
   timeExplanation    String?
   recommendation     String?
   overallSummary     String?
-  googleRating       Float?
-  googleReviewCount  Int?
-  googlePlaceId      String?
-  googleUrl          String?
-  googleReviews      Json?
+  googleRating          Float?
+  googleReviewCount     Int?
+  googlePlaceId         String?
+  googleUrl             String?
+  googleReviews         Json?
+  googleMatchConfident  Boolean  @default(false)
   reputationSignals  Json?
   complianceFlags    Json?
   priceSampleSize    Int?

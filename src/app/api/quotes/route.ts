@@ -104,6 +104,7 @@ export async function GET(request: NextRequest) {
     commentCount: q._count.comments,
     helpfulCount: q._count.helpfulMarks,
     similarCount: q._count.similarQuotes,
+    analysisComplete: q.analysis !== null,
   }));
 
   return Response.json({

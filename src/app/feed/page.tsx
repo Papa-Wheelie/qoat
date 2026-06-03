@@ -69,6 +69,7 @@ export default async function FeedPage({
     commentCount: q._count.comments,
     helpfulCount: q._count.helpfulMarks,
     similarCount: q._count.similarQuotes,
+    analysisComplete: q.analysis !== null,
   }));
 
   const validSorts = ["newest", "oldest", "price-high", "price-low", "most-helpful", "most-discussed"];
