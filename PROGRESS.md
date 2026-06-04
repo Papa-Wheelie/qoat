@@ -363,7 +363,22 @@
 - NOTE: Lawyer review required pre-launch
 - NOTE: No cookie banner needed (no analytics/tracking yet)
 
-## 2F COMPLETE ✅
+
+
+### Session 2F.4d/e/f ✅ — Google match tuning (3 rounds)
+- Composite confidence scoring (name 60% / location 25% / type 15%)
+- Token-recall name similarity (handles branded extensions)
+- Multi-query strategy (up to 3 per supplier, cost-capped)
+- Country suffix stripping ("Steela AU" → "Steela")
+- Multi-branch ambiguity guard (re-scores location 55% when 
+  same-name candidates exist, rejects if too close)
+- Three honest UI states: matched / ambiguous / not found
+- Diagnostics persisted on QuoteAnalysis.googleMatchDiagnostics
+- scripts/diagnose-google-matches.ts for ongoing audit
+- Test cases verified: Royal Crest ✓, Steela AU ✓, 
+  Matt Caminiti ✗ (correctly), Jim's Diggers ✗ (API limit)
+- NOTE: existing quotes will pick up new matching as they 
+  re-analyse — no backfill needed
 
 ### Session 2F.4c ✅ — Take-over + polling + remove banner
 - Full-screen analysing take-over (replaces in-page card)
@@ -375,14 +390,8 @@
 - Dismissible with persistence (locationPromptDismissed flag)
 - NOTE: deeper UX polish deferred to dedicated design sprint
 
-## Up Next
-### 2F.4d — Google match tuning (Royal Crest Blinds case)
-- Broaden business type whitelist (window_treatment, etc)
-- Make location proximity a soft signal, not hard fail
-- Keep name similarity strict (primary defence)
-- Test against: Royal Crest Blinds (should match), 
-  Matt Caminiti (should not match), Yeti Foam (should match)
 
+## Up Next
 
 ### 2G — Mobile + polish (2 sessions)
 - 2G.1 Full mobile responsive polish + PWA basics

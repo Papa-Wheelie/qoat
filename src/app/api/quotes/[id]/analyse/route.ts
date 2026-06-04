@@ -139,6 +139,7 @@ export async function POST(
     googleUrl: googleReviews?.confident ? (googleReviews.googleUrl ?? null) : null,
     googleReviews: googleReviews?.confident ? (googleReviews.reviews ?? Prisma.DbNull) : Prisma.DbNull,
     googleMatchConfident: googleReviews?.confident ?? false,
+    googleDiagnostics: googleReviews?.diagnostics ?? Prisma.DbNull,
     reputationSignals: reputationSignals ?? undefined,
     complianceFlags: complianceFlags ?? undefined,
     methodologyVersion: CURRENT_METHODOLOGY_VERSION,

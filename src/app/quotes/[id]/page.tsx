@@ -642,6 +642,14 @@ export default async function QuotePage({
                   googleUrl={analysis.googleUrl}
                   googleReviews={analysis.googleReviews as GoogleReview[] | null}
                   googleMatchConfident={analysis.googleMatchConfident}
+                  googleCandidateFound={
+                    !!(analysis.googleDiagnostics &&
+                      (analysis.googleDiagnostics as { googleCandidate?: unknown }).googleCandidate != null)
+                  }
+                  ambiguityRejected={
+                    !!(analysis.googleDiagnostics &&
+                      (analysis.googleDiagnostics as { ambiguityRejected?: boolean }).ambiguityRejected === true)
+                  }
                   supplierName={analysis.supplierName}
                   reputationSignals={analysis.reputationSignals as ReputationSignals | null}
                 />

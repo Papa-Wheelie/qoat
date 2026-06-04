@@ -222,6 +222,7 @@ export async function POST(request: Request) {
             googleUrl: googleReviews?.confident ? (googleReviews.googleUrl ?? undefined) : undefined,
             googleReviews: googleReviews?.confident ? (googleReviews.reviews ?? undefined) : undefined,
             googleMatchConfident: googleReviews?.confident ?? false,
+            googleDiagnostics: googleReviews?.diagnostics ?? undefined,
             reputationSignals: reputationSignals ?? undefined,
             complianceFlags: complianceFlags ?? undefined,
             methodologyVersion: CURRENT_METHODOLOGY_VERSION,

@@ -213,6 +213,7 @@ model QuoteAnalysis {
   googleUrl             String?
   googleReviews         Json?
   googleMatchConfident  Boolean  @default(false)
+  googleDiagnostics     Json?
   reputationSignals  Json?
   complianceFlags    Json?
   priceSampleSize    Int?

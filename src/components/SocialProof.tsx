@@ -14,6 +14,10 @@ type Props = {
   googleUrl: string | null;
   googleReviews: GoogleReview[] | null;
   googleMatchConfident?: boolean;
+  /** true when Google returned a candidate but confidence was too low to accept */
+  googleCandidateFound?: boolean;
+  /** true when multiple same-name Google listings were found and couldn't be disambiguated */
+  ambiguityRejected?: boolean;
   supplierName?: string | null;
   reputationSignals?: ReputationSignals | null;
 };
@@ -78,10 +82,14 @@ function truncate(text: string, max: number): { short: string; truncated: boolea
   return { short: text.slice(0, max).trimEnd(), truncated: true };
 }
 
-export default function SocialProof({ googleRating, googleReviewCount, googleUrl, googleReviews, googleMatchConfident, supplierName, reputationSignals }: Props) {
+export default function SocialProof({ googleRating, googleReviewCount, googleUrl, googleReviews, googleMatchConfident, googleCandidateFound, ambiguityRejected, supplierName, reputationSignals }: Props) {
   const hasListing = googleRating != null;
-  // Searched but no confident match found
-  const searchedButUnmatched = !hasListing && supplierName && googleMatchConfident === false;
+  // Multiple same-name listings found — can't pick a branch
+  const isAmbiguityRejected = !hasListing && ambiguityRejected === true;
+  // Searched, candidate found, but confidence too low
+  const foundButRejected = !hasListing && !isAmbiguityRejected && googleMatchConfident === false && googleCandidateFound === true;
+  // Searched (supplier name exists), no candidate returned at all
+  const notFound = !hasListing && !isAmbiguityRejected && supplierName && !foundButRejected;
   const reviews = (googleReviews ?? []).slice(0, 3);
 
   return (
@@ -180,7 +188,7 @@ export default function SocialProof({ googleRating, googleReviewCount, googleUrl
             </a>
           )}
         </div>
-      ) : searchedButUnmatched ? (
+      ) : isAmbiguityRejected ? (
         <div className="bg-white rounded-[16px] px-6 py-5 flex items-start gap-3">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -188,14 +196,29 @@ export default function SocialProof({ googleRating, googleReviewCount, googleUrl
           </svg>
           <div>
             <p className="text-sm font-semibold text-on-surface">
-              We couldn&apos;t confidently identify this supplier on Google.
+              We found multiple Google listings with this supplier name and couldn&apos;t confidently identify the right one.
             </p>
             <p className="text-sm text-on-surface-variant mt-0.5">
-              Results were found but didn&apos;t match closely enough to show.
+              This often happens with franchise or multi-branch businesses. Add a more specific location to your quote to help us match.
             </p>
           </div>
         </div>
-      ) : (
+      ) : foundButRejected ? (
+        <div className="bg-white rounded-[16px] px-6 py-5 flex items-start gap-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <div>
+            <p className="text-sm font-semibold text-on-surface">
+              We found a possible Google listing but couldn&apos;t confidently match it.
+            </p>
+            <p className="text-sm text-on-surface-variant mt-0.5">
+              This may indicate a similar business name or limited information on the quote.
+            </p>
+          </div>
+        </div>
+      ) : notFound ? (
         <div className="bg-white rounded-[16px] px-6 py-5 flex items-start gap-3">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-on-surface-variant shrink-0 mt-0.5">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -203,14 +226,14 @@ export default function SocialProof({ googleRating, googleReviewCount, googleUrl
           </svg>
           <div>
             <p className="text-sm font-semibold text-on-surface">
-              Google listing not found for this supplier.
+              We couldn&apos;t find a Google listing for this supplier.
             </p>
             <p className="text-sm text-on-surface-variant mt-0.5">
               This may indicate a new or unregistered business.
             </p>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Review snippets */}
       {reviews.length > 0 ? (
