@@ -14,9 +14,10 @@ const publicRoutes = [
   "/feed",
   "/privacy",
   "/terms",
+  "/offline",
 ];
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
@@ -37,5 +38,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon\\.ico|apple-icon\\.png|manifest\\.json|sw\\.js|icons/).*)",
+  ],
 };

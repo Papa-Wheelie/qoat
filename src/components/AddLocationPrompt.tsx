@@ -75,28 +75,31 @@ export default function AddLocationPrompt({ quoteId }: Props) {
         </button>
       </div>
 
-      <form onSubmit={handleSave} className="flex flex-wrap gap-2 items-end">
-        <input
-          type="text"
-          value={suburb}
-          onChange={(e) => setSuburb(e.target.value)}
-          placeholder="Suburb"
-          className={`${inputClass} flex-1 min-w-[120px]`}
-        />
-        <select
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          className={`${inputClass} w-24`}
-        >
-          <option value="">State</option>
-          {AU_STATES.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
+      <form onSubmit={handleSave} className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+        <div className="flex gap-2 flex-1">
+          <input
+            type="text"
+            value={suburb}
+            onChange={(e) => setSuburb(e.target.value)}
+            placeholder="Suburb"
+            autoComplete="address-level2"
+            className={`${inputClass} flex-1 min-w-0`}
+          />
+          <select
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            className={`${inputClass} w-24 shrink-0`}
+          >
+            <option value="">State</option>
+            {AU_STATES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
         <button
           type="submit"
           disabled={saving || (!suburb.trim() && !state)}
-          className="px-4 py-2 rounded-[10px] text-sm font-bold text-white transition-opacity disabled:opacity-50"
+          className="px-4 py-2.5 rounded-[10px] text-sm font-bold text-white transition-opacity disabled:opacity-50 active:opacity-80 sm:self-end"
           style={{ backgroundColor: "#856404" }}
         >
           {saving ? "Saving…" : "Save"}

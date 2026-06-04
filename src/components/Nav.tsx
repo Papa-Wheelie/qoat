@@ -21,8 +21,11 @@ export default async function Nav() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-[20px] border-b border-outline-variant/20">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-[20px] border-b border-outline-variant/20"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link
             href="/"
             className="text-lg font-extrabold tracking-tighter text-primary"
@@ -47,9 +50,10 @@ export default async function Nav() {
             )}
             <Link
               href="/upload"
-              className="px-4 py-2 bg-[#111111] text-white rounded-[12px] text-sm font-bold hover:opacity-90 transition-opacity"
+              className="px-4 py-2 bg-[#111111] text-white rounded-[12px] text-sm font-bold hover:opacity-90 active:opacity-80 transition-opacity"
             >
-              Submit a Quote
+              <span className="sm:hidden">Submit</span>
+              <span className="hidden sm:inline">Submit a Quote</span>
             </Link>
           </div>
         </div>

@@ -19,8 +19,11 @@ export default function CompareBar({ selected, onRemove, onClear }: Props) {
   }
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-outline-variant shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-      <div className="max-w-5xl mx-auto px-6 py-3 flex items-center gap-4">
+    <div
+      className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-outline-variant shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4">
         <span className="text-sm font-semibold text-on-surface shrink-0">
           {selected.length} selected
         </span>

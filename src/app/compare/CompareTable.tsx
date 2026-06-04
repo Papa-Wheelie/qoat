@@ -86,8 +86,171 @@ export default function CompareTable({ initialQuotes }: { initialQuotes: Compare
   const scores = quotes.map((q) => qoatScore(q)).filter((s): s is number => s != null);
   const maxScore = scores.length > 0 ? Math.max(...scores) : null;
 
+  // ── Mobile: stacked cards per quote ─────────────────────────────────────────
+
+  const ROWS: { label: string; render: (q: CompareQuote) => React.ReactNode }[] = [
+    {
+      label: "Total",
+      render: (q) => {
+        const isBest = q.totalAmount != null && minTotal != null && q.totalAmount === minTotal && totals.length > 1;
+        return (
+          <span className={isBest ? "text-[#085041] font-bold" : "font-bold text-primary"}>
+            {q.totalAmount != null
+              ? q.isOwner
+                ? formatAUD(q.totalAmount)
+                : formatPublicPrice(q.totalAmount, q.category.slug)
+              : "—"}
+            {isBest && (
+              <span className="ml-2 text-[10px] font-bold text-[#085041] bg-[#C6EBE0] rounded-full px-2 py-0.5">
+                Lowest
+              </span>
+            )}
+          </span>
+        );
+      },
+    },
+    {
+      label: "QOAT Score",
+      render: (q) => {
+        const s = qoatScore(q);
+        const isBest = s != null && maxScore != null && s === maxScore && scores.length > 1;
+        if (!q.isOwner) return <Private />;
+        if (s == null) return <span className="text-on-surface-variant">—</span>;
+        return (
+          <span className={isBest ? "font-bold text-[#085041]" : "font-semibold"}>
+            {s}/10
+            {isBest && (
+              <span className="ml-2 text-[10px] font-bold text-[#085041] bg-[#C6EBE0] rounded-full px-2 py-0.5">
+                Best
+              </span>
+            )}
+          </span>
+        );
+      },
+    },
+    {
+      label: "Price",
+      render: (q) =>
+        q.isOwner ? q.priceScore != null ? `${q.priceScore}/10` : "—" : <Private />,
+    },
+    {
+      label: "Reputation",
+      render: (q) =>
+        q.isOwner ? q.reputationScore != null ? `${q.reputationScore}/10` : "—" : <Private />,
+    },
+    {
+      label: "Timeline",
+      render: (q) =>
+        q.isOwner ? q.timeScore != null ? `${q.timeScore}/10` : "—" : <Private />,
+    },
+    {
+      label: "Line Items",
+      render: (q) =>
+        q.lineItemCount > 0
+          ? `${q.lineItemCount} item${q.lineItemCount !== 1 ? "s" : ""}`
+          : <span className="text-on-surface-variant">—</span>,
+    },
+    {
+      label: "Helpful",
+      render: (q) =>
+        q.helpfulCount > 0
+          ? `${q.helpfulCount} marked helpful`
+          : <span className="text-on-surface-variant">—</span>,
+    },
+    {
+      label: "Similar Quotes",
+      render: (q) =>
+        q.similarCount > 0 ? (
+          <span>
+            {q.similarCount} submitted
+            {q.similarAvgPrice != null && (
+              <> · avg <strong>{formatAUD(q.similarAvgPrice)}</strong></>
+            )}
+          </span>
+        ) : (
+          <span className="text-on-surface-variant">—</span>
+        ),
+    },
+    {
+      label: "Comments",
+      render: (q) =>
+        q.commentCount > 0
+          ? `${q.commentCount} comment${q.commentCount !== 1 ? "s" : ""}`
+          : <span className="text-on-surface-variant">—</span>,
+    },
+    {
+      label: "Status",
+      render: (q) => {
+        if (!q.isOwner || !q.status) return <Private />;
+        const badge = STATUS_BADGE[q.status] ?? STATUS_BADGE.pending;
+        return (
+          <span
+            className="px-2 py-0.5 rounded-full text-xs font-bold"
+            style={{ backgroundColor: badge.bg, color: badge.text }}
+          >
+            {badge.label}
+          </span>
+        );
+      },
+    },
+  ];
+
   return (
-    <div className="overflow-x-auto rounded-[16px] border border-outline-variant/20">
+    <>
+      {/* ── Mobile layout: one card per quote ─────────────────────────── */}
+      <div className="md:hidden space-y-4">
+        {quotes.map((q) => (
+          <div key={q.id} className="bg-white rounded-[16px] border border-outline-variant/20 overflow-hidden">
+            {/* Card header */}
+            <div className="px-5 py-4 flex items-start justify-between gap-3 border-b border-outline-variant/10">
+              <div className="min-w-0">
+                <Link
+                  href={`/quotes/${q.id}`}
+                  className="font-bold text-sm text-on-surface hover:text-primary transition-colors block leading-snug"
+                >
+                  {q.title}
+                </Link>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  {q.category.name}
+                  {(q.suburb || q.state) && (
+                    <> · {[q.suburb, q.state].filter(Boolean).join(", ")}</>
+                  )}
+                </p>
+                {q.isOwner && (
+                  <span className="inline-block mt-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5">
+                    Your quote
+                  </span>
+                )}
+              </div>
+              {quotes.length > 1 && (
+                <button
+                  onClick={() => handleRemove(q.id)}
+                  className="shrink-0 w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container-low transition-colors"
+                  title="Remove from comparison"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+            {/* Attribute rows */}
+            <div className="divide-y divide-outline-variant/10">
+              {ROWS.map(({ label, render }) => (
+                <div key={label} className="px-5 py-3 flex items-center justify-between gap-4">
+                  <span className="text-xs font-semibold tracking-wide uppercase text-on-surface-variant shrink-0">
+                    {label}
+                  </span>
+                  <span className="text-sm text-right">{render(q)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Desktop layout: table ──────────────────────────────────────── */}
+      <div className="hidden md:block overflow-x-auto rounded-[16px] border border-outline-variant/20">
       <table className="w-full border-collapse">
         {/* Column headers */}
         <thead>
@@ -297,6 +460,7 @@ export default function CompareTable({ initialQuotes }: { initialQuotes: Compare
           </tr>
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }

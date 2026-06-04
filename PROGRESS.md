@@ -391,16 +391,24 @@
 - NOTE: deeper UX polish deferred to dedicated design sprint
 
 
-## Up Next
+### Session 2G.1 ✅ — Mobile responsive polish + PWA basics
+- Safe area handling on iOS notch + home indicator
+- Mobile audit + fixes across nav, prompts, compare table
+- Compare table → vertical card stack on mobile
+- AddLocationPrompt → stacked form on mobile
+- PWA: manifest.json, service worker, offline page
+- Icons via Edge route (192/512/maskable) + Apple touch icon
+- iOS Safari "Add to Home Screen" hint (one-time)
+- Service worker: network-first, cache app shell, exclude API
+- proxy.ts (NOT middleware.ts) — Next.js 16 convention
+- Lighthouse: Performance 75, Accessibility 95, 
+  Best Practices 100, SEO 91
+- PWA installability verified via Manifest panel
+- NOTE: Performance improvements live in 2G.2
 
-### 2G — Mobile + polish (2 sessions)
-- 2G.1 Full mobile responsive polish + PWA basics
-  * Mobile responsive audit across every page
-  * manifest.json, icons, splash screens
-  * Add to Home Screen support (iOS + Android)
-  * Basic offline shell for cached views
-  * Camera capture preferred on mobile upload
-- 2G.2 Performance + launch checklist
+## Up Next
+### 2G.2 — Performance + launch checklist (FINAL Phase 2 session)
+
 
 ## Native apps — deferred to Phase 4+
 - React Native app sharing API with web

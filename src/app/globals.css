@@ -61,4 +61,15 @@
 body {
   background: var(--color-surface);
   color: var(--color-on-surface);
+  /* Safe area for iOS viewport-fit=cover (notch / Dynamic Island) */
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Scrollable horizontal pill rows */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

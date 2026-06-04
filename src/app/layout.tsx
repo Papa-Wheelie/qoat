@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import "./globals.css";
 import Providers from "./providers";
 import Nav from "@/components/Nav";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import IOSInstallHint from "@/components/IOSInstallHint";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -18,6 +20,12 @@ const description =
 export const metadata: Metadata = {
   title: "QOAT — Know before you pay",
   description,
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "QOAT",
+  },
   openGraph: {
     title: "QOAT — Know before you pay",
     description,
@@ -28,7 +36,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F9F9F7",
+  themeColor: "#111111",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -44,6 +55,8 @@ export default function RootLayout({
             <Nav />
           </Suspense>
           {children}
+          <ServiceWorkerRegistration />
+          <IOSInstallHint />
         </Providers>
       </body>
     </html>
