@@ -26,9 +26,26 @@
 - Location: suburb + state captured on upload
 - Dates: Australian format DD/MM/YYYY in all AI prompts
 - Categories: 10 AU trade categories seeded in DB
-- Auth: proxy.ts (not middleware.ts) for Next.js 16
+  (audit pending — see Step 1 below)
+- Auth: proxy.ts (NOT middleware.ts) for Next.js 16
 - DB: pooler connection string for Vercel production
 
+
+## Working rhythm (locked in for every session)
+- Pinch-hitter mode: 2-3 hours per day, drop-in / drop-out
+- Experienced software engineer, NEW TO TYPESCRIPT 
+  — keep it light, plain types, no clever generics
+- Bite-size steps: one prompt → one test → one commit
+- Status header at top of each session: where we are, 
+  what's done, what's next
+- Re-orient at start of every session (don't assume continuity)
+- Plain code, no over-engineering
+- Recurring re-entry checks:
+  * Phone hotspot (work firewall blocks DB ports)
+  * Supabase awake (free tier pauses when idle)
+  * Stop dev server before db push / scripts (pool exhaustion)
+  * npx prisma generate after every schema change
+  * Re-login after auth schema changes (JWT carries fields)
 
 
 ## Sessions
@@ -136,16 +153,7 @@
   * Iron triangle, red flags, recommendation owner only
   * Total, line items, community section public
 
-### Session 6.1 ✅ — End to end test + bug sweep
-- [ ] Walk full user journey end to end
-- [ ] Fix any broken flows
-- [ ] Deploy to Vercel and confirm production works
-- [ ] Add ANTHROPIC_API_KEY to Vercel env vars
-
-
-
-## Phase 2 Plan
-### 2A — Auth + accounts (4 sessions)
+### Session 6.1 ✅ — End to end test + first deploy
 
 ### Session 2A.1 ✅ — Forgot password + email verification
 - Resend configured for transactional email
@@ -183,9 +191,6 @@
 - QOAT favicon (bold Q on off-white)
 - SEO metadata + OpenGraph tags
 - Title: "QOAT — Know before you pay"
-
-
-### 2B — Quote management (3 sessions)
 
 ### Session 2B.1 ✅ — Quote status + edit + delete
 - Status field: pending / accepted / rejected
@@ -237,19 +242,6 @@
 - Verified working at 0.5 threshold (3 matches found)
 - Reverted to 0.75 for accuracy during testing phase
 - Switched embeddings OpenAI → Voyage (Anthropic ecosystem)
-- NOTE: local dev needs hotspot — work firewall blocks DB ports
-- NOTE: Supabase free tier pauses when idle — restore before dev
-
-### Session 2C.6 ✅ — Permit + certification compliance flagging
-- assessCompliance.ts — dedicated Claude call for AU regs
-- Flags: permit likely required + mentioned + responsibility
-- Flags: certificate of compliance (electrical/plumbing/gas)
-- Compliance check section on quote detail (owner only)
-- Green check / amber warning / grey dash status model
-- "Guidance only — confirm with council" disclaimer
-- Missing permit/cert also surfaces in red flags
-- ABN verification portion still parked (awaiting ABR GUID)
-- Tested on insulation quote — correctly assessed both ✅
 
 ### Session 2C.5 ✅ — Richer community engagement
 - Up/down voting on comments (Vote.value +1/-1)
@@ -263,10 +255,19 @@
 - Optimistic updates throughout
 - New models: CommentReaction, HelpfulMark, SimilarQuote
 
+### Session 2C.6 ✅ — Permit + certification compliance flagging
+- assessCompliance.ts — dedicated Claude call for AU regs
+- Flags: permit likely required + mentioned + responsibility
+- Flags: certificate of compliance (electrical/plumbing/gas)
+- Compliance check section on quote detail (owner only)
+- Green check / amber warning / grey dash status model
+- "Guidance only — confirm with council" disclaimer
+- Missing permit/cert also surfaces in red flags
+- ABN verification portion still parked (awaiting ABR GUID)
+- Tested on insulation quote — correctly assessed both ✅
+
 ## 2C COMPLETE ✅ (except parked ABN verification)
 
-
-### 2D — Discovery + search (2 sessions)
 
 ### Session 2D.1 ✅ — Search + sort feed
 - Keyword search: title, category, suburb, publicSummary
@@ -276,7 +277,6 @@
 - Combines with category + state filters
 - Result count + empty state + clear all
 - URL state — shareable, survives refresh ✅
-
 
 ### Session 2D.2 ✅ — Compare quotes side by side
 - Checkbox selection on feed + My Quotes cards (max 4)
@@ -289,7 +289,6 @@
 
 ## 2D COMPLETE ✅
 
-## 2E — Trust + safety (2 sessions)
 
 ### Session 2E.1 ✅ — Report + moderation tools
 - Role field on User (user/moderator/admin)
@@ -327,6 +326,7 @@
 
 ## 2E COMPLETE ✅
 
+
 ### Session 2F.1 ✅ — Landing + how it works page
 - Logged-out homepage = marketing page; logged-in = feed
 - Hero with live mock iron triangle illustration
@@ -338,8 +338,6 @@
 - Footer with all marketing links
 - /feed route for full feed access (any auth state)
 - SEO + OpenGraph metadata on marketing page
-- NOTE: Visual polish deferred to dedicated design sprint
-  (after Phase 2 / 3 — wireframe-quality is OK for launch)
 
 ### Session 2F.2 ✅ — FAQ + contact form
 - /faq with 23 Q&As across 5 categories (src/lib/faq.ts editable)
@@ -363,7 +361,14 @@
 - NOTE: Lawyer review required pre-launch
 - NOTE: No cookie banner needed (no analytics/tracking yet)
 
-
+### Session 2F.4c ✅ — Take-over + polling + remove banner
+- Full-screen analysing take-over (replaces in-page card)
+- Linear progress bar with stage transitions
+- Reliable auto-reload via window.location.reload()
+- Failure state with "Try re-analysing"
+- Welcome banner removed (was ceremony)
+- Targeted AddLocationPrompt only when location missing
+- Dismissible with persistence (locationPromptDismissed flag)
 
 ### Session 2F.4d/e/f ✅ — Google match tuning (3 rounds)
 - Composite confidence scoring (name 60% / location 25% / type 15%)
@@ -380,15 +385,7 @@
 - NOTE: existing quotes will pick up new matching as they 
   re-analyse — no backfill needed
 
-### Session 2F.4c ✅ — Take-over + polling + remove banner
-- Full-screen analysing take-over (replaces in-page card)
-- Linear progress bar with stage transitions
-- Reliable auto-reload via window.location.reload()
-- Failure state with "Try re-analysing"
-- Welcome banner removed (was ceremony)
-- Targeted AddLocationPrompt only when location missing
-- Dismissible with persistence (locationPromptDismissed flag)
-- NOTE: deeper UX polish deferred to dedicated design sprint
+## 2F COMPLETE ✅
 
 
 ### Session 2G.1 ✅ — Mobile responsive polish + PWA basics
@@ -401,42 +398,69 @@
 - iOS Safari "Add to Home Screen" hint (one-time)
 - Service worker: network-first, cache app shell, exclude API
 - proxy.ts (NOT middleware.ts) — Next.js 16 convention
-- Lighthouse: Performance 75, Accessibility 95, 
+- Lighthouse baseline: Performance 75, Accessibility 95, 
   Best Practices 100, SEO 91
 - PWA installability verified via Manifest panel
-- NOTE: Performance improvements live in 2G.2
 
-## Up Next
-### 2G.2 — Performance + launch checklist (FINAL Phase 2 session)
-
-
-## Native apps — deferred to Phase 4+
-- React Native app sharing API with web
-- Camera-first upload UX
-- Native push notifications
-- App Store + Play Store distribution
-- Triggered by signal: 1000+ active users + 
-  clear App Store search demand
+### Session 2G.2 — Login validation polish (in progress)
+- Inline error messages instead of silent redirect
+- Empty / invalid email / wrong credentials all handled
+- Custom styling (no browser native tooltips)
+- Autofill background neutralised
+- Credential error box lightened to match field errors
+- NOTE: Step 1 of session — performance + launch checklist 
+  moved to later (now after categories + seed data + design)
 
 
-## Deferred — Dedicated design sprint (post Phase 2 or 3)
-- Visual polish: typography (Fraunces + Plus Jakarta Sans), 
-  hero composition, section rhythm, footer, craft details
-- Deep discovery first: 8-15 references, design principles, 
-  voice
-- Targets: Stripe precision + Monzo warmth
-- Marketing + app polish (consistent feel everywhere)
-- Iterate ourselves across multiple sessions
+## Up Next — Phase 2 final stretch (revised priorities)
 
-## Revised build order:
-2C.4 → 2C.7 → 2C.6 → 2C.5 → 2D → 2E → 2F → 2G
+### Step 1 — Category overhaul
+- Audit current 10 categories — they're inconsistent
+  (mix of narrow trades, huge buckets, non-trades like 
+  insurance)
+- Design proper taxonomy: broader top level + optional 
+  sub-categories
+- Migrate existing quotes to new categories
+- Foundation for the seed data step
+
+### Step 2 — Database seeding with reference quotes
+- Generate 500-1000 realistic AU trade quotes via AI
+- Spread across all new categories
+- Realistic pricing from public sources where possible
+- Mark isSeed: true for each
+- Populate embeddings + reputation signals
+- Goal: comparable benchmarks fire from day 1, not day 100
+- Methodology page updated to disclose seed data transparency
+
+### Step 3 — Design sprint
+- Discovery: gather 8-15 references (Stripe + Monzo + own)
+- Define design principles + voice
+- Build token system
+- Marketing pages redesign (homepage, methodology, FAQ)
+- App polish (quote detail, feed, compare)
+- Goal: trustworthy "this product was made by people who 
+  care" feel — not wireframe quality
+
+### Step 4 — Launch readiness checklist
+- End-to-end functional walk (PRELAUNCH_CHECKLIST.md)
+- Fix issues found
+- FAQ voice review (already noted)
+- Lawyer review of Terms + Privacy (external dependency)
+
+
+## Deferred until after launch
+- Performance optimisation (Lighthouse 75 → 90+)
+- Native iOS/Android apps (Phase 4+)
+
 
 ## Phase 3 (deferred from Phase 2)
 - Email notifications (was 2B.3)
 - AI chatbot — ask about your quote (was 2C.3)
 - Email digest — similar quotes in your area
 
+
 ## Future phases (noted, not now)
+
 ### Phase 4 — Freemium (~6 months) — $9-19/mo
 - Video upload — film space, AI extracts dimensions + scope
 - Unlimited submissions (free tier: 3/month)
@@ -460,6 +484,7 @@
 - White label for home loan apps, property platforms
 - React Native mobile app, NZ expansion
 
+
 ## Parked ideas (need data density or experiments)
 - Seasonal pricing intelligence (e.g. "plumbers 30% pricier
   in winter") — marketing flywheel, needs 1000s of quotes
@@ -469,6 +494,7 @@
 
 
 ## Parked — waiting on external dependency
+
 ### ABN Lookup verification (part of 2C.6)
 - Registered for ABR Web Services GUID — 5 day approval wait
 - When GUID arrives: add ABR_API_GUID to .env.local + Vercel
