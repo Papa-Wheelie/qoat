@@ -25,35 +25,58 @@ function GoogleButton({ label }: { label: string }) {
   );
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+
+  function clearFieldError(field: "email" | "password") {
+    setFieldErrors((prev) => ({ ...prev, [field]: "" }));
+    setError("");
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
     const form = e.currentTarget;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    const errors = { email: "", password: "" };
+    if (!email) errors.email = "Email is required";
+    else if (!EMAIL_RE.test(email)) errors.email = "Please enter a valid email address";
+    if (!password) errors.password = "Password is required";
+
+    if (errors.email || errors.password) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setLoading(true);
+
+    let result;
+    try {
+      result = await signIn("credentials", { email, password, redirect: false });
+    } catch {
+      setLoading(false);
+      setError("Something went wrong. Please try again.");
+      return;
+    }
 
     setLoading(false);
 
-    if (!result?.ok) {
-      setError("Invalid email or password.");
+    if (result?.error || !result?.ok) {
+      setError("Invalid email or password. Try again.");
       return;
     }
 
     router.push("/");
+    router.refresh();
   }
 
   return (
@@ -76,7 +99,7 @@ export default function LoginPage() {
             <div className="flex-1 h-px bg-outline-variant/40" />
           </div>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
           {/* Email */}
           <div className="space-y-2">
             <label
@@ -89,11 +112,14 @@ export default function LoginPage() {
               id="email"
               name="email"
               type="email"
-              required
               autoComplete="email"
               placeholder="hello@qoat.com"
-              className="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200"
+              onChange={() => clearFieldError("email")}
+              className={`w-full bg-surface-container-lowest border rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200 ${fieldErrors.email ? "border-red-400" : "border-outline-variant"}`}
             />
+            {fieldErrors.email && (
+              <p className="text-xs font-medium text-[#791F1F] px-1 pt-1">{fieldErrors.email}</p>
+            )}
           </div>
 
           {/* Password */}
@@ -109,10 +135,10 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                required
                 autoComplete="off"
                 placeholder="••••••••"
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200"
+                onChange={() => clearFieldError("password")}
+                className={`w-full bg-surface-container-lowest border rounded-[12px] p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all duration-200 ${fieldErrors.password ? "border-red-400" : "border-outline-variant"}`}
               />
               <button
                 type="button"
@@ -134,6 +160,9 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p className="text-xs font-medium text-[#791F1F] px-1 pt-1">{fieldErrors.password}</p>
+            )}
             <div className="flex justify-end pt-1">
               <Link
                 href="/forgot-password"
@@ -146,7 +175,9 @@ export default function LoginPage() {
 
           {/* Error */}
           {error && (
-            <p className="text-sm text-error font-medium px-1">{error}</p>
+            <p className="bg-[#FDF0F0] border border-[#F4C4C4] text-[#791F1F] text-xs font-medium rounded-[12px] px-4 py-3">
+              {error}
+            </p>
           )}
 
           {/* Submit */}
