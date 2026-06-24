@@ -1,8 +1,15 @@
-export const CURRENT_METHODOLOGY_VERSION = "v1.0";
+export const CURRENT_METHODOLOGY_VERSION = "v1.1";
 
-export const MODEL_VERSION = "claude-sonnet-4-20250514";
+export const MODEL_VERSION = "claude-sonnet-4-6";
 
 export const CHANGELOG = [
+  {
+    version: "v1.1",
+    date: "2026-06-24",
+    changes: [
+      "Upgraded Claude model from sonnet-4-20250514 (deprecated) to sonnet-4-6.",
+    ],
+  },
   {
     version: "v1.0",
     date: "2026-05-28",

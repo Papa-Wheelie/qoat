@@ -2,6 +2,7 @@ import { z } from "zod";
 import { anthropic } from "./claude";
 import { supabase } from "./supabase";
 import { MODEL_VERSION } from "./methodology";
+import { CATEGORIES, getAllSubcategorySlugs, getAllTopCategorySlugs, getSubcategoryBySlug } from "@/lib/categories";
 
 const LineItemSchema = z.object({
   description: z.string(),
@@ -36,6 +37,8 @@ const ExtractionSchema = z.object({
   }).catch({ quantity: null, unit: null, descriptor: "unspecified", sizeBand: "medium" }),
   inferredTitle: z.string().catch("New quote"),
   inferredCategorySlug: z.string().catch("other"),
+  inferredTopCategorySlug: z.string().catch("supplies-products"),
+  inferredSubcategorySlug: z.string().nullable().catch(null),
   suburb: z.string().nullable().catch(null),
   state: z.string().nullable().catch(null),
 });
@@ -76,9 +79,20 @@ Important: This is an Australian quote. All dates are in Australian format DD/MM
   Guidance for jobSize: extract quantitative measures wherever possible (count, area, volume). Where the job is a scope without clear units (e.g. "renovate bathroom"), set quantity and unit to null and describe the scope in descriptor. Always provide descriptor and sizeBand.
   "inferredTitle": string — a short, descriptive title for this quote (5–7 words max) describing the scope of work, e.g. "3 Velux skylight installation", "Bathroom waterproofing and tiling", "Backyard landscaping and retaining wall". NEVER include the supplier name, business name, street address, suburb, postcode, or price in the title. The title must describe what is being done, not who is doing it or where.
   "inferredCategorySlug": string — MUST be exactly one of: electrical, plumbing, building-construction, hvac-heating, painting-decorating, landscaping, automotive, insurance, supplier-products, other
+  "inferredTopCategorySlug": string — MUST be exactly one slug from the TOP CATEGORIES list at the bottom of this prompt,
+  "inferredSubcategorySlug": string or null — pick one slug from the SUB-CATEGORIES list below only if you are confident it fits; the slug MUST be a child of your chosen top category; if unsure set null,
   "suburb": string or null — the suburb of the job location if mentioned anywhere in the document (Australian suburb name only, no street address or postcode),
   "state": string or null — the Australian state abbreviation of the job location if mentioned (one of: NSW, VIC, QLD, WA, SA, TAS, ACT, NT)
 }`;
+
+function buildCategorySection(): string {
+  const topList = CATEGORIES.map((c) => `  - ${c.slug} (${c.name})`).join("\n");
+  const subList = CATEGORIES.map((c) => {
+    const subs = c.subcategories.map((s) => `    - ${s.slug} (${s.name})`).join("\n");
+    return `  ${c.slug}:\n${subs}`;
+  }).join("\n");
+  return `\n\nTOP CATEGORIES — choose exactly one slug for inferredTopCategorySlug:\n${topList}\n\nSUB-CATEGORIES — choose at most one slug for inferredSubcategorySlug (must be a child of your chosen top category, or null):\n${subList}`;
+}
 
 export async function extractQuote(
   storagePath: string,
@@ -124,9 +138,11 @@ export async function extractQuote(
         },
       });
 
+  const categorySection = buildCategorySection();
+  const basePrompt = USER_PROMPT + categorySection;
   const userPromptText = description?.trim()
-    ? `User provided context: ${description.trim()}\n\n${USER_PROMPT}`
-    : USER_PROMPT;
+    ? `User provided context: ${description.trim()}\n\n${basePrompt}`
+    : basePrompt;
 
   const message = await anthropic.messages.create({
     model: MODEL_VERSION,
@@ -152,7 +168,31 @@ export async function extractQuote(
     .trim();
 
   const parsed = JSON.parse(rawText);
-  const result = ExtractionSchema.parse(parsed);
+  const rawResult = ExtractionSchema.parse(parsed);
+
+  // Validate inferredTopCategorySlug — fall back to "supplies-products" if invalid
+  const allTopSlugs = getAllTopCategorySlugs();
+  const topSlug = allTopSlugs.includes(rawResult.inferredTopCategorySlug)
+    ? rawResult.inferredTopCategorySlug
+    : "supplies-products";
+
+  // Validate inferredSubcategorySlug — must exist and belong to the chosen top
+  let subSlug: string | null = rawResult.inferredSubcategorySlug;
+  if (subSlug !== null) {
+    const allSubSlugs = getAllSubcategorySlugs();
+    const subMatch = getSubcategoryBySlug(subSlug);
+    if (!allSubSlugs.includes(subSlug) || !subMatch || subMatch.top.slug !== topSlug) {
+      subSlug = null;
+    }
+  }
+
+  const result: QuoteExtraction = {
+    ...rawResult,
+    inferredTopCategorySlug: topSlug,
+    inferredSubcategorySlug: subSlug,
+  };
+
   console.log("[extractQuote] validation passed, summary:", result.summary);
+  console.log("[extractQuote] top:", topSlug, "sub:", subSlug);
   return result;
 }

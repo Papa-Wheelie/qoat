@@ -54,6 +54,16 @@ export async function POST(
   }
   await prisma.quote.update({ where: { id }, data: { analysisStatus: "scoring" } });
 
+  // Update subcategoryId from new taxonomy
+  let subcategoryId: string | null = null;
+  if (extraction.inferredSubcategorySlug) {
+    const sub = await prisma.subcategory.findUnique({
+      where: { slug: extraction.inferredSubcategorySlug },
+    });
+    subcategoryId = sub?.id ?? null;
+  }
+  await prisma.quote.update({ where: { id }, data: { subcategoryId } });
+
   // Fetch fresh Google reviews
   let googleReviews = null;
   if (extraction.supplierName) {

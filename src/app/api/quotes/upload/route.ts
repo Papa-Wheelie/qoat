@@ -97,6 +97,15 @@ export async function POST(request: Request) {
         });
         const resolvedCategoryId = inferredCategory?.id ?? otherCategory.id;
 
+        // Look up inferred subcategory by slug (new taxonomy)
+        let subcategoryId: string | null = null;
+        if (extraction.inferredSubcategorySlug) {
+          const sub = await prisma.subcategory.findUnique({
+            where: { slug: extraction.inferredSubcategorySlug },
+          });
+          subcategoryId = sub?.id ?? null;
+        }
+
         // Check if user has already set location (race: they saved it via welcome banner)
         const freshQuote = await prisma.quote.findUnique({
           where: { id: quote.id },
@@ -109,6 +118,7 @@ export async function POST(request: Request) {
           data: {
             title: extraction.inferredTitle,
             categoryId: resolvedCategoryId,
+            subcategoryId: subcategoryId,
             // Only set location from AI if user hasn't saved one manually
             ...(!freshQuote?.locationEdited && {
               suburb: extraction.suburb ?? null,
