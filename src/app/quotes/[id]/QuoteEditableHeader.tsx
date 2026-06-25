@@ -13,6 +13,8 @@ type Props = {
   initialPrivateNickname: string | null;
   initialCategoryId: string;
   initialCategoryName: string;
+  initialTopCategoryName: string | null;
+  initialSubcategoryName: string | null;
   initialSuburb: string | null;
   initialState: string | null;
   initialDescription: string | null;
@@ -61,6 +63,8 @@ export default function QuoteEditableHeader({
   initialPrivateNickname,
   initialCategoryId,
   initialCategoryName,
+  initialTopCategoryName,
+  initialSubcategoryName,
   initialSuburb,
   initialState,
   initialDescription,
@@ -192,9 +196,20 @@ export default function QuoteEditableHeader({
           </div>
         ) : (
           <span>
-            {categoryName}
+            {initialTopCategoryName && initialSubcategoryName ? (
+              <>
+                {initialTopCategoryName}
+                <span className="font-normal normal-case tracking-normal">
+                  {" · "}
+                  {initialSubcategoryName}
+                </span>
+              </>
+            ) : (
+              categoryName
+            )}
             {!categoryWasEdited && <AiBadge />}
-            <EditButton onClick={() => startEdit("category")} />
+            {/* TODO: 1c.iv.c — wire up category editing */}
+            <EditButton onClick={() => { /* no-op until 1c.iv.c */ }} />
           </span>
         )}
 

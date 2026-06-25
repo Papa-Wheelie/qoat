@@ -240,7 +240,15 @@ export default async function QuotePage({
   const [quote, initialComments, quoteVoteCount, userVote, helpfulCount, userHelpful, similarQuotes, hiddenReport, categories] = await Promise.all([
     prisma.quote.findUnique({
       where: { id },
-      include: { analysis: true, category: true },
+      include: {
+        analysis: true,
+        category: true,
+        subcategory: {
+          include: {
+            topCategory: true,
+          },
+        },
+      },
     }),
     prisma.comment.findMany({
       where: { quoteId: id, parentId: null, hidden: false },
@@ -373,6 +381,8 @@ export default async function QuotePage({
             initialPrivateNickname={quote.privateNickname ?? null}
             initialCategoryId={quote.categoryId}
             initialCategoryName={quote.category.name}
+            initialTopCategoryName={quote.subcategory?.topCategory.name ?? null}
+            initialSubcategoryName={quote.subcategory?.name ?? null}
             initialSuburb={quote.suburb}
             initialState={quote.state}
             initialDescription={quote.description ?? null}
@@ -384,7 +394,17 @@ export default async function QuotePage({
         ) : (
           <header className="space-y-3">
             <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
-              {quote.category.name}
+              {quote.subcategory ? (
+                <>
+                  {quote.subcategory.topCategory.name}
+                  <span className="font-normal normal-case tracking-normal">
+                    {" · "}
+                    {quote.subcategory.name}
+                  </span>
+                </>
+              ) : (
+                quote.category.name
+              )}
               {(quote.suburb || quote.state) && (
                 <span className="font-normal normal-case tracking-normal">
                   {" · "}
