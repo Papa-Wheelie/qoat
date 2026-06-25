@@ -4,6 +4,7 @@ import Link from "next/link";
 import { type Metadata } from "next";
 import QuoteFeed, { type FeedQuote, type SortOption } from "./QuoteFeed";
 import { formatPublicPrice } from "@/lib/formatPrice";
+import { CATEGORIES } from "@/lib/categories";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 // Set EXAMPLE_QUOTE_ID in .env.local to a real public quote ID.
@@ -456,8 +457,9 @@ export default async function HomePage({
       OR: [{ hidden: false }, ...(currentUserId ? [{ userId: currentUserId }] : [])],
     };
 
-    const [categories, initialData, totalCount] = await Promise.all([
-      prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, slug: true } }),
+    const categories = CATEGORIES.map((c) => ({ slug: c.slug, name: c.name }));
+
+    const [initialData, totalCount] = await Promise.all([
       prisma.quote.findMany({
         where: visibilityWhere,
         orderBy: { createdAt: "desc" },

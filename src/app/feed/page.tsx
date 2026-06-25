@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { type Metadata } from "next";
 import QuoteFeed, { type FeedQuote, type SortOption } from "@/app/QuoteFeed";
+import { CATEGORIES } from "@/lib/categories";
 
 export const metadata: Metadata = {
   title: "Community quotes — QOAT",
@@ -28,8 +29,9 @@ export default async function FeedPage({
     OR: [{ hidden: false }, ...(currentUserId ? [{ userId: currentUserId }] : [])],
   };
 
-  const [categories, initialData, totalCount] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, slug: true } }),
+  const categories = CATEGORIES.map((c) => ({ slug: c.slug, name: c.name }));
+
+  const [initialData, totalCount] = await Promise.all([
     prisma.quote.findMany({
       where: visibilityWhere,
       orderBy: { createdAt: "desc" },

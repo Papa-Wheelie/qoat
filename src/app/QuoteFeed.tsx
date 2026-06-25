@@ -6,7 +6,7 @@ import { formatPublicPrice } from "@/lib/formatPrice";
 import { useCompareSelection } from "@/lib/useCompareSelection";
 import CompareBar from "@/components/CompareBar";
 
-type Category = { id: string; name: string; slug: string };
+type Category = { slug: string; name: string };
 export type SortOption = "newest" | "oldest" | "price-high" | "price-low" | "most-helpful" | "most-discussed";
 
 const SORT_LABELS: Record<SortOption, string> = {

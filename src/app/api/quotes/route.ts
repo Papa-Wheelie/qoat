@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
+import { getLegacyCategorySlugsForTop } from "@/lib/categories";
 
 const PAGE_SIZE = 20;
 
@@ -49,9 +50,29 @@ export async function GET(request: NextRequest) {
     ? {}
     : { OR: [{ hidden: false }, ...(currentUserId ? [{ userId: currentUserId }] : [])] };
 
+  // Build top-category filter: match new quotes via subcategoryId OR legacy quotes via old category slug
+  let categoryFilterClause = {};
+  if (categorySlug) {
+    const subcategories = await prisma.subcategory.findMany({
+      where: { topCategory: { slug: categorySlug } },
+      select: { id: true },
+    });
+    const subcategoryIds = subcategories.map((s) => s.id);
+    const legacySlugs = getLegacyCategorySlugsForTop(categorySlug);
+    // Use AND so this OR doesn't collide with the top-level visibility/search ORs
+    categoryFilterClause = {
+      AND: [{
+        OR: [
+          { subcategoryId: { in: subcategoryIds } },
+          { category: { slug: { in: legacySlugs } } },
+        ],
+      }],
+    };
+  }
+
   const where = {
     ...visibilityFilter,
-    ...(categorySlug && { category: { slug: categorySlug } }),
+    ...categoryFilterClause,
     ...(state && { state }),
     ...searchFilter,
   };

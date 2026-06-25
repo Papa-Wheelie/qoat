@@ -121,3 +121,28 @@ export function getAllTopCategorySlugs(): string[] {
 export function getAllSubcategorySlugs(): string[] {
   return CATEGORIES.flatMap((c) => c.subcategories.map((s) => s.slug));
 }
+
+// Maps legacy Category slugs to new TopCategory slugs.
+// Used during the migration window so legacy quotes
+// still appear under the right new top-level filter.
+// Will be deleted once 1c.v migration is complete.
+export const LEGACY_CATEGORY_TO_TOP: Record<string, string> = {
+  "building-construction": "building-structural",
+  "electrical":            "trades",
+  "plumbing":              "trades",
+  "hvac-heating":          "trades",
+  "painting-decorating":   "trades",
+  "landscaping":           "outdoor-property",
+  "supplier-products":     "supplies-products",
+  // automotive, insurance, other → no fallback
+};
+
+export function getLegacyCategorySlugsForTop(topSlug: string): string[] {
+  const result: string[] = [];
+  for (const key in LEGACY_CATEGORY_TO_TOP) {
+    if (LEGACY_CATEGORY_TO_TOP[key] === topSlug) {
+      result.push(key);
+    }
+  }
+  return result;
+}
