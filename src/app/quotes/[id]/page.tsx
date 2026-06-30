@@ -383,6 +383,8 @@ export default async function QuotePage({
             initialCategoryName={quote.category.name}
             initialTopCategoryName={quote.subcategory?.topCategory.name ?? null}
             initialSubcategoryName={quote.subcategory?.name ?? null}
+            initialTopCategorySlug={quote.subcategory?.topCategory.slug ?? null}
+            initialSubcategorySlug={quote.subcategory?.slug ?? null}
             initialSuburb={quote.suburb}
             initialState={quote.state}
             initialDescription={quote.description ?? null}

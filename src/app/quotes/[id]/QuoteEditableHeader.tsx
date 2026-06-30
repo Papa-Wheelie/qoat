@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import QuoteOwnerActions from "./QuoteOwnerActions";
+import { CATEGORIES } from "@/lib/categories";
 
 const AU_STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
 
@@ -15,6 +16,8 @@ type Props = {
   initialCategoryName: string;
   initialTopCategoryName: string | null;
   initialSubcategoryName: string | null;
+  initialTopCategorySlug: string | null;
+  initialSubcategorySlug: string | null;
   initialSuburb: string | null;
   initialState: string | null;
   initialDescription: string | null;
@@ -57,29 +60,38 @@ function EditButton({ onClick }: { onClick: () => void }) {
 const inputClass =
   "w-full bg-white border border-outline-variant rounded-[10px] px-3 py-2 text-on-surface focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all";
 
+const selectClass =
+  "bg-white border border-outline-variant rounded-[10px] px-3 py-2 text-sm text-on-surface focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all";
+
 export default function QuoteEditableHeader({
   quoteId,
   initialTitle,
   initialPrivateNickname,
-  initialCategoryId,
+  initialCategoryId: _initialCategoryId,
   initialCategoryName,
   initialTopCategoryName,
   initialSubcategoryName,
+  initialTopCategorySlug,
+  initialSubcategorySlug,
   initialSuburb,
   initialState,
   initialDescription,
   categoryEdited,
   locationEdited,
   initialStatus,
-  categories,
+  categories: _categories,
 }: Props) {
   const [editing, setEditing] = useState<EditingField>(null);
   const [saving, setSaving] = useState(false);
   const [fieldError, setFieldError] = useState("");
 
   // Optimistic display values
-  const [categoryId, setCategoryId] = useState(initialCategoryId);
-  const [categoryName, setCategoryName] = useState(initialCategoryName);
+  // categoryName is a legacy fallback — only shown when no subcategory is set
+  const [categoryName] = useState(initialCategoryName);
+  const [topCatName, setTopCatName] = useState(initialTopCategoryName ?? "");
+  const [subCatName, setSubCatName] = useState(initialSubcategoryName ?? "");
+  const [topCatSlug, setTopCatSlug] = useState(initialTopCategorySlug ?? "");
+  const [subCatSlug, setSubCatSlug] = useState(initialSubcategorySlug ?? "");
   const [suburb, setSuburb] = useState(initialSuburb ?? "");
   const [stateVal, setStateVal] = useState(initialState ?? "");
   const [description, setDescription] = useState(initialDescription ?? "");
@@ -89,7 +101,8 @@ export default function QuoteEditableHeader({
 
   // Draft state while editing
   const [draftNickname, setDraftNickname] = useState("");
-  const [draftCategoryId, setDraftCategoryId] = useState("");
+  const [draftTopSlug, setDraftTopSlug] = useState("");
+  const [draftSubSlug, setDraftSubSlug] = useState("");
   const [draftSuburb, setDraftSuburb] = useState("");
   const [draftState, setDraftState] = useState("");
   const [draftDescription, setDraftDescription] = useState("");
@@ -98,7 +111,10 @@ export default function QuoteEditableHeader({
     setFieldError("");
     setEditing(field);
     if (field === "nickname") setDraftNickname(nickname);
-    if (field === "category") setDraftCategoryId(categoryId);
+    if (field === "category") {
+      setDraftTopSlug(topCatSlug);
+      setDraftSubSlug(subCatSlug);
+    }
     if (field === "location") { setDraftSuburb(suburb); setDraftState(stateVal); }
     if (field === "description") setDraftDescription(description);
   }
@@ -111,11 +127,21 @@ export default function QuoteEditableHeader({
   async function saveField(field: EditingField) {
     if (!field) return;
     setFieldError("");
+
+    // For category, validate top slug is chosen
+    if (field === "category" && !draftTopSlug) {
+      setFieldError("Please select a top category.");
+      return;
+    }
+
     setSaving(true);
 
-    const body: Record<string, string> = {};
+    const body: Record<string, string | null> = {};
     if (field === "nickname") body.privateNickname = draftNickname.trim();
-    if (field === "category") body.categoryId = draftCategoryId;
+    if (field === "category") {
+      body.topCategorySlug = draftTopSlug;
+      body.subcategorySlug = draftSubSlug || null;
+    }
     if (field === "location") { body.suburb = draftSuburb.trim(); body.state = draftState; }
     if (field === "description") body.description = draftDescription.trim();
 
@@ -136,8 +162,17 @@ export default function QuoteEditableHeader({
     // Apply optimistic update
     if (field === "nickname") setNickname(draftNickname.trim());
     if (field === "category") {
-      const cat = categories.find((c) => c.id === draftCategoryId);
-      if (cat) { setCategoryId(cat.id); setCategoryName(cat.name); }
+      const top = CATEGORIES.find((c) => c.slug === draftTopSlug);
+      setTopCatName(top?.name ?? "");
+      setTopCatSlug(draftTopSlug);
+      if (draftSubSlug) {
+        const sub = top?.subcategories.find((s) => s.slug === draftSubSlug);
+        setSubCatName(sub?.name ?? "");
+        setSubCatSlug(draftSubSlug);
+      } else {
+        setSubCatName("");
+        setSubCatSlug("");
+      }
       setCategoryWasEdited(true);
     }
     if (field === "location") {
@@ -176,40 +211,58 @@ export default function QuoteEditableHeader({
 
   const locationDisplay = [suburb, stateVal].filter(Boolean).join(", ");
 
+  // Subcategories for the currently chosen top draft
+  const draftTopCategory = CATEGORIES.find((c) => c.slug === draftTopSlug);
+
   return (
     <header className="space-y-3">
       {/* Category + location */}
       <div className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
         {editing === "category" ? (
-          <div className="space-y-1">
-            <select
-              value={draftCategoryId}
-              onChange={(e) => setDraftCategoryId(e.target.value)}
-              className="bg-white border border-outline-variant rounded-[10px] px-2 py-1 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary focus:border-primary outline-none normal-case tracking-normal"
-              autoFocus
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+          <div className="space-y-2 normal-case tracking-normal font-normal">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <select
+                value={draftTopSlug}
+                onChange={(e) => { setDraftTopSlug(e.target.value); setDraftSubSlug(""); }}
+                className={selectClass}
+                autoFocus
+              >
+                <option value="">(select top category)</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+              </select>
+              <select
+                value={draftSubSlug}
+                onChange={(e) => setDraftSubSlug(e.target.value)}
+                className={selectClass}
+                disabled={!draftTopSlug}
+              >
+                <option value="">(none)</option>
+                {draftTopCategory?.subcategories.map((s) => (
+                  <option key={s.slug} value={s.slug}>{s.name}</option>
+                ))}
+              </select>
+            </div>
             <SaveCancel field="category" />
           </div>
         ) : (
           <span>
-            {initialTopCategoryName && initialSubcategoryName ? (
+            {topCatName && subCatName ? (
               <>
-                {initialTopCategoryName}
+                {topCatName}
                 <span className="font-normal normal-case tracking-normal">
                   {" · "}
-                  {initialSubcategoryName}
+                  {subCatName}
                 </span>
               </>
+            ) : topCatName ? (
+              topCatName
             ) : (
               categoryName
             )}
             {!categoryWasEdited && <AiBadge />}
-            {/* TODO: 1c.iv.c — wire up category editing */}
-            <EditButton onClick={() => { /* no-op until 1c.iv.c */ }} />
+            <EditButton onClick={() => startEdit("category")} />
           </span>
         )}
 

@@ -28,8 +28,10 @@ export async function PATCH(
     suburb?: string;
     state?: string;
     description?: string;
+    topCategorySlug?: string;
+    subcategorySlug?: string | null;
   };
-  const { title, privateNickname, categoryId, suburb, state, description } = body;
+  const { title, privateNickname, categoryId, suburb, state, description, topCategorySlug, subcategorySlug } = body;
 
   // title is now locked — controlled by QOAT AI only
   if (title !== undefined) {
@@ -55,6 +57,30 @@ export async function PATCH(
     if (!mod.ok) return Response.json({ error: mod.reason ?? "That content isn't allowed." }, { status: 422 });
   }
 
+  // Category slug validation
+  if (subcategorySlug !== undefined && topCategorySlug === undefined) {
+    return Response.json({ error: "You must select a top category first." }, { status: 400 });
+  }
+
+  let resolvedSubcategoryId: string | null = null;
+
+  if (topCategorySlug !== undefined) {
+    const topCat = await prisma.topCategory.findUnique({ where: { slug: topCategorySlug } });
+    if (!topCat) return Response.json({ error: "Invalid top category." }, { status: 400 });
+
+    if (subcategorySlug != null) {
+      const sub = await prisma.subcategory.findUnique({
+        where: { slug: subcategorySlug },
+        include: { topCategory: { select: { slug: true } } },
+      });
+      if (!sub) return Response.json({ error: "Invalid subcategory." }, { status: 400 });
+      if (sub.topCategory.slug !== topCategorySlug) {
+        return Response.json({ error: "Subcategory does not belong to the selected top category." }, { status: 400 });
+      }
+      resolvedSubcategoryId = sub.id;
+    }
+  }
+
   // Build update payload — only update fields present in the request
   const data: Record<string, unknown> = {};
 
@@ -63,6 +89,10 @@ export async function PATCH(
   }
   if (categoryId !== undefined) {
     data.categoryId = categoryId;
+    data.categoryEdited = true;
+  }
+  if (topCategorySlug !== undefined) {
+    data.subcategoryId = resolvedSubcategoryId;
     data.categoryEdited = true;
   }
   if (suburb !== undefined || state !== undefined) {
@@ -86,12 +116,21 @@ export async function PATCH(
       title: true,
       privateNickname: true,
       categoryId: true,
+      subcategoryId: true,
       suburb: true,
       state: true,
       description: true,
       categoryEdited: true,
       locationEdited: true,
       category: { select: { id: true, name: true, slug: true } },
+      subcategory: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          topCategory: { select: { id: true, name: true, slug: true } },
+        },
+      },
     },
   });
 
