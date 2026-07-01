@@ -2,7 +2,7 @@
   "$schema": "internal draft — pricing reference for QOAT seed data generation",
   "$notes": "Curated collaboratively. Approved batches added incrementally. Formalised into seeder source at Step 2.b.v.",
   "$modelVersion": "curated-v1",
-  "approvedBatches": ["home-renovation"],
+  "approvedBatches": ["home-renovation", "building-structural"],
   "categories": {
     "home-renovation": {
       "kitchen-renovation": {
@@ -75,6 +75,79 @@
           "small": { "median": 60000, "min": 35000, "max": 100000, "scope": "Cosmetic across whole house — paint, flooring, minor kitchen/bath updates", "confidence": "low" },
           "medium": { "median": 220000, "min": 150000, "max": 350000, "scope": "Full kitchen + bathrooms + flooring + paint, some structural", "confidence": "low" },
           "large": { "median": 500000, "min": 350000, "max": 900000, "scope": "Complete gut renovation, layout changes, premium finishes", "confidence": "low" }
+        }
+      }
+    },
+    "building-structural": {
+      "new-build": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 280000, "min": 200000, "max": 400000, "scope": "Kit home / small 2-3 bedroom (~100m²), standard finish", "confidence": "medium" },
+          "medium": { "median": 550000, "min": 400000, "max": 750000, "scope": "Standard 3-4 bedroom family home (~180-220m²), mid-range finish", "confidence": "high" },
+          "large": { "median": 900000, "min": 700000, "max": 1500000, "scope": "250m²+, premium finish, custom design, potentially double-storey", "confidence": "medium" }
+        }
+      },
+      "roofing": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 1200, "min": 500, "max": 2500, "scope": "Minor repair, patch, few tile replacements, small leak fix", "confidence": "medium" },
+          "medium": { "median": 8000, "min": 4000, "max": 18000, "scope": "Partial replacement (e.g. one roof section, gutter + fascia), tile respray", "confidence": "medium" },
+          "large": { "median": 22000, "min": 14000, "max": 40000, "scope": "Full roof replacement — Colorbond or full retile — average 150-200m² house", "confidence": "medium" }
+        }
+      },
+      "concrete-paving": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/m²",
+        "rate": {
+          "median": 95, "min": 65, "max": 180,
+          "notes": "Standard grey concrete slab, straightforward access. Exposed aggregate + $30-60/m² premium. Coloured/stamped concrete top of range. Access constraints push higher.",
+          "confidence": "medium"
+        }
+      },
+      "fencing": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/lineal m",
+        "rate": {
+          "median": 150, "min": 80, "max": 600,
+          "notes": "Timber paling ~$95/m, Colorbond ~$150/m, aluminium/tubular ~$220/m, frameless glass pool fencing $800-1200/m. Wide because materials are so different.",
+          "confidence": "medium"
+        }
+      },
+      "decking": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/m²",
+        "rate": {
+          "median": 350, "min": 200, "max": 700,
+          "notes": "Treated pine ~$200-300/m², merbau/spotted gum ~$350-500/m², composite (Trex etc) $450-700/m². Structural changes (raised platforms, roof over) add ~30%.",
+          "confidence": "medium"
+        }
+      },
+      "retaining-walls": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 3000, "min": 1500, "max": 6000, "scope": "Garden-bed retention, sleeper wall, under 1m high, 5-10m long", "confidence": "medium" },
+          "medium": { "median": 18000, "min": 10000, "max": 35000, "scope": "Concrete block or timber, 1-2m high, 15-30m long", "confidence": "medium" },
+          "large": { "median": 50000, "min": 30000, "max": 120000, "scope": "Engineered concrete/steel, over 2m high, or long runs, requires engineering", "confidence": "low" }
+        }
+      },
+      "demolition": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 3000, "min": 1500, "max": 6000, "scope": "Shed, small outbuilding, single-room removal", "confidence": "medium" },
+          "medium": { "median": 12000, "min": 7000, "max": 20000, "scope": "Garage, carport, partial house demolition", "confidence": "medium" },
+          "large": { "median": 30000, "min": 20000, "max": 55000, "scope": "Full house demolition + site clearance + disposal", "confidence": "medium" }
+        }
+      },
+      "waterproofing": {
+        "pricingModel": "fixed-job",
+        "band": { "median": 1800, "min": 800, "max": 4000, "scope": "Bathroom or wet area waterproofing, membrane + coating (~$50-80/m²)", "confidence": "medium" }
+      },
+      "foundations-footings": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 8000, "min": 4000, "max": 15000, "scope": "Extension footings, small structural additions", "confidence": "low" },
+          "medium": { "median": 28000, "min": 18000, "max": 45000, "scope": "House-scale footings, standard site conditions", "confidence": "low" },
+          "large": { "median": 60000, "min": 40000, "max": 110000, "scope": "Difficult site (reactive soil, sloping block, underpinning)", "confidence": "low" }
         }
       }
     }
