@@ -1,0 +1,82 @@
+{
+  "$schema": "internal draft — pricing reference for QOAT seed data generation",
+  "$notes": "Curated collaboratively. Approved batches added incrementally. Formalised into seeder source at Step 2.b.v.",
+  "$modelVersion": "curated-v1",
+  "approvedBatches": ["home-renovation"],
+  "categories": {
+    "home-renovation": {
+      "kitchen-renovation": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 12000, "min": 6000, "max": 18000, "scope": "Cabinet reface, benchtop swap, backsplash, retain layout", "confidence": "high" },
+          "medium": { "median": 30000, "min": 18000, "max": 50000, "scope": "Full rebuild, new cabinets, standard stone benchtop, mid-range appliances, existing layout", "confidence": "high" },
+          "large": { "median": 65000, "min": 45000, "max": 120000, "scope": "Full rebuild + layout change + premium finishes (stone, imported tile, integrated appliances)", "confidence": "medium" }
+        }
+      },
+      "bathroom-renovation": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 8000, "min": 4000, "max": 14000, "scope": "Vanity swap, tapware refresh, retile shower recess only", "confidence": "high" },
+          "medium": { "median": 22000, "min": 14000, "max": 35000, "scope": "Full main bathroom or ensuite rebuild, standard tiles + fittings, retain layout", "confidence": "high" },
+          "large": { "median": 45000, "min": 32000, "max": 75000, "scope": "Full rebuild + layout change + premium finishes (stone, freestanding bath, imported tile)", "confidence": "medium" }
+        }
+      },
+      "laundry-renovation": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 4000, "min": 2000, "max": 7000, "scope": "Cabinet + benchtop refresh, retain layout", "confidence": "medium" },
+          "medium": { "median": 10000, "min": 6000, "max": 16000, "scope": "Full rebuild, new cabinets, benchtop, sink, appliance space", "confidence": "medium" },
+          "large": { "median": 18000, "min": 14000, "max": 28000, "scope": "Full rebuild + layout change + premium finishes (stone benchtop, cabinetry to ceiling)", "confidence": "medium" }
+        }
+      },
+      "living-area-renovation": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 8000, "min": 4000, "max": 14000, "scope": "Paint + new flooring + light updates, no structural", "confidence": "medium" },
+          "medium": { "median": 25000, "min": 15000, "max": 45000, "scope": "Structural changes (single wall out, opened plan), new flooring throughout", "confidence": "low" },
+          "large": { "median": 55000, "min": 40000, "max": 100000, "scope": "Major reconfiguration, ceiling changes, high-end finishes, potentially load-bearing work", "confidence": "low" }
+        }
+      },
+      "extension": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 60000, "min": 40000, "max": 100000, "scope": "~10-25m² addition (sunroom, small bedroom + ensuite)", "confidence": "medium" },
+          "medium": { "median": 180000, "min": 130000, "max": 260000, "scope": "~30-60m² addition (2 bedrooms, family room extension)", "confidence": "medium" },
+          "large": { "median": 380000, "min": 260000, "max": 600000, "scope": "60m²+ or second-storey addition", "confidence": "medium" }
+        }
+      },
+      "loft-conversion": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 35000, "min": 20000, "max": 55000, "scope": "Storage-focused conversion, no dormer, no plumbing", "confidence": "low" },
+          "medium": { "median": 70000, "min": 50000, "max": 110000, "scope": "Habitable bedroom, insulation, flooring, single window addition", "confidence": "low" },
+          "large": { "median": 130000, "min": 100000, "max": 200000, "scope": "Habitable rooms + ensuite, dormer additions, structural work", "confidence": "low" }
+        }
+      },
+      "garage-conversion": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 18000, "min": 10000, "max": 30000, "scope": "Basic conversion — insulation, lining, flooring", "confidence": "medium" },
+          "medium": { "median": 38000, "min": 25000, "max": 60000, "scope": "Habitable room with power, HVAC, potentially kitchenette", "confidence": "medium" },
+          "large": { "median": 70000, "min": 50000, "max": 110000, "scope": "Full granny flat or self-contained studio conversion", "confidence": "medium" }
+        }
+      },
+      "basement-renovation": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 25000, "min": 15000, "max": 40000, "scope": "Basic habitable-ish upgrade (waterproofing, flooring, lighting)", "confidence": "low" },
+          "medium": { "median": 65000, "min": 45000, "max": 95000, "scope": "Fully habitable rec room / office", "confidence": "low" },
+          "large": { "median": 140000, "min": 100000, "max": 220000, "scope": "Bedroom + bathroom + kitchenette, full self-contained", "confidence": "low" }
+        }
+      },
+      "whole-house-renovation": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 60000, "min": 35000, "max": 100000, "scope": "Cosmetic across whole house — paint, flooring, minor kitchen/bath updates", "confidence": "low" },
+          "medium": { "median": 220000, "min": 150000, "max": 350000, "scope": "Full kitchen + bathrooms + flooring + paint, some structural", "confidence": "low" },
+          "large": { "median": 500000, "min": 350000, "max": 900000, "scope": "Complete gut renovation, layout changes, premium finishes", "confidence": "low" }
+        }
+      }
+    }
+  }
+}
