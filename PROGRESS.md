@@ -412,17 +412,18 @@
   moved to later (now after categories + seed data + design)
 
 
-## Up Next — Phase 2 final stretch (revised priorities)
+## Phase 2 final stretch (revised priorities)
 
-### Step 1 — Category overhaul
-- Audit current 10 categories — they're inconsistent
-  (mix of narrow trades, huge buckets, non-trades like 
-  insurance)
-- Design proper taxonomy: broader top level + optional 
-  sub-categories
-- Migrate existing quotes to new categories
-- Foundation for the seed data step
+### Step 1 ✅ — Category overhaul (complete)
+- Taxonomy file: 6 top categories, 54 subcategories
+- DB schema: TopCategory + Subcategory tables, seeded
+- AI extraction infers top + sub on upload (claude-sonnet-4-6)
+- UI: detail page shows top + sub, editable inline by owner
+- Feed: 6 top-category filter pills with legacy fallback
+- Migrated all 11 legacy quotes via AI categorisation script
+- Cleanup deferred (legacy fallback code stays until pre-launch)
 
+## Up Next
 ### Step 2 — Database seeding with reference quotes
 - Generate 500-1000 realistic AU trade quotes via AI
 - Spread across all new categories
