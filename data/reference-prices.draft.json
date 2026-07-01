@@ -2,7 +2,7 @@
   "$schema": "internal draft — pricing reference for QOAT seed data generation",
   "$notes": "Curated collaboratively. Approved batches added incrementally. Formalised into seeder source at Step 2.b.v.",
   "$modelVersion": "curated-v1",
-  "approvedBatches": ["home-renovation", "building-structural", "trades", "outdoor-property"],
+  "approvedBatches": ["home-renovation", "building-structural", "trades", "outdoor-property", "energy-systems"],
   "categories": {
     "home-renovation": {
       "kitchen-renovation": {
@@ -326,6 +326,59 @@
       "exterior-cleaning": {
         "pricingModel": "fixed-job",
         "band": { "median": 350, "min": 150, "max": 900, "scope": "Standard exterior cleaning — windows OR gutters OR pressure wash. Combined services top of range", "confidence": "high" }
+      }
+    },
+    "energy-systems": {
+      "solar-install": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/kW",
+        "rate": {
+          "median": 1100, "min": 700, "max": 1600,
+          "notes": "Standard 6.6kW residential system: ~$4-6k after STC rebate. Higher-quality panels (LG, REC, SunPower) top of range. Micro-inverter systems 30-40% premium over string inverter. Pre-rebate ~$2k/kW; rebate significantly reduces effective rate.",
+          "confidence": "high"
+        }
+      },
+      "battery-storage": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/kWh",
+        "rate": {
+          "median": 1300, "min": 900, "max": 2000,
+          "notes": "Tesla Powerwall 2 (~13.5kWh) $12-15k installed. AlphaESS + Sungrow cheaper per kWh. Larger battery stacks slightly better per-kWh economics. Includes hybrid inverter for retrofit installs.",
+          "confidence": "medium"
+        }
+      },
+      "insulation": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/m²",
+        "rate": {
+          "median": 28, "min": 18, "max": 55,
+          "notes": "Ceiling batts (R4.0-6.0): $20-30/m² supplied + installed. Wall batts $30-40/m². Underfloor $35-55/m². Spray foam or thermal upgrade premium. Retrofit access adds cost.",
+          "confidence": "medium"
+        }
+      },
+      "hot-water-system": {
+        "pricingModel": "fixed-job",
+        "band": { "median": 2800, "min": 900, "max": 6500, "scope": "Standard hot water system replacement — gas storage, electric, heat pump, or solar. Includes install. Electric storage $1-2k, gas storage $1.5-3k, heat pump $3-5k (with rebates), solar HW $4-6.5k", "confidence": "high" }
+      },
+      "heating-install": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 1800, "min": 800, "max": 3500, "scope": "Single-room heater install — gas space heater, wood heater, or electric panel", "confidence": "medium" },
+          "medium": { "median": 8000, "min": 5000, "max": 14000, "scope": "Multi-zone gas ducted heating OR hydronic single-loop", "confidence": "medium" },
+          "large": { "median": 22000, "min": 15000, "max": 45000, "scope": "Full hydronic heating with boiler + multi-zone panels, or premium ducted system with zoning", "confidence": "medium" }
+        }
+      },
+      "cooling-install": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 2200, "min": 1500, "max": 3500, "scope": "Single split system install (2-3.5kW), standard back-to-back", "confidence": "high" },
+          "medium": { "median": 6000, "min": 4000, "max": 9500, "scope": "Multi-head split OR large-capacity single, multiple rooms", "confidence": "medium" },
+          "large": { "median": 16000, "min": 11000, "max": 25000, "scope": "Full ducted reverse-cycle system, whole-house zoning", "confidence": "medium" }
+        }
+      },
+      "ev-charger-install": {
+        "pricingModel": "fixed-job",
+        "band": { "median": 2500, "min": 1500, "max": 5000, "scope": "Standard home wall charger install (7-22kW), single-phase or three-phase. Basic charger unit $800-1500 + install $500-1500. Three-phase upgrades or switchboard work push higher", "confidence": "medium" }
       }
     }
   }
