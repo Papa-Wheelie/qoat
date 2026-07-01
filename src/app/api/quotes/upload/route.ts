@@ -238,6 +238,7 @@ export async function POST(request: Request) {
             methodologyVersion: CURRENT_METHODOLOGY_VERSION,
             modelVersion: MODEL_VERSION,
             jobSize: extraction.jobSize ?? undefined,
+            qualityTier: extraction.qualityTier,
             priceComparableIds: comparables.comparableIds,
             ...(score && {
               priceSampleSize: comparables.sampleSize >= 3 ? comparables.sampleSize : null,

@@ -39,6 +39,7 @@ const ExtractionSchema = z.object({
   inferredCategorySlug: z.string().catch("other"),
   inferredTopCategorySlug: z.string().catch("supplies-products"),
   inferredSubcategorySlug: z.string().nullable().catch(null),
+  qualityTier: z.enum(["budget", "mid", "premium"]).catch("mid"),
   suburb: z.string().nullable().catch(null),
   state: z.string().nullable().catch(null),
 });
@@ -81,9 +82,17 @@ Important: This is an Australian quote. All dates are in Australian format DD/MM
   "inferredCategorySlug": string — MUST be exactly one of: electrical, plumbing, building-construction, hvac-heating, painting-decorating, landscaping, automotive, insurance, supplier-products, other
   "inferredTopCategorySlug": string — MUST be exactly one slug from the TOP CATEGORIES list at the bottom of this prompt,
   "inferredSubcategorySlug": string or null — pick one slug from the SUB-CATEGORIES list below only if you are confident it fits; the slug MUST be a child of your chosen top category; if unsure set null,
+  "qualityTier": "budget" | "mid" | "premium" — assess overall quality level based on the quote's contents,
   "suburb": string or null — the suburb of the job location if mentioned anywhere in the document (Australian suburb name only, no street address or postcode),
   "state": string or null — the Australian state abbreviation of the job location if mentioned (one of: NSW, VIC, QLD, WA, SA, TAS, ACT, NT)
-}`;
+}
+
+Quality tier guidance:
+- "budget": basic materials, minimum scope, off-the-shelf fittings, entry-level brands, cost-conscious specs
+- "mid": typical mid-range work, standard fittings, common brands, normal spec (most common — default here if unclear)
+- "premium": high-end finishes, natural stone, imported tiles, designer fixtures, custom joinery, luxury brand names (e.g. Miele, Sub-Zero, imported tapware)
+Signals for premium: luxury brand names, descriptors like "custom", "bespoke", "handcrafted", "imported", specific premium materials (Carrara marble, brass tapware, designer names).
+Signals for budget: "basic", "standard", "value", affordable brand mentions, minimal scope descriptions.`;
 
 function buildCategorySection(): string {
   const topList = CATEGORIES.map((c) => `  - ${c.slug} (${c.name})`).join("\n");

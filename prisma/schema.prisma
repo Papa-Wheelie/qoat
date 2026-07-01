@@ -247,6 +247,7 @@ model QuoteAnalysis {
   analysedAt         DateTime @default(now()) @updatedAt
   priceComparableIds String[] @default([])
   jobSize            Json?
+  qualityTier        String?
   // embedding column is vector(1024) — managed via raw SQL (pgvector, Voyage AI voyage-3).
   // See scripts/setup-pgvector.ts. Cannot use in normal Prisma queries.
   embedding          Unsupported("vector(1024)")?
