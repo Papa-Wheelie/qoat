@@ -2,7 +2,7 @@
   "$schema": "internal draft — pricing reference for QOAT seed data generation",
   "$notes": "Curated collaboratively. Approved batches added incrementally. Formalised into seeder source at Step 2.b.v.",
   "$modelVersion": "curated-v1",
-  "approvedBatches": ["home-renovation", "building-structural"],
+  "approvedBatches": ["home-renovation", "building-structural", "trades"],
   "categories": {
     "home-renovation": {
       "kitchen-renovation": {
@@ -149,6 +149,120 @@
           "medium": { "median": 28000, "min": 18000, "max": 45000, "scope": "House-scale footings, standard site conditions", "confidence": "low" },
           "large": { "median": 60000, "min": 40000, "max": 110000, "scope": "Difficult site (reactive soil, sloping block, underpinning)", "confidence": "low" }
         }
+      }
+    },
+    "trades": {
+      "electrical": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 280, "min": 150, "max": 500, "scope": "Single powerpoint install, single light, small fault repair, safety switch", "confidence": "high" },
+          "medium": { "median": 2500, "min": 1200, "max": 5000, "scope": "Room-scale rewire, switchboard upgrade, downlight install throughout room", "confidence": "high" },
+          "large": { "median": 12000, "min": 7000, "max": 22000, "scope": "Whole-house rewire or major switchboard replacement", "confidence": "medium" }
+        },
+        "calloutFee": {
+          "median": 140, "min": 80, "max": 220,
+          "notes": "Standard business hours diagnostic. After-hours 1.5-2x. Some sparkies waive if job proceeds.",
+          "confidence": "high"
+        },
+        "hourlyRate": {
+          "median": 120, "min": 90, "max": 160,
+          "notes": "Metro AU average. Rural/remote higher due to travel. Certified/specialty (data, solar) top of range.",
+          "confidence": "high"
+        }
+      },
+      "plumbing": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 320, "min": 180, "max": 600, "scope": "Tap replacement, blocked drain clear, single fitting fix, small leak", "confidence": "high" },
+          "medium": { "median": 2200, "min": 1000, "max": 5000, "scope": "Hot water swap, kitchen/bathroom re-plumbing, gas connection", "confidence": "high" },
+          "large": { "median": 14000, "min": 8000, "max": 28000, "scope": "Whole-house re-plumb, main sewer replacement, major bathroom + kitchen", "confidence": "medium" }
+        },
+        "calloutFee": {
+          "median": 150, "min": 80, "max": 250,
+          "notes": "Similar to electrical. Blocked drain + specialist equipment call-outs top of range.",
+          "confidence": "high"
+        },
+        "hourlyRate": {
+          "median": 110, "min": 85, "max": 150,
+          "notes": "Metro AU. Gas-fitting or licensed hot water higher. Master plumber premium.",
+          "confidence": "high"
+        }
+      },
+      "hvac-heating": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 2200, "min": 1500, "max": 3500, "scope": "Single split system install (2-3.5kW), standard back-to-back", "confidence": "high" },
+          "medium": { "median": 6000, "min": 4000, "max": 9500, "scope": "Multi-head split system OR large-capacity single unit, more complex install", "confidence": "medium" },
+          "large": { "median": 16000, "min": 11000, "max": 25000, "scope": "Full ducted reverse-cycle system, whole-house zoning", "confidence": "medium" }
+        },
+        "calloutFee": {
+          "median": 160, "min": 100, "max": 250,
+          "notes": "Refrigeration mechanics often charge higher call-out than sparkies. Diagnostic on ducted system towards top.",
+          "confidence": "medium"
+        },
+        "hourlyRate": {
+          "median": 130, "min": 100, "max": 180,
+          "notes": "Refrigeration-licensed premium over general HVAC install.",
+          "confidence": "medium"
+        }
+      },
+      "painting-decorating": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/m²",
+        "rate": {
+          "median": 35, "min": 20, "max": 60,
+          "notes": "Interior walls: cheap end is single coat roller/brush, $35-45/m² typical for two-coat prep + paint. Ceilings + heights add ~30%. Exterior often $45-70/m² for prep-heavy jobs.",
+          "confidence": "medium"
+        }
+      },
+      "plastering": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/m²",
+        "rate": {
+          "median": 55, "min": 35, "max": 95,
+          "notes": "Standard set: $30-50/m². Full sheet + set (new gyprock): $50-80/m². Ceiling + cornices: higher. Repairs to existing walls higher per m² for small patches.",
+          "confidence": "medium"
+        }
+      },
+      "tiling": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/m²",
+        "rate": {
+          "median": 85, "min": 50, "max": 180,
+          "notes": "Labour only: $50-70/m² for standard porcelain. Supply + install: $85-130/m² for mid-range tile. Premium (stone, large-format, imported): $150-250/m².",
+          "confidence": "medium"
+        }
+      },
+      "carpentry": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 350, "min": 180, "max": 700, "scope": "Hang a door, small repair, single shelf install, skirting patch", "confidence": "medium" },
+          "medium": { "median": 4000, "min": 2000, "max": 8000, "scope": "Built-in wardrobes, custom shelving, structural repairs, doorframes", "confidence": "medium" },
+          "large": { "median": 18000, "min": 10000, "max": 40000, "scope": "Full custom cabinetry, structural additions, complex builds", "confidence": "low" }
+        },
+        "calloutFee": {
+          "median": 100, "min": 50, "max": 180,
+          "notes": "Lower call-out than electrical/plumbing — carpenters often bundle into job pricing. Some don't charge separately.",
+          "confidence": "medium"
+        },
+        "hourlyRate": {
+          "median": 90, "min": 65, "max": 140,
+          "notes": "Wide range because 'carpentry' spans site labourers ($65-80) through cabinet makers ($100-140+). Custom cabinetry premium.",
+          "confidence": "medium"
+        }
+      },
+      "glazing": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/unit",
+        "rate": {
+          "median": 650, "min": 250, "max": 2500,
+          "notes": "Basic single-glazed window replacement: $250-450. Standard double-glazed: $550-900. Large picture windows or bifolds: $1500-3000. Premium (frameless, thermal, custom) higher.",
+          "confidence": "medium"
+        }
+      },
+      "locksmith": {
+        "pricingModel": "fixed-job",
+        "band": { "median": 180, "min": 80, "max": 450, "scope": "Standard call-out — lock repair, replace deadbolt, cut keys, gain entry (call-out $80-140 + parts, after-hours or rekeying whole house top of range)", "confidence": "high" }
       }
     }
   }
