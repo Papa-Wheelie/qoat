@@ -2,7 +2,7 @@
   "$schema": "internal draft — pricing reference for QOAT seed data generation",
   "$notes": "Curated collaboratively. Approved batches added incrementally. Formalised into seeder source at Step 2.b.v.",
   "$modelVersion": "curated-v1",
-  "approvedBatches": ["home-renovation", "building-structural", "trades"],
+  "approvedBatches": ["home-renovation", "building-structural", "trades", "outdoor-property"],
   "categories": {
     "home-renovation": {
       "kitchen-renovation": {
@@ -263,6 +263,69 @@
       "locksmith": {
         "pricingModel": "fixed-job",
         "band": { "median": 180, "min": 80, "max": 450, "scope": "Standard call-out — lock repair, replace deadbolt, cut keys, gain entry (call-out $80-140 + parts, after-hours or rekeying whole house top of range)", "confidence": "high" }
+      }
+    },
+    "outdoor-property": {
+      "landscaping": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 1500, "min": 500, "max": 3500, "scope": "Single garden bed refresh, mulch + plants, small planting scheme", "confidence": "medium" },
+          "medium": { "median": 12000, "min": 6000, "max": 25000, "scope": "Backyard refresh — turf, planting, edging, feature elements", "confidence": "medium" },
+          "large": { "median": 50000, "min": 30000, "max": 120000, "scope": "Full backyard design + hardscaping, retaining, water features, pergola", "confidence": "low" }
+        }
+      },
+      "lawn-garden-maintenance": {
+        "pricingModel": "fixed-job",
+        "band": { "median": 90, "min": 45, "max": 250, "scope": "Standard mow + edge, one-off or recurring visit. Large blocks + hedging top of range", "confidence": "high" }
+      },
+      "tree-work": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 450, "min": 200, "max": 900, "scope": "Prune single tree, remove small tree (under 5m), hedge trim", "confidence": "medium" },
+          "medium": { "median": 2500, "min": 1200, "max": 5000, "scope": "Multiple tree removal, larger tree (5-15m), stump grinding", "confidence": "medium" },
+          "large": { "median": 12000, "min": 6000, "max": 28000, "scope": "Multiple large trees, crane access, complex removal, land clearing. Protected species / permits add compliance cost", "confidence": "medium" }
+        }
+      },
+      "pest-control": {
+        "pricingModel": "fixed-job",
+        "band": { "median": 280, "min": 150, "max": 600, "scope": "Standard pest control treatment (roaches, spiders, ants) — full house. Termite inspection/treatment $500-1500+", "confidence": "high" }
+      },
+      "pool-spa": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 4000, "min": 2000, "max": 8000, "scope": "Heater install, equipment swap, resurface small pool", "confidence": "medium" },
+          "medium": { "median": 25000, "min": 15000, "max": 45000, "scope": "Pool renovation (retile, new pumps, coping), or spa install", "confidence": "medium" },
+          "large": { "median": 65000, "min": 45000, "max": 150000, "scope": "New in-ground pool build (fibreglass to concrete), landscaping around", "confidence": "medium" }
+        }
+      },
+      "driveway-pathways": {
+        "pricingModel": "per-unit",
+        "unitLabel": "$/m²",
+        "rate": {
+          "median": 120, "min": 75, "max": 250,
+          "notes": "Plain concrete: $75-100/m². Exposed aggregate: $110-160/m². Coloured/stamped: $150-220/m². Pavers (brick/stone): $120-250/m². Long driveways slight discount per m².",
+          "confidence": "medium"
+        }
+      },
+      "irrigation": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 650, "min": 300, "max": 1500, "scope": "Small drip system for garden beds, single zone", "confidence": "medium" },
+          "medium": { "median": 3500, "min": 2000, "max": 6000, "scope": "Multi-zone system, pop-up sprinklers for lawn, controller", "confidence": "medium" },
+          "large": { "median": 9000, "min": 6000, "max": 18000, "scope": "Full property smart irrigation with sensors, multiple zones, backflow prevention", "confidence": "low" }
+        }
+      },
+      "outdoor-lighting": {
+        "pricingModel": "scope-variant",
+        "bands": {
+          "small": { "median": 550, "min": 250, "max": 1200, "scope": "Few path/spot lights installed, single circuit", "confidence": "medium" },
+          "medium": { "median": 3000, "min": 1500, "max": 6000, "scope": "Property-scale outdoor lighting scheme, multiple zones, sensors", "confidence": "medium" },
+          "large": { "median": 8500, "min": 5000, "max": 18000, "scope": "Full landscape lighting design, low-voltage system, controls, feature lighting", "confidence": "low" }
+        }
+      },
+      "exterior-cleaning": {
+        "pricingModel": "fixed-job",
+        "band": { "median": 350, "min": 150, "max": 900, "scope": "Standard exterior cleaning — windows OR gutters OR pressure wash. Combined services top of range", "confidence": "high" }
       }
     }
   }
