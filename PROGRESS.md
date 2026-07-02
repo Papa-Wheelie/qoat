@@ -415,24 +415,31 @@
 ## Phase 2 final stretch (revised priorities)
 
 ### Step 1 ✅ — Category overhaul (complete)
-- Taxonomy file: 6 top categories, 54 subcategories
-- DB schema: TopCategory + Subcategory tables, seeded
-- AI extraction infers top + sub on upload (claude-sonnet-4-6)
+- Taxonomy: 6 top categories, 54 subcategories
+  (scope-variant, per-unit, fixed-job)
+- DB schema: TopCategory + Subcategory tables
+- AI extraction infers top + sub on upload
 - UI: detail page shows top + sub, editable inline by owner
 - Feed: 6 top-category filter pills with legacy fallback
-- Migrated all 11 legacy quotes via AI categorisation script
-- Cleanup deferred (legacy fallback code stays until pre-launch)
+- Migrated all 11 legacy quotes via AI categorisation
+- Feed cards now show top category from new taxonomy
+
+### Step 2 ✅ — Database seeding + scoring upgrade (complete)
+- Added isSeed, seedBatch, seedNotes to Quote schema
+- Extract qualityTier (budget/mid/premium) on analysis
+- Curated 54-sub pricing reference:
+  data/reference-prices.draft.json
+- Built scripts/seed-quotes.ts with retry logic
+- Generated 351 seed quotes across 4 batches
+- Reference badge + transparency banner on seed quotes
+- Community engagement disabled on seed quotes
+- Comparables lookup filters by sub-category + size band
+  with 3-tier fallback
+- AI scoring reasons with curated AU market reference +
+  comparables
+- Methodology bumped to v1.2 with disclosure of both
 
 ## Up Next
-### Step 2 — Database seeding with reference quotes
-- Generate 500-1000 realistic AU trade quotes via AI
-- Spread across all new categories
-- Realistic pricing from public sources where possible
-- Mark isSeed: true for each
-- Populate embeddings + reputation signals
-- Goal: comparable benchmarks fire from day 1, not day 100
-- Methodology page updated to disclose seed data transparency
-
 ### Step 3 — Design sprint
 - Discovery: gather 8-15 references (Stripe + Monzo + own)
 - Define design principles + voice
