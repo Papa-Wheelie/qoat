@@ -312,6 +312,41 @@ function deriveRecommendation(price: number, rep: number, time: number): string 
   return "reject";
 }
 
+// ── Retry helper ───────────────────────────────────────────────────────────────
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 1000
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      const isTransient =
+        msg.includes("timeout") ||
+        msg.includes("Connection error") ||
+        msg.includes("Server has closed") ||
+        msg.includes("ECONNRESET") ||
+        msg.includes("529") ||
+        msg.includes("overloaded");
+
+      if (!isTransient || attempt === maxAttempts) {
+        throw err;
+      }
+
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = baseDelayMs * Math.pow(2, attempt - 1);
+      console.log(`  → attempt ${attempt} failed (${msg.slice(0, 60)}...), retrying in ${delay}ms`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastError;
+}
+
 // ── Zod schema for Claude's content response ───────────────────────────────────
 
 const ContentSchema = z.object({
@@ -628,16 +663,20 @@ async function main() {
     }
 
     try {
-      const content = await generateContent(subSlug, topSlug, qualityTier, sizeBand, priceResult, suburb, state);
+      const content = await withRetry(() =>
+        generateContent(subSlug, topSlug, qualityTier, sizeBand, priceResult, suburb, state)
+      );
 
       const subRecord = await prisma.subcategory.findUnique({
         where: { slug: subSlug },
         select: { id: true },
       });
 
-      await insertQuote(
-        subSlug, topSlug, qualityTier, sizeBand, priceResult, content,
-        suburb, state, seedUserId, fallbackCategoryId, subRecord?.id ?? null, i
+      await withRetry(() =>
+        insertQuote(
+          subSlug, topSlug, qualityTier, sizeBand, priceResult, content,
+          suburb, state, seedUserId, fallbackCategoryId, subRecord?.id ?? null, i
+        )
       );
 
       const { price: p, reputation: r, time: t } = content.scores;
@@ -649,7 +688,7 @@ async function main() {
     }
 
     if (i < COUNT - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
     }
   }
 
