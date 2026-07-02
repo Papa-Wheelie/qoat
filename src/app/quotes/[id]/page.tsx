@@ -392,6 +392,7 @@ export default async function QuotePage({
             locationEdited={quote.locationEdited}
             initialStatus={quote.status as "pending" | "accepted" | "rejected"}
             categories={categories}
+            isSeed={quote.isSeed}
           />
         ) : (
           <header className="space-y-3">
@@ -413,6 +414,11 @@ export default async function QuotePage({
                   {[quote.suburb, quote.state].filter(Boolean).join(", ")}
                 </span>
               )}
+              {quote.isSeed && (
+                <span className="inline-flex items-center rounded-full bg-neutral-200 px-2 py-0.5 text-[11px] font-medium text-neutral-600 tracking-wide normal-case ml-2 align-middle">
+                  Reference
+                </span>
+              )}
             </p>
             <h1 className="text-3xl font-extrabold tracking-tight text-primary">
               {quote.title}
@@ -422,6 +428,14 @@ export default async function QuotePage({
             )}
             <ShareButton />
           </header>
+        )}
+
+        {/* Seed transparency banner */}
+        {quote.isSeed && (
+          <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <span className="font-medium">Reference quote.</span>{" "}
+            This is example data provided by QOAT to help calibrate pricing benchmarks. Not from a real customer submission.
+          </div>
         )}
 
         {/* Hidden notice for owner */}
@@ -805,6 +819,7 @@ export default async function QuotePage({
           initialUserMarkedHelpful={!!userHelpful}
           initialSimilarQuotes={serializedSimilarQuotes}
           similarAvgPrice={similarAvgPrice}
+          isSeed={quote.isSeed}
         />
       </div>
     </main>

@@ -458,6 +458,7 @@ type Props = {
   initialUserMarkedHelpful: boolean;
   initialSimilarQuotes: SimilarQuoteData[];
   similarAvgPrice: number | null;
+  isSeed: boolean;
 };
 
 export default function CommunitySection({
@@ -470,7 +471,20 @@ export default function CommunitySection({
   initialUserMarkedHelpful,
   initialSimilarQuotes,
   similarAvgPrice: initialSimilarAvgPrice,
+  isSeed,
 }: Props) {
+  if (isSeed) {
+    return (
+      <section className="space-y-6">
+        <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
+          Community
+        </p>
+        <div className="rounded-2xl bg-neutral-50 px-4 py-3 text-sm text-neutral-500">
+          Community engagement is disabled on reference quotes.
+        </div>
+      </section>
+    );
+  }
   const [comments, setComments] = useState<CommentData[]>(initialComments);
   const [quoteVoted, setQuoteVoted] = useState(initialUserVoted);
   const [quoteVoteCount, setQuoteVoteCount] = useState(initialVoteCount);

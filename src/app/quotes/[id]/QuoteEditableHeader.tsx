@@ -25,6 +25,7 @@ type Props = {
   locationEdited: boolean;
   initialStatus: "pending" | "accepted" | "rejected";
   categories: Category[];
+  isSeed?: boolean;
 };
 
 type EditingField = "nickname" | "category" | "location" | "description" | null;
@@ -80,6 +81,7 @@ export default function QuoteEditableHeader({
   locationEdited,
   initialStatus,
   categories: _categories,
+  isSeed = false,
 }: Props) {
   const [editing, setEditing] = useState<EditingField>(null);
   const [saving, setSaving] = useState(false);
@@ -263,6 +265,11 @@ export default function QuoteEditableHeader({
             )}
             {!categoryWasEdited && <AiBadge />}
             <EditButton onClick={() => startEdit("category")} />
+            {isSeed && (
+              <span className="inline-flex items-center rounded-full bg-neutral-200 px-2 py-0.5 text-[11px] font-medium text-neutral-600 tracking-wide normal-case ml-2 align-middle">
+                Reference
+              </span>
+            )}
           </span>
         )}
 

@@ -23,6 +23,7 @@ export type FeedQuote = {
   userId: string;
   title: string;
   hidden: boolean;
+  isSeed: boolean;
   suburb: string | null;
   state: string | null;
   createdAt: string;
@@ -98,6 +99,11 @@ function QuoteCard({ quote, currentUserId, isSelected, atMax, onToggle }: QuoteC
               {(quote.suburb || quote.state) && (
                 <span className="font-normal normal-case tracking-normal">
                   {" · "}{[quote.suburb, quote.state].filter(Boolean).join(", ")}
+                </span>
+              )}
+              {quote.isSeed && (
+                <span className="inline-flex items-center rounded-full bg-neutral-200 px-2 py-0.5 text-[11px] font-medium text-neutral-600 tracking-wide normal-case ml-2 align-middle">
+                  Reference
                 </span>
               )}
             </p>
