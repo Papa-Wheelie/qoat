@@ -22,7 +22,8 @@ export default async function proxy(request: NextRequest) {
 
   if (
     publicRoutes.includes(pathname) ||
-    pathname.startsWith("/quotes/")
+    pathname.startsWith("/quotes/") ||
+    pathname.startsWith("/categories/")
   ) {
     return NextResponse.next();
   }
