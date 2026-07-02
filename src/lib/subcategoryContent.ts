@@ -50,3 +50,22 @@ const FALLBACK: SubcategoryContent = {
 export function getSubcategoryContent(slug: string): SubcategoryContent {
   return SUBCATEGORY_CONTENT[slug] || FALLBACK;
 }
+
+// ── Top category content ──────────────────────────────────────────────────────
+
+export type TopCategoryContent = {
+  description: string;
+};
+
+export const TOP_CATEGORY_CONTENT: Record<string, TopCategoryContent> = {
+  "home-renovation": {
+    description:
+      "Full or partial home renovations across Australia — kitchens, bathrooms, extensions and whole-house rebuilds.",
+  },
+};
+
+export function getTopCategoryContent(slug: string): TopCategoryContent {
+  return TOP_CATEGORY_CONTENT[slug] || {
+    description: "Category-specific summary coming soon.",
+  };
+}

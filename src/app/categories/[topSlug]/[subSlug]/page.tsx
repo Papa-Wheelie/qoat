@@ -5,12 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { getCategoryStats } from "@/lib/categoryStats";
 import { getSubcategoryContent } from "@/lib/subcategoryContent";
 import { formatAUD } from "@/lib/formatPrice";
+import CategoryBreadcrumb from "@/components/CategoryBreadcrumb";
 import PriceDistributionChart from "./PriceDistributionChart";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ subSlug: string }>;
+  params: Promise<{ topSlug: string; subSlug: string }>;
 }): Promise<Metadata> {
   const { subSlug } = await params;
   const stats = await getCategoryStats(subSlug);
@@ -47,12 +48,13 @@ function Card({
 export default async function Page({
   params,
 }: {
-  params: Promise<{ subSlug: string }>;
+  params: Promise<{ topSlug: string; subSlug: string }>;
 }) {
-  const { subSlug } = await params;
+  const { topSlug, subSlug } = await params;
 
   const stats = await getCategoryStats(subSlug);
-  if (!stats) notFound();
+  // 404 if sub not found, or if the sub doesn't belong to this top category
+  if (!stats || stats.topSlug !== topSlug) notFound();
 
   const content = getSubcategoryContent(subSlug);
 
@@ -95,12 +97,26 @@ export default async function Page({
 
   return (
     <main className="min-h-screen bg-surface pt-14">
-      <div className="max-w-3xl mx-auto px-6 pt-12 pb-24 space-y-8">
+      <div className="max-w-3xl mx-auto px-6 pt-8 pb-24 space-y-8">
+
+        {/* Breadcrumb */}
+        <CategoryBreadcrumb
+          topSlug={topSlug}
+          topName={stats.topName}
+          subName={stats.subName}
+        />
 
         {/* ── Section 1: Hero header ────────────────────────────────────── */}
         <section className="space-y-3 pb-2">
           <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
-            {stats.topName}
+            <Link
+              href={`/categories/${topSlug}`}
+              className="hover:text-on-surface transition-colors"
+            >
+              {stats.topName}
+            </Link>
+            {" "}›{" "}
+            <span className="text-on-surface">{stats.subName}</span>
           </p>
           <h1 className="text-4xl font-extrabold tracking-tight text-primary">
             {stats.subName}
@@ -142,7 +158,9 @@ export default async function Page({
           ) : (
             <Card>
               <p className="text-sm text-on-surface-variant">
-                We have <span className="font-semibold text-on-surface">{stats.totalCount}</span> quote{stats.totalCount !== 1 ? "s" : ""} for {stats.subName.toLowerCase()}. Full distribution appears once we reach 10 or more.
+                We have{" "}
+                <span className="font-semibold text-on-surface">{stats.totalCount}</span>{" "}
+                quote{stats.totalCount !== 1 ? "s" : ""} for {stats.subName.toLowerCase()}. Full distribution appears once we reach 10 or more.
               </p>
             </Card>
           )}

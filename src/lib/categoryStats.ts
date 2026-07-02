@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { getSubcategoryBySlug } from "./categories";
+import { getSubcategoryBySlug, getTopCategoryBySlug } from "./categories";
 
 export type PriceBucket = {
   label: string;
@@ -221,6 +221,99 @@ function buildSizeDistribution(
     count: counts[band],
     percentage: total > 0 ? Math.round((counts[band] / total) * 100) : 0,
   }));
+}
+
+// ── Top category stats ────────────────────────────────────────────────────────
+
+export type TopCategoryStats = {
+  topSlug: string;
+  topName: string;
+  subSummaries: {
+    subSlug: string;
+    subName: string;
+    totalCount: number;
+    priceMedian: number | null;
+    priceMin: number | null;
+    priceMax: number | null;
+    hasEnoughData: boolean;
+  }[];
+  totalCount: number;
+};
+
+export async function getTopCategoryStats(
+  topSlug: string
+): Promise<TopCategoryStats | null> {
+  // Look up DB top category with its subcategories
+  const dbTop = await prisma.topCategory.findUnique({
+    where: { slug: topSlug },
+    include: { subcategories: true },
+  });
+  if (!dbTop) return null;
+
+  // Static config gives us the canonical sub order
+  const catInfo = getTopCategoryBySlug(topSlug);
+  if (!catInfo) return null;
+
+  // One query for all quotes across all subs in this top category
+  const subIds = dbTop.subcategories.map((s) => s.id);
+  const allQuotes = await prisma.quote.findMany({
+    where: { subcategoryId: { in: subIds }, hidden: false },
+    select: {
+      subcategoryId: true,
+      analysis: { select: { totalAmount: true } },
+    },
+  });
+
+  // Group by subcategoryId
+  const quotesBySubId = new Map<string, (number | null)[]>();
+  for (const q of allQuotes) {
+    if (!q.subcategoryId) continue;
+    const amounts = quotesBySubId.get(q.subcategoryId) ?? [];
+    amounts.push(q.analysis?.totalAmount ?? null);
+    quotesBySubId.set(q.subcategoryId, amounts);
+  }
+
+  // Build summaries in static order
+  const subSummaries = catInfo.subcategories
+    .map((staticSub) => {
+      const dbSub = dbTop.subcategories.find((s) => s.slug === staticSub.slug);
+      if (!dbSub) return null;
+
+      const rawAmounts = quotesBySubId.get(dbSub.id) ?? [];
+      const totalCount = rawAmounts.length;
+      const amounts = rawAmounts.filter((a): a is number => a != null);
+
+      let priceMedian: number | null = null;
+      let priceMin: number | null = null;
+      let priceMax: number | null = null;
+
+      if (amounts.length > 0) {
+        const sorted = [...amounts].sort((a, b) => a - b);
+        priceMedian = computeMedian(sorted);
+        priceMin = sorted[0];
+        priceMax = sorted[sorted.length - 1];
+      }
+
+      return {
+        subSlug: staticSub.slug,
+        subName: staticSub.name,
+        totalCount,
+        priceMedian,
+        priceMin,
+        priceMax,
+        hasEnoughData: totalCount >= 10,
+      };
+    })
+    .filter((s): s is NonNullable<typeof s> => s !== null);
+
+  const totalCount = subSummaries.reduce((acc, s) => acc + s.totalCount, 0);
+
+  return {
+    topSlug,
+    topName: dbTop.name,
+    subSummaries,
+    totalCount,
+  };
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
