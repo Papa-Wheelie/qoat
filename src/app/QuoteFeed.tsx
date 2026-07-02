@@ -28,6 +28,7 @@ export type FeedQuote = {
   state: string | null;
   createdAt: string;
   category: { name: string; slug: string };
+  subcategory: { name: string; topCategory: { name: string } } | null;
   totalAmount: number | null;
   priceScore: number | null;
   reputationScore: number | null;
@@ -95,7 +96,7 @@ function QuoteCard({ quote, currentUserId, isSelected, atMax, onToggle }: QuoteC
         <div className="space-y-3">
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant mb-1">
-              {quote.category.name}
+              {quote.subcategory ? quote.subcategory.topCategory.name : quote.category.name}
               {(quote.suburb || quote.state) && (
                 <span className="font-normal normal-case tracking-normal">
                   {" · "}{[quote.suburb, quote.state].filter(Boolean).join(", ")}

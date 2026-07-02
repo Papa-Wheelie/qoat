@@ -93,6 +93,7 @@ export async function GET(request: NextRequest) {
         state: true,
         createdAt: true,
         category: { select: { name: true, slug: true } },
+        subcategory: { select: { name: true, topCategory: { select: { name: true } } } },
         analysis: {
           select: {
             totalAmount: true,
@@ -119,6 +120,9 @@ export async function GET(request: NextRequest) {
     state: q.state,
     createdAt: q.createdAt,
     category: q.category,
+    subcategory: q.subcategory
+      ? { name: q.subcategory.name, topCategory: { name: q.subcategory.topCategory.name } }
+      : null,
     totalAmount: q.analysis?.totalAmount ?? null,
     priceScore: q.analysis?.priceScore ?? null,
     reputationScore: q.analysis?.reputationScore ?? null,
