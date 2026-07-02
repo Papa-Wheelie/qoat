@@ -469,11 +469,25 @@
 
 ## Future phases (noted, not now)
 
-### Phase 4 — Freemium (~6 months) — $9-19/mo
+## Phase 4 — Freemium (~6 months) — expanded
+Feature vertical additions:
 - Video upload — film space, AI extracts dimensions + scope
 - Unlimited submissions (free tier: 3/month)
 - AI chatbot, quote history/portfolio, priority analysis
 - Stripe subscription billing
+
+**NEW — Brief Builder (headline paid feature)**
+- Assistant walks user through structured brief creation
+- Generates dimensioned drawings + spec sheet for supplier RFQs
+- Categories with clear physical outputs first (windows, doors, 
+  fencing, decking, custom cabinetry)
+- Text-only structured briefs for services (electrical scope 
+  of work, painting scope, etc)
+- Standalone product OR bundled into Freemium tier
+- Rationale: attacks upstream cause of bad quotes 
+  (unclear briefs). Complements analysis-side of QOAT. 
+  Users would pay $5-15 per brief individually.
+- Pilot on 3-5 categories, expand based on demand.
 
 ### Phase 5 — Send to tender (~12 months) — B2B leads
 - Consumer publishes job brief, contractors compete
@@ -516,3 +530,7 @@
 - No national registry — significant ongoing integration
 - Reuse the Verified/Claimed/Not found pattern from ABN
 - Likely Phase 5 (pairs with contractor onboarding)
+
+### Brief Builder waitlist teaser on category hubs — validate demand 
+  during Phase 2 launch without building the feature; 
+  gives signal for Phase 4 prioritisation
