@@ -54,7 +54,8 @@ export default function PriceDistributionChart({ distribution, median }: Props) 
             boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
             fontSize: 12,
           }}
-          formatter={(value) => [value, "Quotes"]}
+          formatter={(value) => [`${value} quotes`, ""]}
+          labelFormatter={(label) => label}
         />
         <Bar dataKey="count" fill="#7DD4C0" radius={[4, 4, 0, 0]} />
         {medianLabel && (

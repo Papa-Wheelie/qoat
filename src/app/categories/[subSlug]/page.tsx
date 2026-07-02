@@ -62,19 +62,34 @@ export default async function Page({
     select: { id: true },
   });
 
-  const recentQuotes = dbSub
+  const recentQuoteSelect = {
+    id: true,
+    state: true,
+    isSeed: true,
+    analysis: { select: { totalAmount: true, qualityTier: true } },
+  } as const;
+
+  const realQuotes = dbSub
     ? await prisma.quote.findMany({
-        where: { subcategoryId: dbSub.id, hidden: false },
+        where: { subcategoryId: dbSub.id, hidden: false, isSeed: false },
         orderBy: { createdAt: "desc" },
         take: 5,
-        select: {
-          id: true,
-          state: true,
-          isSeed: true,
-          analysis: { select: { totalAmount: true, qualityTier: true } },
-        },
+        select: recentQuoteSelect,
       })
     : [];
+
+  const recentQuotes =
+    dbSub && realQuotes.length < 5
+      ? [
+          ...realQuotes,
+          ...(await prisma.quote.findMany({
+            where: { subcategoryId: dbSub.id, hidden: false, isSeed: true },
+            orderBy: { createdAt: "desc" },
+            take: 5 - realQuotes.length,
+            select: recentQuoteSelect,
+          })),
+        ]
+      : realQuotes;
 
   const { price } = stats;
 
@@ -105,6 +120,14 @@ export default async function Page({
               · based on {stats.totalCount} quote{stats.totalCount !== 1 ? "s" : ""}
             </p>
           )}
+          <div className="pt-2">
+            <Link
+              href="/upload"
+              className="inline-block bg-primary text-white text-sm font-semibold px-8 py-4 rounded-xl hover:opacity-90 transition-opacity"
+            >
+              Know if your quote is fair
+            </Link>
+          </div>
         </section>
 
         {/* ── Section 2: Price distribution ────────────────────────────── */}
@@ -265,17 +288,17 @@ export default async function Page({
           </div>
         </section>
 
-        {/* ── Section 10: CTA ──────────────────────────────────────────── */}
-        <section className="text-center space-y-4 pt-4">
-          <h2 className="text-2xl font-bold tracking-tight text-primary">
-            Got a {stats.subName.toLowerCase()} quote?
+        {/* ── Section 10: Closing CTA ───────────────────────────────────── */}
+        <section className="text-center space-y-3 pt-4">
+          <h2 className="text-xl font-semibold tracking-tight text-on-surface">
+            Ready to check your quote?
           </h2>
           <p className="text-on-surface-variant text-sm">
-            Upload it and we&apos;ll check if it&apos;s fair.
+            Upload it and get an honest read in about a minute.
           </p>
           <Link
             href="/upload"
-            className="inline-block bg-primary text-white text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
+            className="inline-block border border-neutral-300 text-on-surface text-sm font-semibold px-6 py-3 rounded-xl hover:bg-neutral-50 transition-colors"
           >
             Upload quote
           </Link>
