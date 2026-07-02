@@ -1,8 +1,17 @@
-export const CURRENT_METHODOLOGY_VERSION = "v1.1";
+export const CURRENT_METHODOLOGY_VERSION = "v1.2";
 
 export const MODEL_VERSION = "claude-sonnet-4-6";
 
 export const CHANGELOG = [
+  {
+    version: "v1.2",
+    date: "2026-07-02",
+    changes: [
+      "Curated AU market reference now feeds the price scoring prompt alongside community comparables.",
+      "Bootstrapped comparables with ~350 reference quotes across all sub-categories so benchmarks fire from day 1.",
+      "Comparables lookup filters by sub-category and size band before falling back to embedding similarity.",
+    ],
+  },
   {
     version: "v1.1",
     date: "2026-06-24",

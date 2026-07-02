@@ -154,6 +154,27 @@ export default function MethodologyPage() {
           </div>
         </section>
 
+        {/* Bootstrapping pricing benchmarks */}
+        <section className="bg-surface-container-lowest rounded-[16px] px-6 py-6 space-y-4">
+          <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
+            How we bootstrap pricing benchmarks
+          </p>
+          <div className="space-y-3 text-sm leading-relaxed" style={{ color: "#444444" }}>
+            <p>
+              QOAT compares your quote against similar quotes in our database. When we launched, that database was empty — which would mean no benchmarks for the first users. To solve this, we added two data sources at launch:
+            </p>
+            <p>
+              <strong className="text-on-surface">Reference quotes.</strong> We generated approximately 350 representative Australian trade quotes across all our sub-categories. These are marked clearly with a &quot;Reference&quot; badge in the feed and are excluded from community engagement (no comments, no reactions). They exist to give the AI a baseline to compare against. As real user quotes accumulate, their weight in scoring grows and reference quotes fade into the background.
+            </p>
+            <p>
+              <strong className="text-on-surface">Curated market ranges.</strong> For each sub-category, we researched typical AU market pricing (min, median, and max ranges) and expose that reference to the AI when it scores your quote. So even before comparables kick in, the AI is anchored on real Australian market rates.
+            </p>
+            <p>
+              Both signals are transparent. If a scoring decision seems off, you can inspect the comparables used (via the &quot;Benchmarked against N similar jobs&quot; link) and know that our reference table sits alongside them.
+            </p>
+          </div>
+        </section>
+
         {/* Changelog */}
         <section className="space-y-4">
           <p className="text-xs font-semibold tracking-widest uppercase text-on-surface-variant">
