@@ -4,6 +4,7 @@ import { MODEL_VERSION } from "./methodology";
 import type { QuoteExtraction } from "./extractQuote";
 import type { ComparableStats } from "./getComparables";
 import type { ReputationSignals } from "./getReputationSignals";
+import { getReferenceBlock } from "./pricingReference";
 
 const ScoreSchema = z.object({
   price: z.object({
@@ -66,6 +67,18 @@ export async function scoreQuote(
 Score reputation 1-10. A licensed, insured supplier with an ABN and strong Google reviews scores high. Missing a legally-required licence is a major red flag. No Google presence for an established-seeming business is a concern.`
     : null;
 
+  const topSlug = extraction.inferredTopCategorySlug ?? null;
+  const subSlug = extraction.inferredSubcategorySlug ?? null;
+  let referenceBlock: string | null = null;
+  if (topSlug && subSlug) {
+    referenceBlock = getReferenceBlock(topSlug, subSlug);
+  }
+  console.log(`[score] reference block for ${subSlug}:`, referenceBlock ? "present" : "null");
+
+  const referenceLine = referenceBlock
+    ? `Consider the following AU market reference alongside the community comparables below.\n\n${referenceBlock}`
+    : null;
+
   const categoryName = (extraction as { category?: string }).category ?? "trade";
   const stateName = location?.state ?? null;
   const communityLine =
@@ -86,7 +99,7 @@ Score Time on the realism of the estimated timeframe RELATIVE TO this job's size
       {
         role: "user",
         content: `Based on this Australian trade quote, provide an iron triangle assessment. Score each dimension 1-10 where 10 is best.
-${locationLine ? `\n${locationLine}\n` : ""}${descriptionLine ? `\n${descriptionLine}\n` : ""}${reputationLine ? `\n${reputationLine}\n` : googleLine ? `\n${googleLine}\n` : ""}${communityLine ? `\n${communityLine}\n` : ""}${jobSizeLine ? `\n${jobSizeLine}\n` : ""}
+${locationLine ? `\n${locationLine}\n` : ""}${descriptionLine ? `\n${descriptionLine}\n` : ""}${reputationLine ? `\n${reputationLine}\n` : googleLine ? `\n${googleLine}\n` : ""}${referenceLine ? `\n${referenceLine}\n` : ""}${communityLine ? `\n${communityLine}\n` : ""}${referenceLine || communityLine ? `\nPrice scoring should reflect BOTH the curated AU market reference AND the community comparables. Where they agree, confidence is high. Where they diverge (e.g. comparables cluster higher/lower than the market reference), acknowledge and reason about why. If no reference is provided, rely on comparables plus general knowledge of AU market rates.\n` : ""}${jobSizeLine ? `\n${jobSizeLine}\n` : ""}
 Quote data: ${JSON.stringify(extraction, null, 2)}
 
 Return JSON:
