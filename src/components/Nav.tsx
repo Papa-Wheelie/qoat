@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import UserMenu from "./UserMenu";
 import VerificationBanner from "./VerificationBanner";
+import NavCategoriesLink from "./NavCategoriesLink";
 
 export default async function Nav() {
   const session = await auth();
@@ -26,12 +27,15 @@ export default async function Nav() {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-lg font-extrabold tracking-tighter text-primary"
-          >
-            QOAT
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              href="/"
+              className="text-lg font-extrabold tracking-tighter text-primary"
+            >
+              QOAT
+            </Link>
+            <NavCategoriesLink />
+          </div>
 
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
@@ -52,8 +56,7 @@ export default async function Nav() {
               href="/upload"
               className="px-4 py-2 bg-[#111111] text-white rounded-[12px] text-sm font-bold hover:opacity-90 active:opacity-80 transition-opacity"
             >
-              <span className="sm:hidden">Submit</span>
-              <span className="hidden sm:inline">Submit a Quote</span>
+              Upload quote
             </Link>
           </div>
         </div>
