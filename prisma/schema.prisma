@@ -78,6 +78,7 @@ model Subcategory {
   topCategoryId String
   topCategory   TopCategory @relation(fields: [topCategoryId], references: [id])
   quotes        Quote[]
+  comments      Comment[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -120,16 +121,18 @@ model Quote {
 }
 
 model Comment {
-  id        String            @id @default(cuid())
-  content   String
-  quoteId   String
-  userId    String
-  parentId  String?
-  hidden    Boolean           @default(false)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  quote     Quote             @relation(fields: [quoteId], references: [id])
-  user      User              @relation(fields: [userId], references: [id])
+  id            String            @id @default(cuid())
+  content       String
+  quoteId       String?
+  subcategoryId String?
+  userId        String
+  parentId      String?
+  hidden        Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  quote         Quote?            @relation(fields: [quoteId], references: [id])
+  subcategory   Subcategory?      @relation(fields: [subcategoryId], references: [id])
+  user          User              @relation(fields: [userId], references: [id])
   parent    Comment?          @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[]         @relation("CommentReplies")
   votes     Vote[]

@@ -13,7 +13,7 @@ export type ReportData = {
   reporter: { name: string | null; email: string };
   resolvedBy: { name: string | null } | null;
   quote: { id: string; title: string; hidden: boolean } | null;
-  comment: { id: string; content: string; hidden: boolean; quoteId: string } | null;
+  comment: { id: string; content: string; hidden: boolean; quoteId: string | null } | null;
 };
 
 type ActionState = "idle" | "loading" | "done" | "error";
