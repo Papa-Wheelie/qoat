@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
 import { getTopCategoryStats } from "@/lib/categoryStats";
 import { getTopCategoryContent } from "@/lib/subcategoryContent";
+import CategoryCard from "@/components/CategoryCard";
 
 export const dynamic = "force-dynamic";
 
@@ -62,30 +63,14 @@ export default async function Page() {
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.map(({ top, stats, content }) => (
-              <Link
+              <CategoryCard
                 key={top.slug}
-                href={`/categories/${top.slug}`}
-                className="group bg-white rounded-2xl px-5 py-5 space-y-3 hover:shadow-sm transition-shadow block"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-on-surface leading-snug">
-                    {top.name}
-                  </h3>
-                  <span className="text-on-surface-variant group-hover:text-on-surface transition-colors shrink-0 mt-0.5">
-                    ›
-                  </span>
-                </div>
-                <p className="text-xs text-on-surface-variant leading-relaxed line-clamp-2">
-                  {content.description}
-                </p>
-                <p className="text-xs text-on-surface-variant">
-                  {top.subcategories.length} sub-categories ·{" "}
-                  <span className="text-on-surface font-medium">
-                    {stats?.totalCount ?? 0}
-                  </span>{" "}
-                  quotes
-                </p>
-              </Link>
+                topSlug={top.slug}
+                topName={top.name}
+                subcategoryCount={top.subcategories.length}
+                quoteCount={stats?.totalCount ?? 0}
+                description={content.description}
+              />
             ))}
           </div>
         </section>
