@@ -7,6 +7,7 @@ import { getSubcategoryContent } from "@/lib/subcategoryContent";
 import { formatAUD } from "@/lib/formatPrice";
 import CategoryBreadcrumb from "@/components/CategoryBreadcrumb";
 import PriceDistributionChart from "./PriceDistributionChart";
+import CategoryCommentsSection from "@/components/CategoryCommentsSection";
 
 export async function generateMetadata({
   params,
@@ -297,13 +298,9 @@ export default async function Page({
           </section>
         )}
 
-        {/* ── Section 9: Community placeholder ─────────────────────────── */}
+        {/* ── Section 9: Community discussion ───────────────────────────── */}
         <section>
-          <div className="bg-white rounded-2xl px-6 py-4">
-            <p className="text-sm text-on-surface-variant">
-              Community discussion coming soon.
-            </p>
-          </div>
+          <CategoryCommentsSection subSlug={subSlug} subName={stats.subName} />
         </section>
 
         {/* ── Section 10: Closing CTA ───────────────────────────────────── */}
