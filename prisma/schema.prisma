@@ -16,15 +16,16 @@ model User {
   role          String            @default("user")
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
-  quotes        Quote[]
-  comments      Comment[]
-  votes         Vote[]
-  accounts      Account[]
-  reactions     CommentReaction[]
-  helpfulMarks  HelpfulMark[]
-  similarQuotes SimilarQuote[]
-  reportsMade     Report[]        @relation("ReportsMade")
-  reportsResolved Report[]        @relation("ReportsResolved")
+  quotes            Quote[]
+  comments          Comment[]
+  votes             Vote[]
+  accounts          Account[]
+  reactions         CommentReaction[]
+  helpfulMarks      HelpfulMark[]
+  similarQuotes     SimilarQuote[]
+  reportsMade       Report[]          @relation("ReportsMade")
+  reportsResolved   Report[]          @relation("ReportsResolved")
+  chatConversations ChatConversation[]
 }
 
 model Account {
@@ -112,12 +113,13 @@ model Quote {
   user          User           @relation(fields: [userId], references: [id])
   category      Category       @relation(fields: [categoryId], references: [id])
   subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
-  analysis      QuoteAnalysis?
-  comments      Comment[]
-  votes         Vote[]
-  helpfulMarks  HelpfulMark[]
-  similarQuotes SimilarQuote[]
-  reports       Report[]
+  analysis         QuoteAnalysis?
+  comments         Comment[]
+  votes            Vote[]
+  helpfulMarks     HelpfulMark[]
+  similarQuotes    SimilarQuote[]
+  reports          Report[]
+  chatConversation ChatConversation?
 }
 
 model Comment {
@@ -209,6 +211,26 @@ model Report {
 
   @@unique([reporterId, quoteId])
   @@unique([reporterId, commentId])
+}
+
+model ChatConversation {
+  id        String        @id @default(cuid())
+  quoteId   String        @unique
+  quote     Quote         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String           @db.Text
+  createdAt      DateTime         @default(now())
 }
 
 model QuoteAnalysis {
