@@ -2,535 +2,300 @@
 
 ## Project
 - Repo: github.com/Papa-Wheelie/qoat
-- Live: qoat.vercel.app
+- Live: qoat.vercel.app (custom domain getqoat.com)
 - Supabase: db.iotmnxydsnvirfrefuyk.supabase.co
-- Stack: Next.js 16, TypeScript, Prisma 6, Supabase, 
-  NextAuth v5, Tailwind CSS, Anthropic Claude API, Vercel
+- Admin: joseph@papawheelie.com.au
+- Target market: Australia
+- Stack: Next.js 16 (App Router, Turbopack), TypeScript, Prisma 6,
+  Supabase (Postgres + pgvector), NextAuth v5, Tailwind CSS,
+  Anthropic Claude API, Voyage AI embeddings, Google Places API,
+  Resend, Recharts, Vercel
 
-## Design System
+## Design System (wireframe quality — dedicated sprint pending)
 - Font: Plus Jakarta Sans
 - Background: #F9F9F7
 - Inputs: white bg, #C6C6C6 border, 12px radius, 16px padding
 - Primary button: black #111111, white text, 12px radius
-- Accent colours: #7DD4C0 (price), #F4A7C3 (reputation), 
-  #89CFF0 (time)
+- Iron triangle accents: #7DD4C0 (Price), #F4A7C3 (Reputation),
+  #89CFF0 (Time)
+- Error styling: soft pink #FDF0F0 bg, #791F1F text, 12px radius
 - No divider lines — whitespace only
-- Reference: src/design/DESIGN.md + src/design/login.html
 
 ## Key Decisions
-- Pricing: exact for owners, 10% range for services publicly,
-  exact for products publicly
-- Privacy: supplier name, iron triangle, red flags, 
-  recommendation owner-only
-- Public: total, line items, public summary, community
-- Location: suburb + state captured on upload
-- Dates: Australian format DD/MM/YYYY in all AI prompts
-- Categories: 10 AU trade categories seeded in DB
-  (audit pending — see Step 1 below)
-- Auth: proxy.ts (NOT middleware.ts) for Next.js 16
-- DB: pooler connection string for Vercel production
-
+- Categories: 6 top / 54 sub taxonomy. Each sub tagged with a
+  pricingModel: scope-variant (3 size bands), per-unit (unit rate),
+  or fixed-job (single band).
+- PRODUCT SHAPE: category-hub model, NOT quote-feed. Upload = the
+  hero action. Category dashboards = market intelligence. Community
+  lives at the category level, not the quote level. Individual
+  quotes = private analysis for the owner + optional anonymised
+  community input.
+- Homepage: split — HomepageMarketing (logged-out) vs
+  HomepageDashboard (logged-in). page.tsx routes by session.
+- Voice principle: everything QOAT says is framed around what the
+  USER gets, never what QOAT gets. ("Know if your quote is fair",
+  not "Got a quote?")
+- Community: category-level threads (reused Comment model with
+  subcategoryId). Quote-level public comments being retired in
+  favour of opt-in "Ask the Community" (Step 3.d).
+- Pricing display: owners see exact; public sees 10% range for
+  services, exact for products. Line items also ranged for public.
+- Privacy: supplier name, iron triangle, red flags, recommendation
+  owner-only. Public: total (ranged), category, location
+  (suburb+state), public summary, line items.
+- AI model: claude-sonnet-4-6 (single source: src/lib/methodology.ts).
+- Methodology version: v1.2 (seed data + curated market reference
+  disclosed).
+- Auth/routing: proxy.ts (NOT middleware.ts) for Next.js 16.
+- DB: Session pooler connection (aws-1-ap-southeast-2.pooler...:5432),
+  IPv4.
 
 ## Working rhythm (locked in for every session)
-- Pinch-hitter mode: 2-3 hours per day, drop-in / drop-out
-- Experienced software engineer, NEW TO TYPESCRIPT 
-  — keep it light, plain types, no clever generics
+- Pinch-hitter: 2-3 hours per day, drop-in / drop-out
+- Experienced engineer, NEW TO TYPESCRIPT — plain types, no clever
+  generics
 - Bite-size steps: one prompt → one test → one commit
-- Status header at top of each session: where we are, 
-  what's done, what's next
-- Re-orient at start of every session (don't assume continuity)
-- Plain code, no over-engineering
+- Status header at top of each session: where we are, what's done,
+  what's next
+- Re-orient at the start of every session (don't assume continuity)
 - Recurring re-entry checks:
-  * Phone hotspot (work firewall blocks DB ports)
-  * Supabase awake (free tier pauses when idle)
-  * Stop dev server before db push / scripts (pool exhaustion)
-  * npx prisma generate after every schema change
+  * Phone hotspot on (work firewall blocks DB ports)
+  * Supabase awake (free tier pauses when idle — restart from
+    dashboard)
+  * Use `npx prisma ...` (prisma isn't a global command)
+  * Stop dev server before `prisma db push` (pool exhaustion)
+  * `npx prisma generate` after every schema change
   * Re-login after auth schema changes (JWT carries fields)
+  * Hard-refresh browser (Cmd+Shift+R) after UI changes — Turbopack
+    caches
 
+## Env Vars
+DATABASE_URL (pooler), NEXTAUTH_SECRET, NEXTAUTH_URL,
+NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, GOOGLE_CLIENT_ID,
+GOOGLE_CLIENT_SECRET, GOOGLE_PLACES_API_KEY, RESEND_API_KEY,
+VOYAGE_API_KEY, EXAMPLE_QUOTE_ID
 
-## Sessions
+## Key Files
+- prisma/schema.prisma — data model
+- src/lib/prisma.ts — singleton client
+- src/lib/methodology.ts — MODEL_VERSION, CURRENT_METHODOLOGY_VERSION
+  (v1.2), CHANGELOG
+- src/lib/categories.ts — taxonomy (6 top / 54 sub), pricingModel +
+  unitLabel, LEGACY_CATEGORY_TO_TOP fallback map, helper functions
+- src/lib/extractQuote.ts — Claude vision extraction (infers top +
+  sub category + qualityTier + jobSize)
+- src/lib/scoreQuote.ts — iron triangle scoring (comparables +
+  reputation + curated market reference)
+- src/lib/getComparables.ts — 3-tier lookup (sub+size → sub → embedding)
+- src/lib/pricingReference.ts — reads reference JSON into scoring prompt
+- src/lib/getReputationSignals.ts, assessCompliance.ts,
+  googlePlaces.ts, embeddings.ts, moderateText.ts
+- src/lib/categoryStats.ts — dashboard aggregation (getCategoryStats,
+  getTopCategoryStats)
+- src/lib/subcategoryContent.ts — hand-written blurbs/drivers/
+  questions/permits (kitchen-renovation only so far)
+- src/lib/getCategoryComments.ts — shared category-thread query
+- data/reference-prices.draft.json — curated AU market pricing (54 subs)
+- src/auth.ts, src/proxy.ts
+- Homepage: src/app/page.tsx (router), HomepageMarketing.tsx,
+  HomepageDashboard.tsx
+- Categories: src/app/categories/page.tsx, [topSlug]/page.tsx,
+  [topSlug]/[subSlug]/page.tsx, PriceDistributionChart.tsx,
+  CategoryCommentsSection.tsx, CategoryCommentsInteractive.tsx
+- Scripts: seed-quotes.ts, seed-categories.ts,
+  migrate-legacy-categories.ts, backfill-embeddings.ts,
+  test-category-stats.ts, diagnose-google-matches.ts
 
-### Session 1.1 ✅ — Project scaffold + first deploy
-- Next.js app created with Tailwind + TypeScript
-- Prisma initialised, User model created
-- Supabase connected, schema pushed
-- Deployed to Vercel on personal hobby account (public repo)
-- Env vars: DATABASE_URL + NEXTAUTH_SECRET set in Vercel
+---
 
-### Session 1.2 ✅ — Design reference established
-- Stitch login screen exported to src/design/login.html
-- Design system documented in src/design/DESIGN.md
-- Colours locked: #7DD4C0 (price), #F4A7C3 (quality), #89CFF0 (time)
-- Font: Plus Jakarta Sans
-- Stitch removed from build plan — Claude Code builds UI directly
+## COMPLETED
 
-### Session 1.3 ✅ — Auth backend wiring
-- NextAuth v5 configured at src/auth.ts
-- API route created at src/app/api/auth/[...nextauth]/route.ts
-- Register API route at src/app/api/register/route.ts
-- Passwords hashed with bcryptjs
-- NEXTAUTH_SECRET confirmed in .env.local
+### Phase 1 + Phase 2 foundation ✅
+Full auth (email/password + Google OAuth, NextAuth v5, JWT with role),
+profiles + account settings, quote upload (PDF/image to Supabase
+Storage), AI extraction (supplier, total, line items, timeframe, red
+flags, AU date format), iron triangle scoring (Price/Reputation/Time
++ weighted QOAT score), community comments/votes/reactions, privacy
+model, quote status/edit/delete/re-analyse/share, Google Places
+supplier reputation (3 rounds of match tuning — composite confidence,
+token-recall name similarity, multi-query, ambiguity guard),
+semantic comparables (Voyage embeddings + pgvector HNSW), richer
+community engagement (helpful marks, similar-quote submissions),
+permit/compliance flagging, search/sort/filter feed, compare quotes,
+report + moderation with admin role, methodology versioning + source
+attribution, scale-aware Time scoring, marketing landing + FAQ +
+contact + terms + privacy (draft, awaiting lawyer review), mobile
+responsive + PWA basics, login validation polish.
+Lighthouse baseline: Perf 75, A11y 95, Best Practices 100, SEO 91.
 
-### Session 1.4 ✅ — Auth UI with Claude Code
-- Login screen built matching Stitch design
-- Register screen built with same design system
-- Font: Plus Jakarta Sans applied globally
-- Input focus ring updated to black #111111
-- Tagline updated to "Know before you pay."
-- Protected routes working — unauthenticated users → /login
-- Temporary logout button on homepage for testing
-- Full register → login → protected route flow tested ✅
-
-### Session 2.1 ✅ — Quote upload backend
-- Prisma schema updated — Quote and Category models added
-- 10 categories seeded to database
-- Supabase Storage bucket "quotes" created
-- Upload API route at /api/quotes/upload
-- File validation — PDF, jpg, png, webp, max 10MB
-- Unauthorized requests correctly blocked
-- Tested and confirmed ✅
-
-### Session 2.2 ✅ — Quote upload UI
-- Upload page at /upload with drag and drop
-- Category dropdown populated from DB
-- File validated — PDF, jpg, png, webp, max 10MB
-- Files stored in Supabase Storage quotes bucket
-- Quote record saved to database
-- Placeholder quote detail page at /quotes/:id
-- SessionProvider fix applied
-- Full upload flow tested end to end ✅
-
-### Session 3.1 ✅ — AI extraction with Claude API
-- Anthropic client configured at src/lib/claude.ts
-- extractQuote.ts sends PDF/image to Claude vision API
-- Extracts supplier, total, line items, timeframe, red flags
-- QuoteAnalysis model added to Prisma schema
-- Quote detail page displays full extraction results
-- Tested with real skylight quote — working perfectly ✅
-- Fixed Australian date format (DD/MM/YYYY) in extraction prompt
-- Red flags no longer incorrectly flag past dates as future dated
-
-### Session 3.2 ✅ — Iron triangle scoring
-- scoreQuote.ts built using Claude API
-- Three dimensions: Price, Reputation, Time
-- Quality renamed to Reputation — assesses provider 
-  trustworthiness (ABN, licence, insurance, payment terms)
-- Price benchmarked against AU market rates with $ specifics
-- Time scores realistic timeframe vs industry standard
-- Overall recommendation: accept/negotiate/reject/get-more-quotes
-- Iron triangle cards displayed on quote detail page
-- Tested with real skylight quote ✅
-
-### Session 4.1 ✅ — Community comments + upvotes
-- Comment model with one level of replies
-- Vote model with unique constraints (no double voting)
-- Community confidence score calculated from votes
-- Optimistic upvote updates on the client
-- Unauthenticated users see Sign in prompts
-
-### Session 4.2 ✅ — Privacy model + location + questions
-- Supplier name owner-only
-- Iron triangle, red flags, recommendation owner-only
-- Public summary generated separately (no supplier mention)
-- Public view shows: total, category, location, line items, 
-  community
-- Suburb + state captured on upload
-- Location-aware price benchmarking in scoring prompt
-- "Questions to ask your supplier" section added
-- AI never mentions supplier in public-facing content
-
-### Session 5.1 ✅ — Quote feed homepage
-- Public feed with category pills and state filter
-- Quote cards with scores, vote count, comment count
-- Nav component reused across pages
-- Hero section for logged out users
-- Smart pricing model:
-  * Owners always see exact prices
-  * Services show 10% range publicly (e.g. $8,500-$10,500)
-  * Products show exact price publicly
-- Privacy model complete:
-  * Supplier name owner only
-  * Iron triangle, red flags, recommendation owner only
-  * Total, line items, community section public
-
-### Session 6.1 ✅ — End to end test + first deploy
-
-### Session 2A.1 ✅ — Forgot password + email verification
-- Resend configured for transactional email
-- Domain getqoat.com verified in Resend
-- Sending from noreply@getqoat.com
-- Forgot password flow — email with reset link, 1hr expiry
-- Reset password page — validates token, updates password
-- Email verification on register — 24hr expiry
-- Verification banner in nav for unverified users
-- Resend/verify endpoints working end to end ✅
-
-### Session 2A.2 ✅ — Google OAuth
-- Google provider added to NextAuth v5
-- Account model added to Prisma schema
-- Account linking — existing email/password users can 
-  sign in with Google without duplicate user created
-- Google OAuth users get emailVerified set automatically
-- Prisma singleton pattern fixed in src/lib/prisma.ts
-- Google button on login + register pages ✅
-
-### Session 2A.3 ✅ — User profile + account settings
-- My Quotes page at /my-quotes
-- Profile page — avatar, stats, edit name
-- Account settings — email verified badge, change password,
-  delete account with confirmation modal
-- Nav dropdown — initials avatar, My Quotes, Profile, 
-  Settings, Sign Out
-- Prisma singleton pattern applied globally
-- Nav wrapped in Suspense boundary in layout ✅
-
-### Session 2A.4 ✅ — Global flows polish
-- Custom 404 page
-- Global error boundary with retry
-- Loading spinner
-- QOAT favicon (bold Q on off-white)
-- SEO metadata + OpenGraph tags
-- Title: "QOAT — Know before you pay"
-
-### Session 2B.1 ✅ — Quote status + edit + delete
-- Status field: pending / accepted / rejected
-- Status pill selector on quote detail (owner only)
-- Optimistic status updates
-- Status badge on My Quotes cards
-- Edit quote page at /quotes/:id/edit
-- Delete quote with cascade + Supabase Storage cleanup
-- Owner actions component — edit, delete, status pills ✅
-
-### Session 2B.2 ✅ — Re-analyse + quote sharing
-- Re-analyse button — reruns extraction + scoring, 
-  refreshes page on complete
-- Copy URL button — copies quote link to clipboard
-- Download button — generates signed Supabase URL, 
-  opens original file in new tab
-- OpenGraph metadata on quote detail pages
-- Share button visible to non-owners too ✅
-
-### Session 2B.3 → Moved to Phase 3 (email notifications)
-
-### Session 2C.1 ✅ — Rework score UI
-- White cards with 4px accent left border (colour = dimension)
-- Score number colour-coded: green ≥8, amber 5-7, red ≤4
-- 10-segment progress bar per score
-- Verdict badges with semantic colours (positive/neutral/negative)
-- QOAT Score — weighted average (Price 40%, Rep 35%, Time 25%)
-- Recommendation section — icon + sentiment-coloured heading
-- Feed cards use neutral grey score badges ✅
-
-### Session 2C.2 ✅ — Supplier social proof + Google Reviews
-- Google Places API integrated
-- Rating, review count, review snippets fetched
-- Dedicated "Supplier reputation" section on quote detail
-- Shows: star rating, review count, 3 review snippets
-- First names only for reviewer privacy
-- "View on Google Maps" and "See all reviews" links
-- Feeds into Reputation score prompt
-- Owner only — supplier data stays private ✅
-
-### Session 2C.3 → Moved to Phase 3 (AI chatbot)
-
-### Session 2C.4 ✅ — Community data feeds price scoring
-- Semantic job-type matching via Voyage AI embeddings
-- pgvector(1024) column + HNSW index in Supabase
-- getComparables uses cosine similarity (threshold 0.75)
-- Comparable price stats fed into scoreQuote prompt
-- Data confidence line: "Benchmarked against N similar jobs"
-- Verified working at 0.5 threshold (3 matches found)
-- Reverted to 0.75 for accuracy during testing phase
-- Switched embeddings OpenAI → Voyage (Anthropic ecosystem)
-
-### Session 2C.5 ✅ — Richer community engagement
-- Up/down voting on comments (Vote.value +1/-1)
-- Comment reactions: 👍 💡 😱 with counts + active state
-- Sort comments: Most helpful / Newest / Oldest
-- "This helped me" toggle + counter on quotes
-- "I got a similar quote" — price + note, shows aggregate
-  (real crowd-sourced pricing data for future benchmarking)
-- "Looks fair" quote upvote
-- Engagement signals on feed + My Quotes cards
-- Optimistic updates throughout
-- New models: CommentReaction, HelpfulMark, SimilarQuote
-
-### Session 2C.6 ✅ — Permit + certification compliance flagging
-- assessCompliance.ts — dedicated Claude call for AU regs
-- Flags: permit likely required + mentioned + responsibility
-- Flags: certificate of compliance (electrical/plumbing/gas)
-- Compliance check section on quote detail (owner only)
-- Green check / amber warning / grey dash status model
-- "Guidance only — confirm with council" disclaimer
-- Missing permit/cert also surfaces in red flags
-- ABN verification portion still parked (awaiting ABR GUID)
-- Tested on insulation quote — correctly assessed both ✅
-
-## 2C COMPLETE ✅ (except parked ABN verification)
-
-
-### Session 2D.1 ✅ — Search + sort feed
-- Keyword search: title, category, suburb, publicSummary
-  (supplier name excluded for privacy)
-- Debounced 300ms search with clear button
-- Sort: newest, oldest, price high/low, most helpful, most discussed
-- Combines with category + state filters
-- Result count + empty state + clear all
-- URL state — shareable, survives refresh ✅
-
-### Session 2D.2 ✅ — Compare quotes side by side
-- Checkbox selection on feed + My Quotes cards (max 4)
-- Floating compare bar with chips, persists via sessionStorage
-- Compare page /compare?ids=... — side-by-side table
-- Per-quote privacy: own quotes full, others public-only
-- Best value highlighting (lowest total, best QOAT score)
-- Owner-only fields show "Private" for non-owned quotes
-- Shareable comparison URLs ✅
-
-## 2D COMPLETE ✅
-
-
-### Session 2E.1 ✅ — Report + moderation tools
-- Role field on User (user/moderator/admin)
-- Report model: reasons (spam/offensive/misleading/privacy/other)
-- Report buttons on quotes + comments
-- One report per user per item
-- Admin dashboard at /admin (role-protected)
-- Hide/Unhide/Dismiss actions, resolvedBy + resolvedAt tracked
-- Hidden content filter rules:
-  * Public: never sees hidden
-  * Owner: always sees own with badge
-  * Admin/mod: normal feed by default, "Include hidden" toggle
-- Badge: "Hidden by moderation" (responsive)
-- Detail banner: "Hidden by a moderator on [AU date]"
-- JWT carries user role (re-login required after migration)
-- Privileged-only check enforced at API layer (not just UI)
-- joseph@papawheelie.com.au promoted to admin ✅
-
-### Session 2E.2 ✅ — Source attribution + methodology + scale-aware Time
-- Methodology versioning: methodologyVersion, modelVersion, 
-  analysedAt stamped on every analysis
-- Public /methodology page with changelog
-- Methodology stamp on quote detail (owner only)
-- Source attribution: priceComparableIds persisted on analysis
-- "Benchmarked against N similar jobs" now clickable — opens 
-  modal listing comparable quotes (title, location, range, 
-  similarity %)
-- /api/quotes/[id]/comparables endpoint (owner-only)
-- Scale-aware Time scoring: jobSize extracted (quantity, unit, 
-  descriptor, sizeBand)
-- Time prompt now factors job size — reasons about time-per-unit
-- Time card shows "[size] job · [descriptor]" 
-- Verified pro badge form deferred to Phase 5 (contractor onboarding)
-- MODEL_VERSION consolidated to src/lib/methodology.ts
-
-## 2E COMPLETE ✅
-
-
-### Session 2F.1 ✅ — Landing + how it works page
-- Logged-out homepage = marketing page; logged-in = feed
-- Hero with live mock iron triangle illustration
-- "How it works" 3-step section
-- "See it in action" — configurable example quote 
-  via EXAMPLE_QUOTE_ID env var
-- "Why trust QOAT" — methodology, attribution, privacy
-- Recent community quotes (6) below the fold
-- Footer with all marketing links
-- /feed route for full feed access (any auth state)
-- SEO + OpenGraph metadata on marketing page
-
-### Session 2F.2 ✅ — FAQ + contact form
-- /faq with 23 Q&As across 5 categories (src/lib/faq.ts editable)
-- Accordion: multiple-open, keyboard accessible
-- /contact form with honeypot + rate limit (3/hour/email)
-- Pre-fills name + email when logged in
-- Resend email with Reply-To header for direct reply
-- Public access in proxy.ts
-- Contact link in user menu
-- NOTE: FAQ content + voice review pre-launch
-
-### Session 2F.3 ✅ — Terms + privacy policy
-- /privacy with 13 sections incl Cookies (AU Privacy Act + APPs)
-- All third-party processors named (Supabase, Vercel, Anthropic, 
-  Voyage, Google, Resend)
-- /terms with 15 sections, GOVERNING_STATE constant for easy edit
-- Draft callout banner on both pages
-- Table of contents with anchor links
-- Register page links to ToS + Privacy
-- Public routes in proxy.ts
-- NOTE: Lawyer review required pre-launch
-- NOTE: No cookie banner needed (no analytics/tracking yet)
-
-### Session 2F.4c ✅ — Take-over + polling + remove banner
-- Full-screen analysing take-over (replaces in-page card)
-- Linear progress bar with stage transitions
-- Reliable auto-reload via window.location.reload()
-- Failure state with "Try re-analysing"
-- Welcome banner removed (was ceremony)
-- Targeted AddLocationPrompt only when location missing
-- Dismissible with persistence (locationPromptDismissed flag)
-
-### Session 2F.4d/e/f ✅ — Google match tuning (3 rounds)
-- Composite confidence scoring (name 60% / location 25% / type 15%)
-- Token-recall name similarity (handles branded extensions)
-- Multi-query strategy (up to 3 per supplier, cost-capped)
-- Country suffix stripping ("Steela AU" → "Steela")
-- Multi-branch ambiguity guard (re-scores location 55% when 
-  same-name candidates exist, rejects if too close)
-- Three honest UI states: matched / ambiguous / not found
-- Diagnostics persisted on QuoteAnalysis.googleMatchDiagnostics
-- scripts/diagnose-google-matches.ts for ongoing audit
-- Test cases verified: Royal Crest ✓, Steela AU ✓, 
-  Matt Caminiti ✗ (correctly), Jim's Diggers ✗ (API limit)
-- NOTE: existing quotes will pick up new matching as they 
-  re-analyse — no backfill needed
-
-## 2F COMPLETE ✅
-
-
-### Session 2G.1 ✅ — Mobile responsive polish + PWA basics
-- Safe area handling on iOS notch + home indicator
-- Mobile audit + fixes across nav, prompts, compare table
-- Compare table → vertical card stack on mobile
-- AddLocationPrompt → stacked form on mobile
-- PWA: manifest.json, service worker, offline page
-- Icons via Edge route (192/512/maskable) + Apple touch icon
-- iOS Safari "Add to Home Screen" hint (one-time)
-- Service worker: network-first, cache app shell, exclude API
-- proxy.ts (NOT middleware.ts) — Next.js 16 convention
-- Lighthouse baseline: Performance 75, Accessibility 95, 
-  Best Practices 100, SEO 91
-- PWA installability verified via Manifest panel
-
-### Session 2G.2 — Login validation polish (in progress)
-- Inline error messages instead of silent redirect
-- Empty / invalid email / wrong credentials all handled
-- Custom styling (no browser native tooltips)
-- Autofill background neutralised
-- Credential error box lightened to match field errors
-- NOTE: Step 1 of session — performance + launch checklist 
-  moved to later (now after categories + seed data + design)
-
-
-## Phase 2 final stretch (revised priorities)
-
-### Step 1 ✅ — Category overhaul (complete)
-- Taxonomy: 6 top categories, 54 subcategories
-  (scope-variant, per-unit, fixed-job)
-- DB schema: TopCategory + Subcategory tables
+### Step 1 ✅ — Category overhaul
+- Taxonomy: 6 top / 54 sub in src/lib/categories.ts, each with
+  pricingModel (27 scope-variant, 19 per-unit, 8 fixed-job) + unitLabel
+- DB: TopCategory + Subcategory tables, seeded
 - AI extraction infers top + sub on upload
-- UI: detail page shows top + sub, editable inline by owner
-- Feed: 6 top-category filter pills with legacy fallback
+- UI: detail page shows "TOP · Sub", editable inline by owner
+- Feed cards + filter pills use new taxonomy (legacy fallback map)
 - Migrated all 11 legacy quotes via AI categorisation
-- Feed cards now show top category from new taxonomy
 
-### Step 2 ✅ — Database seeding + scoring upgrade (complete)
-- Added isSeed, seedBatch, seedNotes to Quote schema
-- Extract qualityTier (budget/mid/premium) on analysis
-- Curated 54-sub pricing reference:
-  data/reference-prices.draft.json
-- Built scripts/seed-quotes.ts with retry logic
-- Generated 351 seed quotes across 4 batches
-- Reference badge + transparency banner on seed quotes
-- Community engagement disabled on seed quotes
-- Comparables lookup filters by sub-category + size band
-  with 3-tier fallback
-- AI scoring reasons with curated AU market reference +
-  comparables
-- Methodology bumped to v1.2 with disclosure of both
+### Step 2 ✅ — Database seeding + scoring upgrade
+- Schema: isSeed, seedBatch, seedNotes on Quote; qualityTier on
+  QuoteAnalysis
+- Curated 54-sub pricing reference (data/reference-prices.draft.json):
+  min/median/max per size band (scope-variant), unit rates (per-unit),
+  call-out + hourly rates for electrical/plumbing/hvac/carpentry,
+  market-signal notes throughout
+- Seeder script (scripts/seed-quotes.ts) with retry logic
+- Generated 351 seed quotes across 4 batches (credit limit stopped
+  us at 351 of 500 target — accepted; ~6-7 per sub, above the
+  3-comparable benchmark threshold)
+- Reference badge + transparency banner on seed quotes; community
+  engagement disabled on them
+- Comparables lookup: 3-tier (sub+size exact → sub-only → embedding)
+- AI scoring reasons with curated market reference + comparables +
+  reputation
+- Methodology page updated to v1.2 disclosing both
 
-## Up Next
-### Step 3 — Design sprint
-- Discovery: gather 8-15 references (Stripe + Monzo + own)
-- Define design principles + voice
-- Build token system
-- Marketing pages redesign (homepage, methodology, FAQ)
-- App polish (quote detail, feed, compare)
-- Goal: trustworthy "this product was made by people who 
-  care" feel — not wireframe quality
+## Phase 3 — Product restructure (IN PROGRESS)
 
-### Step 4 — Launch readiness checklist
+Reframe from quote-feed to category-hub model. Triggered by the
+realisation that browsing individual quotes is the wrong primary
+interface — QOAT's job is "is my quote fair?", not "browse other
+people's quotes". Merged Claude + ChatGPT insights: hero upload,
+category dashboards as market intelligence, community at category
+level, individual quotes as private analysis + optional anonymised
+community input.
+
+### Step 3.b ✅ — Category hub system
+- 3.b.i — categoryStats.ts (median, distribution buckets, common
+  line items, state/quality/size distributions, hasEnoughData flag,
+  always-3 size bands)
+- 3.b.ii — sub-category dashboard (kitchen-renovation end-to-end):
+  hero + value-forward CTA at top, Recharts price distribution,
+  what drives price, common line items, regional breakdown,
+  questions to ask, permits, recent quotes (real preferred over
+  seed), community section, bottom CTA. Chart tooltip on hover.
+- 3.b.iii — hierarchical URLs /categories/[top]/[sub] + top-level
+  directory pages + breadcrumbs
+- 3.b.iv — /categories index (6 top-category cards)
+- 3.b.v — nav wiring (Categories link; "Submit a Quote" →
+  "Upload quote")
+- CONTENT: hand-written for kitchen-renovation only. Other 53 subs
+  use placeholder fallback. Full content batch still TODO (Step 3.g).
+
+### Step 3.a ✅ — Homepage restructure
+- Split: HomepageMarketing (logged-out) + HomepageDashboard
+  (logged-in); page.tsx routes by session
+- Marketing: hero + iron triangle mock + how it works + see it in
+  action (EXAMPLE_QUOTE_ID) + browse categories + why trust + CTA
+- Dashboard: compact welcome + quick actions + your recent quotes
+  + continue exploring + browse categories (NO marketing pitch —
+  user already converted)
+- 0-quote users: dashboard with empty state
+- Killed the old recent-community-quotes homepage grid
+
+### Step 3.c ✅ — Category-level community threads
+- Reused Comment model with subcategoryId field (XOR with quoteId,
+  enforced at API layer)
+- API: GET + POST /api/categories/[subSlug]/comments
+- getCategoryComments.ts shared helper (API + server component)
+- Embedded discussion component on sub-category dashboards
+- Votes, reactions, one-level replies, report/moderation all reused
+- Cross-category isolation verified; auth-gated compose; empty state
+  invites first comment
+
+## Up Next — Phase 3 remaining
+
+### Step 3.d — Ask the Community (NEXT)
+- Opt-in: quote owner clicks "Ask the community" on their quote
+- Auto-generates an ANONYMISED structured summary post into the
+  relevant category thread (category, state, price, key specs,
+  AI verdict — no PDF, no supplier name, no address)
+- Replies visible to the owner in their private quote view
+- Higher-quality discussion than public comments on raw quotes
+
+### Step 3.e — Experience badges
+- Users who've completed projects earn badges (✓ Renovated bathroom
+  2024, ✓ Solar installed)
+- Displayed on category thread comments — weights responses visually
+- Schema + earn logic + display
+
+### Step 3.f — Retire the public quote feed
+- Quietly re-plumb: old /feed → /browse (kept for the curious, not
+  front-and-centre). No announcement.
+- Individual quote pages become owner-primary + anonymised evidence
+
+### Step 3.g — Content batch (before launch)
+- Hand-write description + price drivers + questions + permit notes
+  for the other 53 sub-categories + 6 top-category descriptions
+- AI-generate first drafts, human-polish top ~10 subs
+
+## Step 4 — Design sprint (after restructure)
+- Targets the NEW structure (category hubs, dashboards, homepage split)
+- Discovery: references (Stripe precision + Monzo warmth + own)
+- Design principles + voice + token system
+- Apply across marketing, dashboards, quote detail
+- Goal: trustworthy "made by people who care" feel
+
+## Step 5 — Launch readiness
 - End-to-end functional walk (PRELAUNCH_CHECKLIST.md)
-- Fix issues found
-- FAQ voice review (already noted)
+- Fix issues found; FAQ voice review
 - Lawyer review of Terms + Privacy (external dependency)
-
+- Performance pass (Lighthouse 75 → 90+) — deferred here from Phase 2
+- DECISION PENDING: hold launch for Brief Builder (Phase 4) or ship
+  without — decide closer to launch
 
 ## Deferred until after launch
-- Performance optimisation (Lighthouse 75 → 90+)
 - Native iOS/Android apps (Phase 4+)
 
+## Parked — waiting on external dependency
+- ABN Lookup verification (ABR GUID — 5 day approval). When it
+  arrives: add ABR_API_GUID env var, verify ABN active + capture
+  registered name for name-mismatch flag, Verified/Claimed/Not found
+  model.
+- Multi-state licence verification (Phase 5, with contractor onboarding)
 
-## Phase 3 (deferred from Phase 2)
+## Future phases
+
+### Phase 4 — Freemium (~6 months) — $9-19/mo
+- Video upload (film space, AI extracts dimensions + scope)
+- Unlimited submissions (free tier: 3/month)
+- AI chatbot, quote history/portfolio, priority analysis
+- Stripe subscription billing
+- **Brief Builder — headline paid feature**
+  * Assistant walks user through structured brief creation
+  * Generates dimensioned drawings + spec sheet for supplier RFQs
+  * Categories with clear physical outputs first (windows, doors,
+    fencing, decking, custom cabinetry, blinds); text-only structured
+    briefs for services
+  * $5-15 per brief or bundled into Freemium
+  * Rationale: attacks upstream cause of bad quotes (unclear briefs).
+    Validated by Joseph's own use case (ChatGPT generated black steel
+    window drawing for Chinese supplier RFQ).
+  * NOTE: Joseph may hold Phase 2 launch for this — decision deferred.
+    Waitlist teaser on category hubs is the fallback.
+
+### Phase 5 — Send to tender (~12 months) — B2B leads
+- Consumer publishes brief, contractors compete
+- Contractor onboarding + licence verification
+- Contractor subscription $99-299/mo; bid management (iron triangle
+  auto-scores each bid)
+- B2B for property managers / strata / agents
+
+### Phase 6 — QOAT Guarantee (~18 months) — insurance-backed
+- AU underwriter partnership, AFS licence required
+
+### Phase 7 — Scale (~24 months)
+- Pricing API, white label, React Native, NZ expansion
+
+## Phase 3 (deferred features, not the restructure)
 - Email notifications (was 2B.3)
 - AI chatbot — ask about your quote (was 2C.3)
 - Email digest — similar quotes in your area
 
-
-## Future phases (noted, not now)
-
-## Phase 4 — Freemium (~6 months) — expanded
-Feature vertical additions:
-- Video upload — film space, AI extracts dimensions + scope
-- Unlimited submissions (free tier: 3/month)
-- AI chatbot, quote history/portfolio, priority analysis
-- Stripe subscription billing
-
-**NEW — Brief Builder (headline paid feature)**
-- Assistant walks user through structured brief creation
-- Generates dimensioned drawings + spec sheet for supplier RFQs
-- Categories with clear physical outputs first (windows, doors, 
-  fencing, decking, custom cabinetry)
-- Text-only structured briefs for services (electrical scope 
-  of work, painting scope, etc)
-- Standalone product OR bundled into Freemium tier
-- Rationale: attacks upstream cause of bad quotes 
-  (unclear briefs). Complements analysis-side of QOAT. 
-  Users would pay $5-15 per brief individually.
-- Pilot on 3-5 categories, expand based on demand.
-
-### Phase 5 — Send to tender (~12 months) — B2B leads
-- Consumer publishes job brief, contractors compete
-- Contractor onboarding + licence verification
-- Contractor subscription $99-299/mo for tender invites
-- Bid management — iron triangle auto-scores each bid
-- B2B for property managers / strata / agents (consumer first, then B2B)
-
-### Phase 6 — QOAT Guarantee (~18 months) — insurance
-- Partner with AU underwriter, risk from QOAT data
-- Consumer pays 1-2% premium for price + completion guarantee
-- AFS licence required — begin BD at Phase 5 launch
-
-### Phase 7 — Scale (~24 months) — enterprise
-- QOAT Pricing API for banks, conveyancers, insurers
-- White label for home loan apps, property platforms
-- React Native mobile app, NZ expansion
-
-
 ## Parked ideas (need data density or experiments)
-- Seasonal pricing intelligence (e.g. "plumbers 30% pricier
-  in winter") — marketing flywheel, needs 1000s of quotes
-- Homeowner-bids-for-contractor-attention — test inside
-  tender platform, not standalone
-- Council permit API integration — deeper version of 2C.6
-
-
-## Parked — waiting on external dependency
-
-### ABN Lookup verification (part of 2C.6)
-- Registered for ABR Web Services GUID — 5 day approval wait
-- When GUID arrives: add ABR_API_GUID to .env.local + Vercel
-- Build: verify ABN valid + active via ABR API
-- Capture registered name → name-mismatch flag + better Google search
-- Confidence model: Verified / Claimed / Not found
-- Currently: licence/ABN signals reflect quote contents only
-
-### Licence verification (future dedicated project)
-- Multi-state, fragmented (NSW Fair Trading, VIC VBA, QLD QBCC...)
-- No national registry — significant ongoing integration
-- Reuse the Verified/Claimed/Not found pattern from ABN
-- Likely Phase 5 (pairs with contractor onboarding)
-
-### Brief Builder waitlist teaser on category hubs — validate demand 
-  during Phase 2 launch without building the feature; 
-  gives signal for Phase 4 prioritisation
+- Seasonal pricing intelligence
+- Homeowner-bids-for-contractor experiment
+- Council permit API integration
+- Brief Builder waitlist teaser on category hubs (validate demand
+  during Phase 2 launch)
