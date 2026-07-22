@@ -206,29 +206,42 @@ community input.
 
 ## Up Next — Phase 3 remaining
 
-### Step 3.d — Ask the Community (NEXT)
-- Opt-in: quote owner clicks "Ask the community" on their quote
-- Auto-generates an ANONYMISED structured summary post into the
-  relevant category thread (category, state, price, key specs,
-  AI verdict — no PDF, no supplier name, no address)
-- Replies visible to the owner in their private quote view
-- Higher-quality discussion than public comments on raw quotes
+### Step 3.d — "Ask QOAT" AI chatbot (NEXT)
+- Post-analysis action: owner can ask follow-up questions
+  about their quote
+- AI answers using the quote data + curated market reference
+  + comparables
+- Works from day 1 at zero traffic (QOAT's strength — no
+  community liquidity needed)
+- Replaces quote-level "Ask the Community" as the post-analysis
+  engagement
 
-### Step 3.e — Experience badges
-- Users who've completed projects earn badges (✓ Renovated bathroom
-  2024, ✓ Solar installed)
-- Displayed on category thread comments — weights responses visually
-- Schema + earn logic + display
-
-### Step 3.f — Retire the public quote feed
-- Quietly re-plumb: old /feed → /browse (kept for the curious, not
-  front-and-centre). No announcement.
+### Step 3.e — Retire the public quote feed
+- Quietly re-plumb: old /feed → /browse (kept for the curious).
+  No announcement.
 - Individual quote pages become owner-primary + anonymised evidence
 
-### Step 3.g — Content batch (before launch)
-- Hand-write description + price drivers + questions + permit notes
-  for the other 53 sub-categories + 6 top-category descriptions
+### Step 3.f — Content batch (before launch)
+- Hand-write description + price drivers + questions + permit
+  notes for the other 53 sub-categories + 6 top-category
+  descriptions
 - AI-generate first drafts, human-polish top ~10 subs
+
+## Strategic decision — community cold-start (logged this session)
+- Community features depend on traffic liquidity; QOAT launches
+  with little/no traffic. An empty community reads as "abandoned"
+  and would poison trust in the analysis (which works from day 1).
+- KEEP at launch (zero-traffic viable): AI analysis, category
+  dashboards (data, not community), category-level threads
+  (durable general questions — an unanswered general question is
+  "not answered yet", not "nobody cares about me"), "Ask QOAT"
+  AI chatbot.
+- DEFER to Phase 4/5 (need traffic): quote-level "Ask the
+  Community" anonymised-post flow, experience badges (both
+  require a responding community to have value).
+- Category threads kept but framed dormant-friendly: empty states
+  invite ("Be the first to ask..."), no active push, no
+  dead-end disappointment.
 
 ## Step 4 — Design sprint (after restructure)
 - Targets the NEW structure (category hubs, dashboards, homepage split)
@@ -281,6 +294,11 @@ community input.
 - Contractor subscription $99-299/mo; bid management (iron triangle
   auto-scores each bid)
 - B2B for property managers / strata / agents
+
+- Quote-level "Ask the Community" (anonymised quote summary posted
+  to category thread) + experience badges — deferred from Phase 3
+  due to cold-start; revisit when tender/contractor side brings
+  traffic.
 
 ### Phase 6 — QOAT Guarantee (~18 months) — insurance-backed
 - AU underwriter partnership, AFS licence required
