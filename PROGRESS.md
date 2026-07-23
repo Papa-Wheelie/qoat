@@ -231,11 +231,45 @@ community input.
 
 ## Up Next — Phase 3 remaining
 
-### Step 3.f — Content batch (before launch)
-- Hand-write description + price drivers + questions + permit
-  notes for the other 53 sub-categories + 6 top-category
-  descriptions
-- AI-generate first drafts, human-polish top ~10 subs
+### Step 3.f — SEO cost-guide build (EXPANDED)
+Competitive context: HiPages, Airtasker, Yellow Pages and
+others all run "How much does a [trade] cost?" pages that
+rank well. Their weakness — numbers come from editorial
+research, not data. QOAT has real analysed quotes, a curated
+market reference with confidence tags, distribution shape
+(not just ranges), and a genuine tool at the end (check your
+quote) vs their lead-gen CTA.
+
+Goal: make each of the 54 sub-category pages a best-in-class
+Australian cost guide that outranks and out-serves the
+incumbents.
+
+Sub-steps:
+- 3.f.i — SEO metadata + structured data
+  * Titles: "How much does a kitchen renovation cost?
+    (2026 Australian prices)"
+  * Meta descriptions with headline range
+  * schema.org markup (FAQPage, Article) for featured snippets
+  * Canonical URLs, OpenGraph per page
+- 3.f.ii — Surface hourly rates + call-out fees on trade pages
+  (data already curated in reference-prices.draft.json for
+  electrical, plumbing, hvac-heating, carpentry — currently
+  unused by the UI)
+- 3.f.iii — Price-by-state aggregation (currently only counts
+  per state; add median price per state)
+- 3.f.iv — FAQ section per sub-category (5-8 Q&As, marked up
+  as schema.org FAQPage)
+- 3.f.v — Trust signals ("Last verified [date]", methodology
+  link, data source disclosure)
+- 3.f.vi — Content batch: description, price drivers, questions
+  to ask, permit notes × 53 remaining subs + 6 top categories
+- 3.f.vii — sitemap.xml + robots.txt
+
+NOTE: SEO pays off in 3-9 months, not at launch. This is an
+investment in organic discovery, not a launch accelerant.
+Worth doing now because the pages must be built anyway —
+adding SEO structure while building is far cheaper than
+retrofitting.
 
 ## Strategic decision — community cold-start (logged this session)
 - Community features depend on traffic liquidity; QOAT launches
