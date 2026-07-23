@@ -4,13 +4,32 @@ import { CATEGORIES } from "@/lib/categories";
 import { getTopCategoryStats } from "@/lib/categoryStats";
 import { getTopCategoryContent } from "@/lib/subcategoryContent";
 import CategoryCard from "@/components/CategoryCard";
+import { StructuredData } from "@/components/StructuredData";
 
 export const dynamic = "force-dynamic";
 
+const SITE_URL = "https://getqoat.com";
+const CANONICAL = `${SITE_URL}/categories`;
+
 export const metadata: Metadata = {
-  title: "Browse trade categories — QOAT",
+  title: "Australian trade and building cost guides | QOAT",
   description:
-    "QOAT tracks pricing across trade, building and supplier categories in Australia. Explore what to expect before you buy.",
+    "What things actually cost in Australia — 54 categories from kitchens to solar. Real pricing data, not guesswork. Check your quote against the market.",
+  alternates: { canonical: CANONICAL },
+  openGraph: {
+    title: "Australian trade and building cost guides | QOAT",
+    description:
+      "What things actually cost in Australia — 54 categories from kitchens to solar. Real pricing data, not guesswork. Check your quote against the market.",
+    type: "website",
+    url: CANONICAL,
+    siteName: "QOAT",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Australian trade and building cost guides | QOAT",
+    description:
+      "What things actually cost in Australia — 54 categories from kitchens to solar. Real pricing data, not guesswork. Check your quote against the market.",
+  },
 };
 
 export default async function Page() {
@@ -31,8 +50,27 @@ export default async function Page() {
     0
   );
 
+  const breadcrumbLD = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Categories", item: CANONICAL },
+    ],
+  };
+
+  const collectionLD = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Australian trade and building cost guides",
+    description: "Real pricing data across 54 trade and building categories in Australia.",
+    url: CANONICAL,
+    publisher: { "@type": "Organization", name: "QOAT" },
+  };
+
   return (
     <main className="min-h-screen bg-surface pt-14">
+      <StructuredData data={breadcrumbLD} />
+      <StructuredData data={collectionLD} />
       <div className="max-w-3xl mx-auto px-6 pt-8 pb-24 space-y-10">
 
         {/* ── Hero ─────────────────────────────────────────────────────── */}

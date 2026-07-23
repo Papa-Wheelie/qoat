@@ -5,6 +5,9 @@ import { getTopCategoryStats } from "@/lib/categoryStats";
 import { getSubcategoryContent, getTopCategoryContent } from "@/lib/subcategoryContent";
 import { formatAUD } from "@/lib/formatPrice";
 import CategoryBreadcrumb from "@/components/CategoryBreadcrumb";
+import { StructuredData } from "@/components/StructuredData";
+
+const SITE_URL = "https://getqoat.com";
 
 export async function generateMetadata({
   params,
@@ -14,9 +17,18 @@ export async function generateMetadata({
   const { topSlug } = await params;
   const stats = await getTopCategoryStats(topSlug);
   if (!stats) return { title: "Not found — QOAT" };
+
+  const year = new Date().getFullYear();
+  const canonical = `${SITE_URL}/categories/${topSlug}`;
+  const title = `${stats.topName} costs in Australia — pricing guide ${year} | QOAT`;
+  const description = `${stats.topName} pricing across ${stats.subSummaries.length} sub-categories. Compare typical costs, see what drives price, and check your own quote against real Australian market data.`;
+
   return {
-    title: `${stats.topName} quotes & pricing — QOAT`,
-    description: `Real Australian ${stats.topName.toLowerCase()} quotes — browse sub-categories, price ranges, and benchmarks.`,
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, type: "article", url: canonical, siteName: "QOAT" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -32,8 +44,18 @@ export default async function Page({
 
   const topContent = getTopCategoryContent(topSlug);
 
+  const breadcrumbLD = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Categories", item: `${SITE_URL}/categories` },
+      { "@type": "ListItem", position: 2, name: stats.topName, item: `${SITE_URL}/categories/${topSlug}` },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-surface pt-14">
+      <StructuredData data={breadcrumbLD} />
       <div className="max-w-3xl mx-auto px-6 pt-8 pb-24 space-y-10">
 
         {/* Breadcrumb */}

@@ -8,18 +8,44 @@ import { formatAUD } from "@/lib/formatPrice";
 import CategoryBreadcrumb from "@/components/CategoryBreadcrumb";
 import PriceDistributionChart from "./PriceDistributionChart";
 import CategoryCommentsSection from "@/components/CategoryCommentsSection";
+import { StructuredData } from "@/components/StructuredData";
+
+const SITE_URL = "https://getqoat.com";
+
+function buildSubDescription(
+  subName: string,
+  hasEnoughData: boolean,
+  price: { min: number; max: number; median: number } | null,
+  totalCount: number
+): string {
+  if (hasEnoughData && price) {
+    const raw = `${subName} in Australia typically costs ${formatAUD(price.min)}–${formatAUD(price.max)}, median ${formatAUD(price.median)}. See price distribution, what drives cost, and questions to ask suppliers. Based on ${totalCount} analysed quotes.`;
+    return raw.length <= 160 ? raw : raw.slice(0, 157) + "...";
+  }
+  return `${subName} pricing in Australia — what to expect, what drives cost, and the questions to ask before you commit. Analysis from QOAT.`;
+}
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ topSlug: string; subSlug: string }>;
 }): Promise<Metadata> {
-  const { subSlug } = await params;
+  const { topSlug, subSlug } = await params;
   const stats = await getCategoryStats(subSlug);
   if (!stats) return { title: "Not found — QOAT" };
+
+  const year = new Date().getFullYear();
+  const canonical = `${SITE_URL}/categories/${topSlug}/${subSlug}`;
+  const baseTitle = `How much does a ${stats.subName.toLowerCase()} cost? Australian prices ${year}`;
+  const title = baseTitle.length + 7 <= 65 ? `${baseTitle} | QOAT` : baseTitle;
+  const description = buildSubDescription(stats.subName, stats.hasEnoughData, stats.price, stats.totalCount);
+
   return {
-    title: `${stats.subName} pricing — QOAT`,
-    description: `Real Australian ${stats.subName.toLowerCase()} quotes — price ranges, benchmarks, and what to ask suppliers.`,
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, type: "article", url: canonical, siteName: "QOAT" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -67,6 +93,7 @@ export default async function Page({
 
   const recentQuoteSelect = {
     id: true,
+    createdAt: true,
     state: true,
     isSeed: true,
     analysis: { select: { totalAmount: true, qualityTier: true } },
@@ -96,8 +123,34 @@ export default async function Page({
 
   const { price } = stats;
 
+  const canonical = `${SITE_URL}/categories/${topSlug}/${subSlug}`;
+  const subDescription = buildSubDescription(stats.subName, stats.hasEnoughData, stats.price, stats.totalCount);
+  const dateModified = recentQuotes[0]?.createdAt.toISOString() ?? new Date().toISOString();
+
+  const breadcrumbLD = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Categories", item: `${SITE_URL}/categories` },
+      { "@type": "ListItem", position: 2, name: stats.topName, item: `${SITE_URL}/categories/${topSlug}` },
+      { "@type": "ListItem", position: 3, name: stats.subName, item: canonical },
+    ],
+  };
+
+  const articleLD = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: `How much does a ${stats.subName.toLowerCase()} cost in Australia?`,
+    description: subDescription,
+    author: { "@type": "Organization", name: "QOAT" },
+    publisher: { "@type": "Organization", name: "QOAT" },
+    dateModified,
+  };
+
   return (
     <main className="min-h-screen bg-surface pt-14">
+      <StructuredData data={breadcrumbLD} />
+      <StructuredData data={articleLD} />
       <div className="max-w-3xl mx-auto px-6 pt-8 pb-24 space-y-8">
 
         {/* Breadcrumb */}
