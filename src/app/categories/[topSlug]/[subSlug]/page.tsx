@@ -10,6 +10,8 @@ import PriceDistributionChart from "./PriceDistributionChart";
 import CategoryCommentsSection from "@/components/CategoryCommentsSection";
 import { StructuredData } from "@/components/StructuredData";
 import { getCategoryRates } from "@/lib/pricingReference";
+import { generateCategoryFaqs } from "@/lib/generateCategoryFaqs";
+import CategoryFaqAccordion from "@/components/CategoryFaqAccordion";
 
 const SITE_URL = "https://getqoat.com";
 
@@ -86,6 +88,7 @@ export default async function Page({
 
   const content = getSubcategoryContent(subSlug);
   const rates = getCategoryRates(topSlug, subSlug);
+  const faqs = generateCategoryFaqs(stats.subName, stats, content);
 
   // Look up DB subcategory ID for the recent quotes query
   const dbSub = await prisma.subcategory.findUnique({
@@ -149,10 +152,23 @@ export default async function Page({
     dateModified,
   };
 
+  const faqPageLD = faqs.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      }
+    : null;
+
   return (
     <main className="min-h-screen bg-surface pt-14">
       <StructuredData data={breadcrumbLD} />
       <StructuredData data={articleLD} />
+      {faqPageLD && <StructuredData data={faqPageLD} />}
       <div className="max-w-3xl mx-auto px-6 pt-8 pb-24 space-y-8">
 
         {/* Breadcrumb */}
@@ -349,7 +365,16 @@ export default async function Page({
           </Card>
         </section>
 
-        {/* ── Section 7: Permits and compliance ────────────────────────── */}
+        {/* ── Section 7: Common questions ───────────────────────────────── */}
+        {faqs.length > 0 && (
+          <section>
+            <Card title="Common questions">
+              <CategoryFaqAccordion items={faqs} />
+            </Card>
+          </section>
+        )}
+
+        {/* ── Section 8: Permits and compliance ────────────────────────── */}
         <section>
           <Card title="Permits and compliance">
             <p className="text-sm leading-relaxed" style={{ color: "#444444" }}>
