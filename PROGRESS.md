@@ -68,6 +68,11 @@
   * Re-login after auth schema changes (JWT carries fields)
   * Hard-refresh browser (Cmd+Shift+R) after UI changes — Turbopack
     caches
+  * Before starting dev: `lsof -i :3000` — kill orphaned
+    servers. Stale processes serve old code and cause phantom
+    bugs (undefined Prisma models, unrendered markdown, etc)
+  * Quote paths with brackets in shell commands:
+    "src/app/quotes/[id]/file.tsx" — zsh globs [id] otherwise
 
 ## Env Vars
 DATABASE_URL (pooler), NEXTAUTH_SECRET, NEXTAUTH_URL,
@@ -204,17 +209,22 @@ community input.
 - Cross-category isolation verified; auth-gated compose; empty state
   invites first comment
 
-## Up Next — Phase 3 remaining
+### Step 3.d ✅ — Ask QOAT AI chatbot
+- ChatConversation + ChatMessage models (one conversation per
+  quote, cascade delete)
+- POST/GET /api/quotes/[id]/chat — owner-only, non-streaming
+- Full quote context fed to Claude: extraction, iron triangle
+  + reasoning, red flags, recommendation, comparables count,
+  reputation signals, compliance flags, curated market reference
+- Excluded from context: PDF URL, raw extraction JSON,
+  embeddings, seed fields, other users' data
+- UI: owner-only section after analysis, suggested starter
+  chips, persisted history, markdown rendering (react-markdown
+  + remark-gfm)
+- Guardrails: stays on-topic, declines off-topic politely,
+  never fabricates, short answers (max_tokens 600)
 
-### Step 3.d — "Ask QOAT" AI chatbot (NEXT)
-- Post-analysis action: owner can ask follow-up questions
-  about their quote
-- AI answers using the quote data + curated market reference
-  + comparables
-- Works from day 1 at zero traffic (QOAT's strength — no
-  community liquidity needed)
-- Replaces quote-level "Ask the Community" as the post-analysis
-  engagement
+## Up Next — Phase 3 remaining
 
 ### Step 3.e — Retire the public quote feed
 - Quietly re-plumb: old /feed → /browse (kept for the curious).
