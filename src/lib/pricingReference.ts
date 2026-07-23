@@ -39,6 +39,37 @@ function formatAUD(n: number): string {
   return "$" + n.toLocaleString("en-AU");
 }
 
+export type RateInfo = {
+  median: number;
+  min: number;
+  max: number;
+  notes: string | null;
+};
+
+export type CategoryRates = {
+  calloutFee: RateInfo | null;
+  hourlyRate: RateInfo | null;
+};
+
+export function getCategoryRates(topSlug: string, subSlug: string): CategoryRates | null {
+  const ref = loadReference();
+  if (!ref) return null;
+  const topCat = ref[topSlug];
+  if (!topCat) return null;
+  const sub = topCat[subSlug];
+  if (!sub) return null;
+
+  const calloutFee = sub.calloutFee
+    ? { median: sub.calloutFee.median, min: sub.calloutFee.min, max: sub.calloutFee.max, notes: sub.calloutFee.notes ?? null }
+    : null;
+  const hourlyRate = sub.hourlyRate
+    ? { median: sub.hourlyRate.median, min: sub.hourlyRate.min, max: sub.hourlyRate.max, notes: sub.hourlyRate.notes ?? null }
+    : null;
+
+  if (!calloutFee && !hourlyRate) return null;
+  return { calloutFee, hourlyRate };
+}
+
 export function getReferenceBlock(topSlug: string, subSlug: string): string | null {
   const ref = loadReference();
   if (!ref) return null;

@@ -9,6 +9,7 @@ import CategoryBreadcrumb from "@/components/CategoryBreadcrumb";
 import PriceDistributionChart from "./PriceDistributionChart";
 import CategoryCommentsSection from "@/components/CategoryCommentsSection";
 import { StructuredData } from "@/components/StructuredData";
+import { getCategoryRates } from "@/lib/pricingReference";
 
 const SITE_URL = "https://getqoat.com";
 
@@ -84,6 +85,7 @@ export default async function Page({
   if (!stats || stats.topSlug !== topSlug) notFound();
 
   const content = getSubcategoryContent(subSlug);
+  const rates = getCategoryRates(topSlug, subSlug);
 
   // Look up DB subcategory ID for the recent quotes query
   const dbSub = await prisma.subcategory.findUnique({
@@ -220,7 +222,49 @@ export default async function Page({
           )}
         </section>
 
-        {/* ── Section 3: What drives the price ─────────────────────────── */}
+        {/* ── Section 3: Typical rates (trade categories only) ─────────── */}
+        {rates && (
+          <section>
+            <Card title="Typical rates">
+              <div className="space-y-3">
+                {rates.calloutFee && (
+                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-4">
+                    <span className="text-sm font-medium text-on-surface sm:w-28 shrink-0">Call-out fee</span>
+                    <span className="text-sm text-on-surface sm:flex-1">
+                      {formatAUD(rates.calloutFee.min)} – {formatAUD(rates.calloutFee.max)}
+                    </span>
+                    <span className="text-sm text-on-surface-variant">
+                      typically {formatAUD(rates.calloutFee.median)}
+                    </span>
+                  </div>
+                )}
+                {rates.hourlyRate && (
+                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-4">
+                    <span className="text-sm font-medium text-on-surface sm:w-28 shrink-0">Hourly rate</span>
+                    <span className="text-sm text-on-surface sm:flex-1">
+                      {formatAUD(rates.hourlyRate.min)} – {formatAUD(rates.hourlyRate.max)}
+                    </span>
+                    <span className="text-sm text-on-surface-variant">
+                      typically {formatAUD(rates.hourlyRate.median)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1.5 pt-2 border-t border-neutral-100">
+                {[rates.calloutFee?.notes, rates.hourlyRate?.notes]
+                  .filter((n): n is string => !!n)
+                  .map((note, i) => (
+                    <p key={i} className="text-xs text-on-surface-variant">{note}</p>
+                  ))}
+                <p className="text-xs text-on-surface-variant">
+                  Standard business hours. After-hours and emergency call-outs typically add 50–100%. Many trades waive or deduct the call-out fee if you proceed with the job — always confirm upfront.
+                </p>
+              </div>
+            </Card>
+          </section>
+        )}
+
+        {/* ── Section 4: What drives the price ─────────────────────────── */}
         <section>
           <Card title="What drives the price">
             <ul className="space-y-2">
