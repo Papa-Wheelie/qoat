@@ -31,6 +31,7 @@ export type CategoryStats = {
   stateDistribution: {
     state: string;
     count: number;
+    medianPrice: number | null; // null when fewer than 3 quotes with prices
   }[];
   qualityDistribution: {
     tier: "budget" | "mid" | "premium";
@@ -169,13 +170,20 @@ function buildCommonLineItems(
 function buildStateDistribution(
   quotes: QuoteRow[]
 ): CategoryStats["stateDistribution"] {
-  const map = new Map<string, number>();
+  const map = new Map<string, { count: number; amounts: number[] }>();
   for (const q of quotes) {
     if (!q.state) continue;
-    map.set(q.state, (map.get(q.state) ?? 0) + 1);
+    const entry = map.get(q.state) ?? { count: 0, amounts: [] };
+    entry.count++;
+    if (q.analysis?.totalAmount != null) entry.amounts.push(q.analysis.totalAmount);
+    map.set(q.state, entry);
   }
   return Array.from(map.entries())
-    .map(([state, count]) => ({ state, count }))
+    .map(([state, { count, amounts }]) => {
+      const sorted = [...amounts].sort((a, b) => a - b);
+      const medianPrice = sorted.length >= 3 ? computeMedian(sorted) : null;
+      return { state, count, medianPrice };
+    })
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 }

@@ -304,29 +304,34 @@ export default async function Page({
           </section>
         )}
 
-        {/* ── Section 5: Regional breakdown ────────────────────────────── */}
+        {/* ── Section 5: Pricing by state ──────────────────────────────── */}
         {stats.stateDistribution.length > 0 && (
           <section>
-            <Card title="Where these quotes come from">
-              <div className="space-y-1.5">
-                {stats.stateDistribution.map(({ state, count }) => (
-                  <div key={state} className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-on-surface w-10">{state}</span>
-                    <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          backgroundColor: "#7DD4C0",
-                          width: `${Math.round((count / stats.totalCount) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs text-on-surface-variant w-16 text-right">
+            <Card title="Pricing by state">
+              <div className="space-y-3">
+                {stats.stateDistribution.map(({ state, count, medianPrice }) => (
+                  <div key={state} className="flex items-baseline gap-3">
+                    <span className="text-sm font-medium text-on-surface w-10 shrink-0">{state}</span>
+                    <span className="text-sm flex-1">
+                      {medianPrice != null ? (
+                        <>
+                          <span className="text-on-surface">{formatAUD(medianPrice)}</span>
+                          {" "}
+                          <span className="text-on-surface-variant">median</span>
+                        </>
+                      ) : (
+                        <span className="text-on-surface-variant">—</span>
+                      )}
+                    </span>
+                    <span className="text-xs text-on-surface-variant shrink-0">
                       {count} quote{count !== 1 ? "s" : ""}
                     </span>
                   </div>
                 ))}
               </div>
+              <p className="text-xs text-on-surface-variant pt-2">
+                Medians shown where we have at least 3 quotes in that state. State-level pricing is indicative — local factors like access, demand and travel affect real quotes.
+              </p>
             </Card>
           </section>
         )}
