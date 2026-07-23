@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 import { type ReactNode } from "react";
 import Link from "next/link";
 import CommunitySection from "./CommunitySection";
+import AskQoatSection from "./AskQoatSection";
 import ShareButton from "./ShareButton";
 import ComparablesPanel from "./ComparablesPanel";
 import QuoteEditableHeader from "./QuoteEditableHeader";
@@ -807,6 +808,13 @@ export default async function QuotePage({
             </div>
           </section>
         )}
+
+        {/* Ask QOAT */}
+        <AskQoatSection
+          quoteId={id}
+          isOwner={isOwner}
+          priceScore={analysis?.priceScore ?? null}
+        />
 
         {/* Community */}
         <CommunitySection

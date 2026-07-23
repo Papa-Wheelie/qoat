@@ -93,7 +93,13 @@ function buildSystemPrompt(
     "When suggesting negotiation, be specific."
   );
   lines.push(
-    "Keep answers concise — a few sentences to a short paragraph. This is a chat, not an essay."
+    "Keep answers SHORT. Aim for 3-5 sentences or a brief bullet list of 3-5 items. This is a chat, not a report. " +
+    "If the full answer would be long, give the most important points and offer to go deeper: " +
+    "'Want me to break down the payment terms in more detail?'"
+  );
+  lines.push(
+    "Use markdown for structure: bullet lists for multiple items, bold sparingly for genuinely key terms. " +
+    "Never use headings (##) — the answers are too short to need them. Never use horizontal rules (---)."
   );
   lines.push(
     "Use Australian English spelling and refer to amounts in Australian dollars. " +
@@ -337,7 +343,7 @@ export async function POST(
   try {
     const response = await anthropic.messages.create({
       model: MODEL_VERSION,
-      max_tokens: 1024,
+      max_tokens: 600,
       system: systemPrompt,
       messages: history.map((m) => ({
         role: m.role as "user" | "assistant",
