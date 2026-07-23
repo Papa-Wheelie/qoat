@@ -333,43 +333,6 @@ function ExampleScoreBadge({
   );
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-
-function MarketingFooter() {
-  return (
-    <footer style={{ backgroundColor: "#F4F4F2" }}>
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
-          <div className="space-y-1.5">
-            <p className="text-lg font-extrabold tracking-tight text-primary">QOAT</p>
-            <p className="text-sm text-on-surface-variant">Know before you pay.</p>
-          </div>
-          <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-on-surface-variant">
-            <a href="#how-it-works" className="hover:text-on-surface transition-colors">
-              How it works
-            </a>
-            <Link href="/methodology" className="hover:text-on-surface transition-colors">
-              Methodology
-            </Link>
-            <Link href="/faq" className="hover:text-on-surface transition-colors">
-              FAQ
-            </Link>
-            <Link href="/privacy" className="hover:text-on-surface transition-colors">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-on-surface transition-colors">
-              Terms
-            </Link>
-          </nav>
-        </div>
-        <div className="mt-10 pt-6 border-t border-outline-variant/20">
-          <p className="text-xs text-on-surface-variant">© 2026 QOAT. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default async function HomepageMarketing() {
@@ -574,9 +537,6 @@ export default async function HomepageMarketing() {
           </div>
         </div>
       </section>
-
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <MarketingFooter />
 
     </main>
   );

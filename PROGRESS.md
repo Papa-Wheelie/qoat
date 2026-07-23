@@ -224,12 +224,12 @@ community input.
 - Guardrails: stays on-topic, declines off-topic politely,
   never fabricates, short answers (max_tokens 600)
 
-## Up Next — Phase 3 remaining
-
-### Step 3.e — Retire the public quote feed
+### Step 3.e ✅ — Retire the public quote feed
 - Quietly re-plumb: old /feed → /browse (kept for the curious).
   No announcement.
 - Individual quote pages become owner-primary + anonymised evidence
+
+## Up Next — Phase 3 remaining
 
 ### Step 3.f — Content batch (before launch)
 - Hand-write description + price drivers + questions + permit

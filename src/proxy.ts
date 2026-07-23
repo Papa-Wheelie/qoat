@@ -11,7 +11,7 @@ const publicRoutes = [
   "/methodology",
   "/faq",
   "/contact",
-  "/feed",
+  "/browse",
   "/privacy",
   "/terms",
   "/offline",

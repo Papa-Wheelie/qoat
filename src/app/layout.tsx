@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import Providers from "./providers";
 import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import IOSInstallHint from "@/components/IOSInstallHint";
 
@@ -54,7 +55,10 @@ export default function RootLayout({
           <Suspense fallback={<div className="h-14" />}>
             <Nav />
           </Suspense>
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer />
           <ServiceWorkerRegistration />
           <IOSInstallHint />
         </Providers>

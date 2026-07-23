@@ -218,8 +218,8 @@ export function AnalysisFailed({ quoteId }: { quoteId: string }) {
           >
             Try re-analysing
           </button>
-          <Link href="/feed" className="text-sm text-on-surface-variant underline underline-offset-2 hover:text-on-surface transition-colors">
-            Back to feed
+          <Link href="/browse" className="text-sm text-on-surface-variant underline underline-offset-2 hover:text-on-surface transition-colors">
+            Browse quotes
           </Link>
         </div>
       </div>

@@ -5,11 +5,11 @@ import QuoteFeed, { type FeedQuote, type SortOption } from "@/app/QuoteFeed";
 import { CATEGORIES } from "@/lib/categories";
 
 export const metadata: Metadata = {
-  title: "Community quotes — QOAT",
-  description: "Browse real Australian trade quotes analysed by QOAT — prices, scores, and community insight.",
+  title: "Browse quotes — QOAT",
+  description: "Every quote QOAT has analysed, including our reference data. Filter by category, state, or search.",
 };
 
-export default async function FeedPage({
+export default async function BrowsePage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -86,6 +86,12 @@ export default async function FeedPage({
   return (
     <main className="min-h-screen bg-surface pt-14">
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-20">
+        <div className="mb-8">
+          <h1 className="text-3xl font-extrabold tracking-tight text-primary mb-2">Browse quotes</h1>
+          <p className="text-on-surface-variant">
+            Every quote QOAT has analysed, including our reference data. Filter by category, state, or search.
+          </p>
+        </div>
         <QuoteFeed
           initialQuotes={initialQuotes}
           initialTotalPages={Math.ceil(totalCount / 20)}
