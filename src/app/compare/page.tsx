@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import CompareTable, { type CompareQuote } from "./CompareTable";
 import { formatAUD } from "@/lib/formatPrice";
 
-export const metadata = { title: "Compare Quotes — QOAT" };
+export const metadata = { title: "Compare Quotes — QOAT", robots: { index: false, follow: false } };
 
 export default async function ComparePage({
   searchParams,

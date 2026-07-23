@@ -4,6 +4,7 @@ import OfflineClient from "./OfflineClient";
 
 export const metadata: Metadata = {
   title: "You're offline — QOAT",
+  robots: { index: false, follow: false },
 };
 
 export default function OfflinePage() {

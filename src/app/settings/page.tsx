@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import SettingsContent from "./SettingsContent";
 
+export const metadata = { title: "Settings — QOAT", robots: { index: false, follow: false } };
+
 export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");

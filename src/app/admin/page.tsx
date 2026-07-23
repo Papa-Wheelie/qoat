@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ReportList, { type ReportData } from "./ReportList";
 
-export const metadata = { title: "Admin — QOAT" };
+export const metadata = { title: "Admin — QOAT", robots: { index: false, follow: false } };
 
 export default async function AdminPage() {
   const session = await auth();

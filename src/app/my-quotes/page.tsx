@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import MyQuotesList, { type MyQuoteData } from "./MyQuotesList";
 
+export const metadata = { title: "My quotes — QOAT", robots: { index: false, follow: false } };
+
 export default async function MyQuotesPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");

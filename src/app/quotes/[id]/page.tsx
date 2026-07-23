@@ -226,6 +226,7 @@ export async function generateMetadata({
       siteName: "QOAT",
       type: "article",
     },
+    robots: { index: false, follow: true },
   };
 }
 

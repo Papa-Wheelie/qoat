@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import EditQuoteForm from "./EditQuoteForm";
 
+export const metadata = { title: "Edit quote — QOAT", robots: { index: false, follow: false } };
+
 export default async function EditQuotePage({
   params,
 }: {

@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/categories";
 export const metadata: Metadata = {
   title: "Browse quotes — QOAT",
   description: "Every quote QOAT has analysed, including our reference data. Filter by category, state, or search.",
+  robots: { index: false, follow: false },
 };
 
 export default async function BrowsePage({
