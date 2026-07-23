@@ -152,6 +152,29 @@ export default async function Page({
     dateModified,
   };
 
+  // ── Trust strip ───────────────────────────────────────────────────────────
+  const trustParts: string[] = [];
+  if (stats.lastUpdated) {
+    const formattedDate = new Date(stats.lastUpdated).toLocaleDateString("en-AU", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    trustParts.push(`Last updated ${formattedDate}`);
+  }
+  if (stats.totalCount > 0) {
+    if (stats.realCount > 0 && stats.seedCount > 0) {
+      trustParts.push(`Based on ${stats.totalCount} quotes (${stats.seedCount} QOAT reference, ${stats.realCount} from users)`);
+    } else if (stats.seedCount > 0) {
+      trustParts.push(`Based on ${stats.seedCount} QOAT reference quotes`);
+    } else {
+      trustParts.push(`Based on ${stats.realCount} quotes from users`);
+    }
+  } else {
+    trustParts.push("No quotes analysed yet in this category");
+  }
+  const trustText = trustParts.join(" · ");
+
   const faqPageLD = faqs.length > 0
     ? {
         "@context": "https://schema.org",
@@ -208,6 +231,16 @@ export default async function Page({
               · based on {stats.totalCount} quote{stats.totalCount !== 1 ? "s" : ""}
             </p>
           )}
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            {trustText}
+            {" · "}
+            <Link
+              href="/methodology"
+              className="underline underline-offset-2 hover:text-on-surface transition-colors"
+            >
+              How we calculate this
+            </Link>
+          </p>
           <div className="pt-2">
             <Link
               href="/upload"

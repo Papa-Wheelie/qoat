@@ -28,6 +28,7 @@ export type CategoryStats = {
     count: number;
     medianAmount: number;
   }[];
+  lastUpdated: string | null; // ISO date of the most recent quote
   stateDistribution: {
     state: string;
     count: number;
@@ -48,6 +49,7 @@ export type CategoryStats = {
 
 // Internal shape from the Prisma select below.
 type QuoteRow = {
+  createdAt: Date;
   isSeed: boolean;
   state: string | null;
   analysis: {
@@ -347,6 +349,7 @@ export async function getCategoryStats(
       hidden: false,
     },
     select: {
+      createdAt: true,
       isSeed: true,
       state: true,
       analysis: {
@@ -363,6 +366,11 @@ export async function getCategoryStats(
   const totalCount = quotes.length;
   const realCount = quotes.filter((q) => !q.isSeed).length;
   const seedCount = quotes.filter((q) => q.isSeed).length;
+
+  const lastUpdated =
+    quotes.length > 0
+      ? new Date(Math.max(...quotes.map((q) => q.createdAt.getTime()))).toISOString()
+      : null;
 
   // Price stats
   const amounts = quotes
@@ -392,6 +400,7 @@ export async function getCategoryStats(
     totalCount,
     realCount,
     seedCount,
+    lastUpdated,
     price,
     distribution: buildDistribution(amounts, median),
     commonLineItems: buildCommonLineItems(quotes),
